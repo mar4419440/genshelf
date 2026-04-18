@@ -1,0 +1,269 @@
+<!DOCTYPE html>
+<html lang="{{ app()->getLocale() }}" dir="{{ app()->getLocale() === 'ar' ? 'rtl' : 'ltr' }}">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<meta name="csrf-token" content="{{ csrf_token() }}">
+<title>{{ config('app.name', 'GenShelf') }}</title>
+<style>
+/* ===== CSS RESET & VARIABLES ===== */
+:root {
+  --bg: #f4f5f7; --bg2: #ffffff; --bg3: #eaecef;
+  --tx: #1a1a2e; --tx2: #555770; --tx3: #8b8da3;
+  --pr: #4f46e5; --pr-h: #4338ca; --pr-l: #eef2ff;
+  --gn: #16a34a; --gn-l: #dcfce7;
+  --am: #d97706; --am-l: #fef3c7;
+  --rd: #dc2626; --rd-l: #fee2e2;
+  --bl: #2563eb; --bl-l: #dbeafe;
+  --border: #d1d5db; --radius: 8px;
+  --font: 'Segoe UI', system-ui, -apple-system, sans-serif;
+}
+*, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
+body { font-family: var(--font); background: var(--bg); color: var(--tx); font-size: 14px; line-height: 1.5; }
+button { cursor: pointer; font-family: var(--font); font-size: 13px; border: none; border-radius: var(--radius); padding: 8px 16px; transition: background .15s, opacity .15s; }
+input, select, textare { font-family: var(--font); font-size: 13px; border: 1px solid var(--border); border-radius: var(--radius); padding: 8px 12px; width: 100%; outline: none; background: var(--bg2); }
+input:focus, select:focus, textarea:focus { border-color: var(--pr); }
+table { width: 100%; border-collapse: collapse; }
+th, td { padding: 10px 12px; text-align: left; border-bottom: 1px solid var(--bg3); font-size: 13px; }
+th { background: var(--bg); font-weight: 600; color: var(--tx2); text-transform: uppercase; font-size: 11px; letter-spacing: .5px; cursor: pointer; position: relative; padding-right: 18px; user-select: none; }
+th::after { content: '↕'; position: absolute; right: 5px; opacity: 0.2; font-size: 14px; top: 50%; transform: translateY(-50%); }
+th.sort-asc::after { content: '▲'; opacity: 1; color: var(--pr); font-size: 10px; }
+th.sort-desc::after { content: '▼'; opacity: 1; color: var(--pr); font-size: 10px; }
+th.no-sort { cursor: default; }
+th.no-sort::after { display: none; }
+tr:hover { background: var(--pr-l); }
+
+/* ===== BUTTONS ===== */
+.btn { display: inline-flex; align-items: center; gap: 6px; font-weight: 500; text-decoration: none; justify-content: center; }
+.btn-pr { background: var(--pr); color: #fff; } .btn-pr:hover { background: var(--pr-h); }
+.btn-gn { background: var(--gn); color: #fff; } .btn-gn:hover { opacity: .9; }
+.btn-rd { background: var(--rd); color: #fff; } .btn-rd:hover { opacity: .9; }
+.btn-am { background: var(--am); color: #fff; } .btn-am:hover { opacity: .9; }
+.btn-o { background: transparent; border: 1px solid var(--border); color: var(--tx2); } .btn-o:hover { border-color: var(--pr); color: var(--pr); }
+.btn-sm { padding: 5px 10px; font-size: 12px; }
+.btn-xs { padding: 3px 8px; font-size: 11px; }
+
+/* ===== BADGES ===== */
+.badge { display: inline-block; padding: 3px 10px; border-radius: 12px; font-size: 11px; font-weight: 600; }
+.badge-gn { background: var(--gn-l); color: var(--gn); }
+.badge-am { background: var(--am-l); color: var(--am); }
+.badge-rd { background: var(--rd-l); color: var(--rd); }
+.badge-bl { background: var(--bl-l); color: var(--bl); }
+.badge-pr { background: var(--pr-l); color: var(--pr); }
+
+/* ===== APP LAYOUT & SIDEBAR ===== */
+.app-container { display: flex; min-height: 100vh; }
+.sidebar { width: 250px; background: var(--bg2); border-right: 1px solid var(--border); display: flex; flex-direction: column; position: sticky; top: 0; height: 100vh; overflow-y: auto; z-index: 100; }
+.sidebar .logo { font-size: 24px; font-weight: 700; color: var(--pr); padding: 20px; white-space: nowrap; text-decoration: none; border-bottom: 1px solid var(--bg3); display: block; text-align: center; }
+.sidebar nav { display: flex; flex-direction: column; padding: 10px 0; flex: 1; }
+.sidebar nav a { text-decoration: none; color: var(--tx2); padding: 12px 20px; font-size: 14px; font-weight: 500; border-left: 3px solid transparent; transition: background .15s, color .15s, border-color .15s; display: flex; align-items: center; gap: 10px;}
+.sidebar nav a:hover { background: var(--bg); color: var(--pr); }
+.sidebar nav a.active { background: var(--pr-l); color: var(--pr); border-left-color: var(--pr); font-weight: 600; }
+.sidebar-actions { padding: 15px 20px; border-top: 1px solid var(--bg3); display: flex; flex-direction: column; gap: 10px; }
+.lang-btn { background: var(--bg3); padding: 8px 10px; font-size: 12px; font-weight: 600; color: var(--tx2); border-radius: var(--radius); text-decoration: none; text-align: center; }
+.user-btn { background: var(--pr-l); color: var(--pr); padding: 8px 12px; font-size: 13px; font-weight: 600; border-radius: var(--radius); border: none; cursor: pointer; text-align: center; width: 100%; display: flex; justify-content: center; align-items: center; gap: 6px; }
+
+.main-content { flex: 1; padding: 20px 30px; max-width: 1400px; display: flex; flex-direction: column; background: var(--bg); min-width: 0;}
+.page-hdr { display: flex; align-items: center; justify-content: space-between; margin-bottom: 24px; flex-wrap: wrap; gap: 12px; border-bottom: 2px solid var(--border); padding-bottom: 15px;}
+.page-hdr h2 { font-size: 24px; font-weight: 700; color: var(--tx); margin: 0;}
+.card { background: var(--bg2); border: 1px solid var(--border); border-radius: var(--radius); padding: 20px; margin-bottom: 16px; box-shadow: 0 1px 3px rgba(0,0,0,0.05);}
+.card-grid { display: grid; gap: 16px; }
+.card-grid-4 { grid-template-columns: repeat(auto-fill, minmax(200px, 1fr)); }
+.card-grid-3 { grid-template-columns: repeat(auto-fill, minmax(280px, 1fr)); }
+.card-grid-2 { grid-template-columns: 1fr 1fr; }
+.metric-card { text-align: center; padding: 24px 16px; }
+.metric-card .metric-val { font-size: 32px; font-weight: 700; color: var(--pr); }
+.metric-card .metric-lbl { font-size: 13px; font-weight: 500; color: var(--tx2); margin-top: 8px; text-transform: uppercase; letter-spacing: 0.5px;}
+.split { display: grid; grid-template-columns: 1fr 1fr; gap: 20px; }
+.split-pos { display: grid; grid-template-columns: 1.2fr .8fr; gap: 20px; }
+.search-bar { margin-bottom: 16px; padding: 10px 14px; font-size: 14px;}
+.table-wrap { overflow-x: auto; width: 100%; -webkit-overflow-scrolling: touch;}
+.empty-state { text-align: center; padding: 40px 20px; color: var(--tx3); font-style: italic;}
+
+/* Hamburger defaults to hidden */
+.mobile-header { display: none; background: var(--bg2); border-bottom: 1px solid var(--border); padding: 12px 20px; align-items: center; justify-content: space-between; position: sticky; top: 0; z-index: 101; }
+.mobile-menu-btn { font-size: 24px; background: none; color: var(--tx); }
+.overlay { display: none; position: fixed; inset: 0; background: rgba(0,0,0,0.5); z-index: 99; }
+
+/* ===== RESPONSIVE MOBILE ===== */
+@media (max-width: 768px) {
+    .app-container { flex-direction: column; }
+    .mobile-header { display: flex; }
+    .sidebar { position: fixed; left: -250px; transition: left 0.3s ease; box-shadow: 2px 0 8px rgba(0,0,0,0.1); height: 100vh; overflow-y: auto; }
+    .sidebar.active { left: 0; }
+    .overlay.active { display: block; }
+    
+    html[dir="rtl"] .sidebar { right: -250px; left: auto; box-shadow: -2px 0 8px rgba(0,0,0,0.1); }
+    html[dir="rtl"] .sidebar.active { right: 0; }
+    
+    .split, .split-pos, .card-grid-2, .card-grid-3, .card-grid-4 { grid-template-columns: 1fr; }
+    .main-content { padding: 16px 14px; }
+}
+
+/* ===== RTL ===== */
+html[dir="rtl"] { direction: rtl; }
+html[dir="rtl"] th, html[dir="rtl"] td { text-align: right; }
+html[dir="rtl"] .sidebar { border-right: none; border-left: 1px solid var(--border); }
+html[dir="rtl"] .sidebar nav a { border-left: none; border-right: 3px solid transparent; }
+html[dir="rtl"] .sidebar nav a.active { border-right-color: var(--pr); }
+
+@stack('styles')
+
+</style>
+</head>
+<body>
+
+  <!-- MOBILE HEADER (Only visible on small screens) -->
+  <div class="mobile-header">
+      <button class="mobile-menu-btn" onclick="toggleSidebar()">☰</button>
+      <a href="{{ route('dashboard') }}" style="text-decoration:none; font-weight:700; color:var(--pr); font-size: 18px;">GenShelf</a>
+      <div style="width: 24px;"></div> <!-- Spacer for flex alignment -->
+  </div>
+
+  <div class="overlay" id="mobile-overlay" onclick="toggleSidebar()"></div>
+
+  <div class="app-container">
+      <!-- SIDEBAR -->
+      <div class="sidebar" id="app-sidebar">
+        <a href="{{ route('dashboard') }}" class="logo">
+           <img src="{{ asset('images/logo.png') }}" alt="{{ config('app.name') }}" style="max-width: 100%; height: auto; max-height: 50px;">
+        </a>
+        <nav>
+            @php
+                // We get user permissions from the DB role, or default ones if admin
+                $roles = auth()->user()->role ? is_string(auth()->user()->role->permissions) ? json_decode(auth()->user()->role->permissions, true) : auth()->user()->role->permissions : [];
+                if (empty($roles)) {
+                    $roles = ['dashboard','pos','inventory','suppliers','customers','offers','returns','finance','reports','warranty','transfers','settings','users'];
+                }
+            @endphp
+
+            @if(in_array('dashboard', $roles))
+                <a href="{{ route('dashboard') }}" class="{{ request()->routeIs('dashboard') ? 'active' : '' }}">📊 {{ __('Dashboard') }}</a>
+            @endif
+            @if(in_array('pos', $roles))
+                <a href="{{ route('pos') }}" class="{{ request()->routeIs('pos') ? 'active' : '' }}">🛒 {{ __('Point of Sale') }}</a>
+            @endif
+            @if(in_array('inventory', $roles))
+                <a href="{{ route('inventory') }}" class="{{ request()->routeIs('inventory') ? 'active' : '' }}">📦 {{ __('Inventory') }}</a>
+            @endif
+            @if(in_array('suppliers', $roles))
+                <a href="{{ route('suppliers') }}" class="{{ request()->routeIs('suppliers') ? 'active' : '' }}">🤝 {{ __('Suppliers & PO') }}</a>
+            @endif
+            @if(in_array('customers', $roles))
+                <a href="{{ route('customers') }}" class="{{ request()->routeIs('customers') ? 'active' : '' }}">👥 {{ __('Customers') }}</a>
+            @endif
+            @if(in_array('offers', $roles))
+                <a href="{{ route('offers') }}" class="{{ request()->routeIs('offers') ? 'active' : '' }}">⭐ {{ __('Special Offers') }}</a>
+            @endif
+            @if(in_array('returns', $roles))
+                <a href="{{ route('returns') }}" class="{{ request()->routeIs('returns') ? 'active' : '' }}">📦 {{ __('Returns') }}</a>
+            @endif
+            @if(in_array('finance', $roles))
+                <a href="{{ route('finance') }}" class="{{ request()->routeIs('finance') ? 'active' : '' }}">💰 {{ __('Finance') }}</a>
+            @endif
+            @if(in_array('reports', $roles))
+                <a href="{{ route('reports') }}" class="{{ request()->routeIs('reports') ? 'active' : '' }}">📈 {{ __('Reports') }}</a>
+            @endif
+            @if(in_array('warranty', $roles))
+                <a href="{{ route('warranty') }}" class="{{ request()->routeIs('warranty') ? 'active' : '' }}">🛡️ {{ __('Warranty') }}</a>
+            @endif
+            @if(in_array('transfers', $roles))
+                <a href="{{ route('transfers') }}" class="{{ request()->routeIs('transfers') ? 'active' : '' }}">🚚 {{ __('Transfers') }}</a>
+            @endif
+            @if(in_array('settings', $roles))
+                <a href="{{ route('settings') }}" class="{{ request()->routeIs('settings') ? 'active' : '' }}">⚙️ {{ __('Settings') }}</a>
+            @endif
+            @if(in_array('users', $roles))
+                <a href="{{ route('users') }}" class="{{ request()->routeIs('users') ? 'active' : '' }}">🔑 {{ __('Users') }}</a>
+            @endif
+        </nav>
+        
+        <div class="sidebar-actions">
+            <!-- Lang Toggle -->
+            <a href="#" class="lang-btn">{{ app()->getLocale() === 'ar' ? 'English' : 'العربية' }}</a>
+            <!-- User Dropdown / Logout -->
+            <form method="POST" action="{{ route('logout') }}" id="logout-form" style="display: none;">
+                @csrf
+            </form>
+            <button class="user-btn" onclick="document.getElementById('logout-form').submit();">
+                {{ auth()->user()->displayName ?? auth()->user()->name }} ↗
+            </button>
+        </div>
+      </div>
+
+      <!-- MAIN CONTENT AREA -->
+      <div class="main-content">
+          @if(session('success'))
+            <div style="background:var(--gn-l);color:var(--gn);padding:12px 16px;border-radius:var(--radius);margin-bottom:16px;font-weight:600;">
+                {{ session('success') }}
+            </div>
+          @endif
+          @if(session('error'))
+            <div style="background:var(--rd-l);color:var(--rd);padding:12px 16px;border-radius:var(--radius);margin-bottom:16px;font-weight:600;">
+                {{ session('error') }}
+            </div>
+          @endif
+
+          @yield('content')
+
+          <!-- GEN CODE FOOTER -->
+          <footer style="margin-top: auto; padding: 20px 0; border-top: 1px solid var(--border); display: flex; align-items: center; justify-content: center; gap: 10px; opacity: 0.8;">
+              <span style="font-size: 12px; color: var(--tx2);">{{ __('Created by') }}</span>
+              <a href="https://gen-code-delta.vercel.app/" target="_blank" style="display: flex; align-items: center; gap: 6px; text-decoration: none;">
+                  <img src="{{ asset('images/gen_code_logo.png') }}" alt="Gen Code" style="height: 20px; width: auto;">
+                  <span style="font-weight: 700; color: var(--tx); font-size: 13px;">Gen Code</span>
+              </a>
+          </footer>
+      </div>
+  </div>
+
+  <script>
+      // Global Table Sorting Logic
+      document.addEventListener('DOMContentLoaded', () => {
+          const getCellValue = (tr, idx) => tr.children[idx].innerText || tr.children[idx].textContent;
+          const comparer = (idx, asc) => (a, b) => ((v1, v2) => 
+              v1 !== '' && v2 !== '' && !isNaN(v1) && !isNaN(v2) ? v1 - v2 : v1.toString().localeCompare(v2)
+          )(getCellValue(asc ? a : b, idx), getCellValue(asc ? b : a, idx));
+
+          document.querySelectorAll('th').forEach(th => th.addEventListener('click', function() {
+              const table = th.closest('table');
+              if (!table) return;
+              
+              const tbody = table.querySelector('tbody') || table;
+              const text = th.innerText.toLowerCase();
+              
+              // Do not sort columns like "Actions", "Permissions", etc.
+              if (text.includes('action') || text.includes('permission') || th.classList.contains('no-sort')) {
+                  return;
+              }
+
+              // Toggle directions
+              this.asc = !this.asc;
+
+              // Sort rows
+              const rows = Array.from(tbody.querySelectorAll('tr:nth-child(n+2)'));
+              if(rows.length === 0) return; // Prevent sorting empty states
+              if(rows.length === 1 && rows[0].querySelector('.empty-state')) return;
+
+              rows.sort(comparer(Array.from(th.parentNode.children).indexOf(th), this.asc))
+                  .forEach(tr => tbody.appendChild(tr));
+
+              // Update arrows
+              table.querySelectorAll('th').forEach(th => th.classList.remove('sort-asc', 'sort-desc'));
+              th.classList.toggle('sort-asc', this.asc);
+              th.classList.toggle('sort-desc', !this.asc);
+          }));
+      });
+
+      // Mobile Sidebar Toggle
+      function toggleSidebar() {
+          const sidebar = document.getElementById('app-sidebar');
+          const overlay = document.getElementById('mobile-overlay');
+          if (sidebar) sidebar.classList.toggle('active');
+          if (overlay) overlay.classList.toggle('active');
+      }
+  </script>
+
+  @stack('scripts')
+</body>
+</html>
