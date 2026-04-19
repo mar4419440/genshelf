@@ -161,14 +161,14 @@
         }
 
         .qty-input {
-            width: 55px;
+            width: 80px;
             text-align: center;
             border: 1px solid var(--border);
             border-radius: 8px;
             background: var(--bg);
             font-weight: 700;
-            padding: 6px;
-            font-size: 14px;
+            padding: 8px;
+            font-size: 15px;
         }
 
         .pos-totals {
@@ -265,7 +265,8 @@
                     <div id="customer-dropdown" class="card"
                         style="position:absolute; width:100%; display:none; z-index:100; max-height:200px; overflow-y:auto; padding:0;">
                         <div style="padding:10px; cursor:pointer;" onclick="selectCustomer('', 'Walk-in')">
-                            {{ __('Walk-in Customer') }}</div>
+                            {{ __('Walk-in Customer') }}
+                        </div>
                         @foreach($customers as $c)
                             <div class="customer-item" data-name="{{ strtolower($c->name) }}"
                                 onclick="selectCustomer('{{ $c->id }}', '{{ addslashes($c->name) }}')"
@@ -362,19 +363,19 @@
                 container.innerHTML = '<div class="empty-state" style="margin-top:40px;">Cart is empty</div>';
             } else {
                 container.innerHTML = cart.map((item, i) => `
-                        <div class="cart-item-row">
-                            <div class="cir-top">
-                                <span class="cir-name">${item.name}</span>
-                                <button type="button" class="cir-del" onclick="removeFromCart(${i})">✕</button>
-                            </div>
-                            <div class="cir-actions">
-                                <div class="cir-qty">
-                                    <input type="number" class="qty-input" value="${item.qty}" min="1" onchange="setQty(${i}, this.value)">
+                            <div class="cart-item-row">
+                                <div class="cir-top">
+                                    <span class="cir-name">${item.name}</span>
+                                    <button type="button" class="cir-del" onclick="removeFromCart(${i})">✕</button>
                                 </div>
-                                <div style="font-weight:700; width: 80px; text-align: right;">${(item.price * item.qty).toFixed(2)}</div>
+                                <div class="cir-actions">
+                                    <div class="cir-qty">
+                                        <input type="number" class="qty-input" value="${item.qty}" min="1" onchange="setQty(${i}, this.value)">
+                                    </div>
+                                    <div style="font-weight:700; width: 80px; text-align: right;">${(item.price * item.qty).toFixed(2)}</div>
+                                </div>
                             </div>
-                        </div>
-                    `).join('');
+                        `).join('');
             }
             updateSummary();
         }
