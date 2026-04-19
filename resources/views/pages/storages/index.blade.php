@@ -122,14 +122,13 @@
                     </form>
                 `;
             document.getElementById('modal-box').innerHTML = html;
-            document.getElementById('modal-overlay').classList.add('active');
             document.getElementById('modal-overlay').style.display = 'flex';
             document.getElementById('modal-overlay').style.alignItems = 'center';
             document.getElementById('modal-overlay').style.justifyContent = 'center';
         }
 
         function closeModal() {
-            document.getElementById('modal-overlay').classList.remove('active');
+            document.getElementById('modal-overlay').style.display = 'none';
         }
     </script>
 @endpush

@@ -1,7 +1,7 @@
 {
     "Dashboard": "لوحة التحكم",
     "Point of Sale": "نقطة البيع",
-    "Inventory": "المخزون",
+    "Product Management": "إدارة المنتجات",
     "Suppliers & PO": "الموردون وأوامر الشراء",
     "Customers": "العملاء",
     "Special Offers": "العروض الخاصة",
@@ -172,7 +172,7 @@
     "Historical Log": "السجل التاريخي",
     "Attention Needed: Overdue Debts": "تنبيه: ديون مستحقة",
     "Low Stock Warning": "تحذير: نقص المخزون",
-    "Manage Inventory": "إدارة المخزون",
+    "Product Management": "إدارة المنتجات",
     "View Details": "عرض التفاصيل",
     "Category Guide": "دليل الفئات",
     "Category Path": "مسار الفئة",
