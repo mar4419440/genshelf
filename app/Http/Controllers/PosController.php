@@ -106,7 +106,7 @@ class PosController extends Controller
                     while ($qtyToDeduct > 0) {
                         $batch = \App\Models\ProductBatch::where('product_id', $item['id'])
                             ->where('qty', '>', 0)
-                            ->orderBy('expiry_date', 'asc')
+                            ->orderBy('expiration_date', 'asc')
                             ->first();
 
                         if (!$batch) {

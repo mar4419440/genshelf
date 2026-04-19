@@ -49,6 +49,8 @@
     <div class="modal-overlay" id="transfer-modal">
         <div class="modal" style="max-width: 500px;">
             <h3>{{ __('New Stock Transfer') }}</h3>
+            <p style="font-size: 11px; margin-bottom: 12px;"><a href="{{ route('storages.index') }}" target="_blank">➕
+                    {{ __('Add New Storage/Store') }}</a></p>
             <form action="{{ route('transfers.store') }}" method="POST">
                 @csrf
                 <div class="form-group">
