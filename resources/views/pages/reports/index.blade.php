@@ -10,6 +10,19 @@
     </div>
 
     <!-- BI Tabs -->
+    @if($dashboard->overdueCount > 0)
+        <div class="card" style="background: rgba(var(--rd-rgb), 0.1); border: 1px solid var(--rd); padding: 16px; margin-bottom: 24px; display:flex; align-items:center; justify-content:space-between;">
+            <div style="display:flex; align-items:center; gap:12px;">
+                <span style="font-size:24px;">⚠️</span>
+                <div>
+                    <strong style="color:var(--rd); display:block;">{{ __('Attention Needed: Overdue Debts') }}</strong>
+                    <span style="font-size:13px; color:var(--tx2);">{{ $dashboard->overdueCount }} {{ __('transactions have passed their due date.') }}</span>
+                </div>
+            </div>
+            <button class="btn btn-sm btn-rd" onclick="showTab('tab-analysis', document.querySelectorAll('.tab-btn')[1])">{{ __('View Details') }}</button>
+        </div>
+    @endif
+
     <div style="display:flex; gap:12px; margin-bottom: 24px; border-bottom: 1px solid var(--border); padding-bottom: 8px;">
         <button class="tab-btn active" onclick="showTab('tab-dashboard', this)">📊 {{ __('Dashboard') }}</button>
         <button class="tab-btn" onclick="showTab('tab-analysis', this)">🔬 {{ __('Analysis') }}</button>

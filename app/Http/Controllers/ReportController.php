@@ -186,6 +186,11 @@ class ReportController extends Controller
             $weekData[$dayIndex] += $item->total;
         }
 
+        $overdueDebts = Transaction::where('due_amount', '>', 0)
+            ->where('due_date', '<', now())
+            ->with('customer')
+            ->get();
+
         return (object) [
             'todayRevenue' => $todayRevenue,
             'totalStock' => $totalStock,
@@ -194,7 +199,9 @@ class ReportController extends Controller
             'weekData' => $weekData,
             'maxSale' => max($weekData) ?: 1,
             'days' => [__('Sun'), __('Mon'), __('Tue'), __('Wed'), __('Thu'), __('Fri'), __('Sat')],
-            'todayDay' => now()->dayOfWeek
+            'todayDay' => now()->dayOfWeek,
+            'overdueCount' => $overdueDebts->count(),
+            'overdueList' => $overdueDebts
         ];
     }
 
