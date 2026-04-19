@@ -86,18 +86,18 @@
                         ${methodField}
                         <div style="margin-bottom: 12px;">
                             <label style="display:block;font-size:12px;font-weight:600;color:var(--tx2);margin-bottom:4px;">{{ __('Arabic Name') }}</label>
-                            <input name="name" value="${c.name || ''}" style="width:100%; padding:10px; border:1px solid var(--border); border-radius:var(--radius);" required>
+                            <input name="name" value="${c.name || ''}" class="search-bar" style="width:100%; border:1px solid var(--border);" required>
                         </div>
                         <div style="margin-bottom: 12px;">
                             <label style="display:block;font-size:12px;font-weight:600;color:var(--tx2);margin-bottom:4px;">{{ __('English Name') }} ({{ __('Optional') }})</label>
-                            <input name="name_en" value="${c.name_en || ''}" style="width:100%; padding:10px; border:1px solid var(--border); border-radius:var(--radius);">
+                            <input name="name_en" value="${c.name_en || ''}" class="search-bar" style="width:100%; border:1px solid var(--border);">
                         </div>
                         <div style="margin-bottom: 20px;">
                             <label style="display:block;font-size:12px;font-weight:600;color:var(--tx2);margin-bottom:4px;">{{ __('Parent Category') }}</label>
-                            <select name="parent_id" style="width:100%; padding:10px; border:1px solid var(--border); border-radius:var(--radius);">
+                            <select name="parent_id" class="search-bar" style="width:100%; border:1px solid var(--border);">
                                 <option value="">{{ __('None (Main Category)') }}</option>
                                 @foreach($categories as $pc)
-                                    <option value="{{ $pc->id }}" \${c.parent_id == {{ $pc->id }} ? 'selected' : ''}>{{ $pc->name }}</option>
+                                    <option value="{{ $pc->id }}" ${c.parent_id == {{ $pc->id }} ? 'selected' : ''}>{{ $pc->name }}</option>
                                 @endforeach
                             </select>
                         </div>
@@ -110,12 +110,11 @@
             document.getElementById('modal-box').innerHTML = html;
             document.getElementById('modal-overlay').classList.add('active');
             document.getElementById('modal-overlay').style.display = 'flex';
-            document.getElementById('modal-overlay').style.alignItems = 'center';
-            document.getElementById('modal-overlay').style.justifyContent = 'center';
         }
 
         function closeModal() {
             document.getElementById('modal-overlay').classList.remove('active');
+            document.getElementById('modal-overlay').style.display = 'none';
         }
     </script>
 @endpush
