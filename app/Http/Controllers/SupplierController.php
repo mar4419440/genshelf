@@ -17,8 +17,9 @@ class SupplierController extends Controller
         $products = Product::where('is_service', false)->get(); // For new PO dropdown
 
         $costMode = DB::table('settings')->where('key', 'cost_display_mode')->value('value') ?? 'unit';
+        $categories = \App\Models\Category::all();
 
-        return view('pages.suppliers.index', compact('suppliers', 'purchaseOrders', 'products', 'costMode'));
+        return view('pages.suppliers.index', compact('suppliers', 'purchaseOrders', 'products', 'costMode', 'categories'));
     }
 
     public function downloadTemplate()
@@ -97,13 +98,17 @@ class SupplierController extends Controller
         $validated = $request->validate([
             'name' => 'required|string|max:255',
             'name_en' => 'nullable|string|max:255',
-            'category' => 'required|string|max:255',
-            'category_en' => 'nullable|string|max:255',
+            'category_id' => 'required|exists:categories,id',
             'contact_person' => 'nullable|string|max:255',
             'phone' => 'required|string|max:20',
             'email' => 'nullable|email|max:255',
             'address' => 'nullable|string',
         ]);
+
+        $category = \App\Models\Category::find($validated['category_id']);
+        $validated['category'] = $category->name;
+        $validated['category_en'] = $category->name_en;
+        unset($validated['category_id']);
 
         Supplier::create($validated);
         return redirect()->back()->with('success', __('Supplier added successfully.'));
@@ -114,13 +119,17 @@ class SupplierController extends Controller
         $validated = $request->validate([
             'name' => 'required|string|max:255',
             'name_en' => 'nullable|string|max:255',
-            'category' => 'required|string|max:255',
-            'category_en' => 'nullable|string|max:255',
+            'category_id' => 'required|exists:categories,id',
             'contact_person' => 'nullable|string|max:255',
             'phone' => 'required|string|max:20',
             'email' => 'nullable|email|max:255',
             'address' => 'nullable|string',
         ]);
+
+        $category = \App\Models\Category::find($validated['category_id']);
+        $validated['category'] = $category->name;
+        $validated['category_en'] = $category->name_en;
+        unset($validated['category_id']);
 
         $supplier->update($validated);
         return redirect()->back()->with('success', __('Supplier updated successfully.'));

@@ -22,6 +22,12 @@ Route::middleware(['auth'])->group(function () {
     Route::get('/pos', [\App\Http\Controllers\PosController::class, 'index'])->name('pos');
     Route::post('/pos/checkout', [\App\Http\Controllers\PosController::class, 'checkout'])->name('pos.checkout');
 
+    // Categories
+    Route::get('/categories', [\App\Http\Controllers\CategoryController::class, 'index'])->name('categories');
+    Route::post('/categories', [\App\Http\Controllers\CategoryController::class, 'store'])->name('categories.store');
+    Route::put('/categories/{category}', [\App\Http\Controllers\CategoryController::class, 'update'])->name('categories.update');
+    Route::delete('/categories/{category}', [\App\Http\Controllers\CategoryController::class, 'destroy'])->name('categories.destroy');
+
     // Inventory
     Route::get('/inventory', [\App\Http\Controllers\InventoryController::class, 'index'])->name('inventory');
     Route::post('/inventory', [\App\Http\Controllers\InventoryController::class, 'store'])->name('inventory.store');

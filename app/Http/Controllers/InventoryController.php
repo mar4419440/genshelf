@@ -27,8 +27,9 @@ class InventoryController extends Controller
         // Use the global low stock default if the product's threshold isn't set
         $lowStockDefault = \DB::table('settings')->where('key', 'low_stock_default')->value('value') ?? 5;
         $suppliers = Supplier::all();
+        $categories = \App\Models\Category::all();
 
-        return view('pages.inventory.index', compact('products', 'lowStockDefault', 'suppliers'));
+        return view('pages.inventory.index', compact('products', 'lowStockDefault', 'suppliers', 'categories'));
     }
 
     public function downloadTemplate()
@@ -80,8 +81,7 @@ class InventoryController extends Controller
         $rules = [
             'name' => 'required|string|max:255',
             'name_en' => 'nullable|string|max:255',
-            'category' => 'required|string|max:255',
-            'category_en' => 'nullable|string|max:255',
+            'category_id' => 'required|exists:categories,id',
             'default_price' => 'required|numeric|min:0',
             'low_stock_threshold' => 'integer|min:0',
             'is_service' => 'boolean'
@@ -93,6 +93,11 @@ class InventoryController extends Controller
         }
 
         $validated = $request->validate($rules);
+
+        $category = \App\Models\Category::find($validated['category_id']);
+        $validated['category'] = $category->name;
+        $validated['category_en'] = $category->name_en;
+        unset($validated['category_id']);
 
         $validated['is_service'] = $request->has('is_service') ? 1 : 0;
 
@@ -142,12 +147,16 @@ class InventoryController extends Controller
         $validated = $request->validate([
             'name' => 'required|string|max:255',
             'name_en' => 'nullable|string|max:255',
-            'category' => 'required|string|max:255',
-            'category_en' => 'nullable|string|max:255',
+            'category_id' => 'required|exists:categories,id',
             'default_price' => 'required|numeric|min:0',
             'low_stock_threshold' => 'integer|min:0',
             'is_service' => 'boolean'
         ]);
+
+        $category = \App\Models\Category::find($validated['category_id']);
+        $validated['category'] = $category->name;
+        $validated['category_en'] = $category->name_en;
+        unset($validated['category_id']);
 
         $validated['is_service'] = $request->has('is_service') ? 1 : 0;
 

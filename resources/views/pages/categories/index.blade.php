@@ -1,0 +1,100 @@
+@extends('layouts.app')
+
+@section('content')
+    <div style="display:flex; justify-content:space-between; align-items:center; margin-bottom: 24px;">
+        <h2 style="font-size:24px; font-weight:700; color:var(--tx);">{{ __('Categories') }}</h2>
+        <button class="btn btn-pr" onclick="openCategoryModal()">
+            + {{ __('Add Category') }}
+        </button>
+    </div>
+
+    <div class="card" style="padding: 20px;">
+        <div style="overflow-x:auto;">
+            <table style="width:100%; text-align:left; border-collapse:collapse;">
+                <thead>
+                    <tr style="border-bottom:1px solid var(--border);">
+                        <th style="padding:12px; font-size:12px; color:var(--tx2); font-weight:600; cursor:pointer;">
+                            {{ __('Arabic Name') }}</th>
+                        <th style="padding:12px; font-size:12px; color:var(--tx2); font-weight:600; cursor:pointer;">
+                            {{ __('English Name') }}</th>
+                        <th style="padding:12px; font-size:12px; color:var(--tx2); font-weight:600; text-align:right;"
+                            class="no-sort">{{ __('Actions') }}</th>
+                    </tr>
+                </thead>
+                <tbody>
+                    @forelse($categories as $category)
+                        <tr style="border-bottom:1px solid #f1f5f9;">
+                            <td style="padding:12px;font-weight:500;">{{ $category->name }}</td>
+                            <td style="padding:12px;color:var(--tx2);">{{ $category->name_en ?: '-' }}</td>
+                            <td style="padding:12px; text-align:right;">
+                                <button class="btn btn-o" style="padding:6px 12px; font-size:12px;"
+                                    onclick='openCategoryModal(@json($category))'>{{ __('Edit') }}</button>
+                                <form action="{{ route('categories.destroy', $category->id) }}" method="POST"
+                                    style="display:inline;"
+                                    onsubmit="return confirm('{{ __('Are you sure you want to delete this category?') }}');">
+                                    @csrf
+                                    @method('DELETE')
+                                    <button type="submit" class="btn"
+                                        style="padding:6px 12px; font-size:12px; background:var(--rd-l); color:var(--rd);">{{ __('Del') }}</button>
+                                </form>
+                            </td>
+                        </tr>
+                    @empty
+                        <tr>
+                            <td colspan="3" style="padding:20px; text-align:center; color:var(--tx2);">
+                                {{ __('No categories found.') }}</td>
+                        </tr>
+                    @endforelse
+                </tbody>
+            </table>
+        </div>
+    </div>
+
+    <!-- Modal Container -->
+    <div class="overlay" id="modal-overlay" onclick="if(event.target===this)closeModal()">
+        <div class="modal" id="modal-box"
+            style="background:var(--bg2); padding: 20px; border-radius: var(--radius); width: 100%; max-width: 400px; display: inline-block;">
+        </div>
+    </div>
+@endsection
+
+@push('scripts')
+    <script>
+        function openCategoryModal(category = null) {
+            const isEdit = category !== null;
+            const actionUrl = isEdit ? `{{ url('categories') }}/${category.id}` : `{{ route('categories.store') }}`;
+            const methodField = isEdit ? `@method('PUT')` : '';
+
+            let c = isEdit ? category : { name: '', name_en: '' };
+
+            const html = `
+                    <h3 style="margin-bottom:16px;">${isEdit ? '{{ __('Edit Category') }}' : '{{ __('Add Category') }}'}</h3>
+                    <form action="${actionUrl}" method="POST">
+                        @csrf
+                        ${methodField}
+                        <div style="margin-bottom: 12px;">
+                            <label style="display:block;font-size:12px;font-weight:600;color:var(--tx2);margin-bottom:4px;">{{ __('Arabic Name') }}</label>
+                            <input name="name" value="${c.name || ''}" style="width:100%; padding:10px; border:1px solid var(--border); border-radius:var(--radius);" required>
+                        </div>
+                        <div style="margin-bottom: 20px;">
+                            <label style="display:block;font-size:12px;font-weight:600;color:var(--tx2);margin-bottom:4px;">{{ __('English Name') }} ({{ __('Optional') }})</label>
+                            <input name="name_en" value="${c.name_en || ''}" style="width:100%; padding:10px; border:1px solid var(--border); border-radius:var(--radius);">
+                        </div>
+                        <div style="display:flex; gap:8px;">
+                            <button type="button" class="btn btn-o" style="width:50%;" onclick="closeModal()">{{ __('Cancel') }}</button>
+                            <button type="submit" class="btn btn-pr" style="width:50%;">${isEdit ? '{{ __('Update') }}' : '{{ __('Save') }}'}</button>
+                        </div>
+                    </form>
+                `;
+            document.getElementById('modal-box').innerHTML = html;
+            document.getElementById('modal-overlay').classList.add('active');
+            document.getElementById('modal-overlay').style.display = 'flex';
+            document.getElementById('modal-overlay').style.alignItems = 'center';
+            document.getElementById('modal-overlay').style.justifyContent = 'center';
+        }
+
+        function closeModal() {
+            document.getElementById('modal-overlay').classList.remove('active');
+        }
+    </script>
+@endpush
