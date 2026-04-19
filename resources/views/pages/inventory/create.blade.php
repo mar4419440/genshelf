@@ -1,3 +1,5 @@
+@extends('layouts.app')
+
 @push('styles')
     <style>
         .category-item:hover {
