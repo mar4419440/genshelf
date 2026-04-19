@@ -124,6 +124,7 @@ class InventoryController extends Controller
         $qty = $validated['initial_qty'] ?? 0;
 
         $validated['has_warranty'] = $request->has('has_warranty');
+        $validated['warranty_duration'] = $validated['warranty_duration'] ?? 0;
         $validated['has_expiration'] = $request->has('has_expiration');
         $validated['is_service'] = $request->has('is_service') ? 1 : 0;
 
