@@ -72,35 +72,10 @@ class ReportController extends Controller
         }
 
         $transactions = $query->latest()->get();
-        $totalRev = $transactions->sum('total');
-        $totalTxCount = $transactions->count();
-        $avgOrder = $totalTxCount > 0 ? $totalRev / $totalTxCount : 0;
-
-        // Calculate Top Selling
-        $productSales = [];
-        foreach ($transactions as $tx) {
-            $items = is_string($tx->items) ? json_decode($tx->items, true) : $tx->items;
-            if (is_array($items)) {
-                foreach ($items as $item) {
-                    $name = $item['name'] ?? 'Unknown';
-                    if (!isset($productSales[$name])) {
-                        $productSales[$name] = ['name' => $name, 'units' => 0, 'revenue' => 0];
-                    }
-                    $qty = $item['qty'] ?? 0;
-                    $price = $item['price'] ?? 0;
-                    $productSales[$name]['units'] += $qty;
-                    $productSales[$name]['revenue'] += $price * $qty;
-                }
-            }
-        }
-
-        usort($productSales, function ($a, $b) {
-            return $b['revenue'] <=> $a['revenue'];
-        });
-
-        $topSelling = array_slice($productSales, 0, 10);
-
-        $leastSelling = $this->aggregateSales($query, 'asc');
+        $summary = $this->getSummary($transactions);
+        
+        $topSelling = $this->aggregateSales($transactions, 'desc');
+        $leastSelling = $this->aggregateSales($transactions, 'asc');
 
         $duePayments = \App\Models\Transaction::where('due_amount', '>', 0)
             ->with('customer')
@@ -115,4 +90,44 @@ class ReportController extends Controller
             'duePayments'
         ));
     }
+
+    private function getSummary($transactions)
+    {
+        $totalRev = $transactions->sum('total');
+        $count = $transactions->count();
+        return (object)[
+            'revenue' => $totalRev,
+            'count' => $count,
+            'avg' => $count > 0 ? $totalRev / $count : 0
+        ];
+    }
+
+    private function aggregateSales($transactions, $order = 'desc')
+    {
+        $productSales = [];
+        foreach ($transactions as $tx) {
+            $items = is_string($tx->items) ? json_decode($tx->items, true) : $tx->items;
+            if (is_array($items)) {
+                foreach ($items as $item) {
+                    $name = $item['name'] ?? 'Unknown';
+                    if (!isset($productSales[$name])) {
+                        $productSales[$name] = ['name' => $name, 'units' => 0, 'revenue' => 0];
+                    }
+                    $qty = (int)($item['qty'] ?? 0);
+                    $price = (float)($item['price'] ?? 0);
+                    $productSales[$name]['units'] += $qty;
+                    $productSales[$name]['revenue'] += $price * $qty;
+                }
+            }
+        }
+
+        usort($productSales, function ($a, $b) use ($order) {
+            return $order === 'desc' 
+                ? $b['revenue'] <=> $a['revenue'] 
+                : $a['revenue'] <=> $b['revenue'];
+        });
+
+        return array_slice($productSales, 0, 10);
+    }
+}
 }
