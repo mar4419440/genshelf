@@ -103,14 +103,15 @@ class PosController extends Controller
                 // 3. Stock Deduction (FIFO)
                 if (!$item['isService']) {
                     $qtyToDeduct = $item['qty'];
-                    $batches = \App\Models\ProductBatch::where('product_id', $item['id'])
-                        ->where('qty', '>', 0)
-                        ->orderBy('created_at', 'asc')
-                        ->get();
+                    while ($qtyToDeduct > 0) {
+                        $batch = \App\Models\ProductBatch::where('product_id', $item['id'])
+                            ->where('qty', '>', 0)
+                            ->orderBy('expiry_date', 'asc')
+                            ->first();
 
-                    foreach ($batches as $batch) {
-                        if ($qtyToDeduct <= 0)
+                        if (!$batch) {
                             break;
+                        }
 
                         if ($batch->qty >= $qtyToDeduct) {
                             $batch->decrement('qty', $qtyToDeduct);
