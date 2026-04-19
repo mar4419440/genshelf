@@ -129,11 +129,29 @@ class PosController extends Controller
             // Sync items JSON to the transaction for report performance
             $transaction->update(['items' => json_encode($processedItemsForJson)]);
 
-            // 4. Update Customer (Credit/Loyalty)
+            // 4. Handle Payments (Full, Partial, or Debt)
+            $paidInput = $request->input('paid_amount');
+            $paidAmount = $grandTotal; // Default to full pay
+
+            if ($isCredit) {
+                $paidAmount = 0; // Debt sale
+            } elseif ($request->filled('paid_amount')) {
+                $paidAmount = (float) $paidInput;
+            }
+
+            $dueAmount = max(0, $grandTotal - $paidAmount);
+
+            $transaction->update([
+                'paid_amount' => $paidAmount,
+                'due_amount' => $dueAmount,
+                'payment_method' => $dueAmount > 0 ? ($paidAmount > 0 ? 'partial' : 'debt') : 'cash'
+            ]);
+
+            // 5. Update Customer (Credit/Loyalty)
             if ($customerId) {
                 $customer = \App\Models\Customer::find($customerId);
-                if ($isCredit) {
-                    $customer->increment('credit_balance', $grandTotal);
+                if ($dueAmount > 0) {
+                    $customer->increment('credit_balance', $dueAmount);
                 }
 
                 // Loyalty: 1 point per 10 total currency

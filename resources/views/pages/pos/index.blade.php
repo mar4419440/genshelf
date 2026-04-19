@@ -220,6 +220,12 @@
                             <span>{{ __('Grand Total') }}</span>
                             <span id="summary-total">0.00</span>
                         </div>
+
+                        <!-- Partial Payment / Debt -->
+                        <div class="form-group" style="margin-top: 12px; border-top: 1px dashed var(--border); padding-top: 12px;">
+                            <label style="display:block; font-size:11px; color:var(--tx2); margin-bottom:4px;">{{ __('Amount Paid') }} ({{ __('Leave empty for full pay') }})</label>
+                            <input type="number" name="paid_amount" id="cart-paid-amount" step="0.01" class="search-bar" style="width:100%; height:38px;" placeholder="0.00">
+                        </div>
                     </div>
 
                     <div class="cart-actions">
