@@ -151,8 +151,20 @@
 @endpush
 
 @section('content')
-    <div class="page-hdr">
+    <div class="page-hdr" style="display:flex; justify-content:space-between; align-items:center; margin-bottom:12px">
         <h2>{{ __('Point of Sale') }}</h2>
+        <div style="display:flex; align-items:center; gap:8px;">
+            <label style="font-size:12px; color:var(--tx2)">{{ __('Active Store') }}:</label>
+            <select id="pos-storage-selector" class="search-bar" style="width:200px; padding:6px 12px;"
+                onchange="updateActiveStorage(this.value)">
+                @foreach(\App\Models\Storage::where('type', 'pos')->get() as $s)
+                    <option value="{{ $s->id }}">{{ $s->name }}</option>
+                @endforeach
+                @if(\App\Models\Storage::where('type', 'pos')->count() == 0)
+                    <option value="">{{ __('No POS Location Set') }}</option>
+                @endif
+            </select>
+        </div>
     </div>
 
     <div class="split-pos">
@@ -183,6 +195,7 @@
 
                 <form action="{{ route('pos.checkout') }}" method="POST" id="checkout-form">
                     @csrf
+                    <input type="hidden" name="storage_id" id="cart-storage-id" value="">
                     <div class="form-group" style="margin-bottom: 14px; position: relative;">
                         <input type="hidden" name="customer_id" id="selected-customer-id" value="">
                         <input type="text" id="customer-search" class="search-bar" style="width: 100%; padding: 10px;"
@@ -235,12 +248,18 @@
                         </div>
 
                         <!-- Partial Payment / Debt -->
-                        <div class="form-group" style="margin-top: 12px; border-top: 1px dashed var(--border); padding-top: 12px;">
-                            <label style="display:block; font-size:11px; color:var(--tx2); margin-bottom:4px;">{{ __('Amount Paid') }} ({{ __('Leave empty for full pay') }})</label>
-                            <input type="number" name="paid_amount" id="cart-paid-amount" step="0.01" class="search-bar" style="width:100%; height:38px;" placeholder="0.00">
+                        <div class="form-group"
+                            style="margin-top: 12px; border-top: 1px dashed var(--border); padding-top: 12px;">
+                            <label
+                                style="display:block; font-size:11px; color:var(--tx2); margin-bottom:4px;">{{ __('Amount Paid') }}
+                                ({{ __('Leave empty for full pay') }})</label>
+                            <input type="number" name="paid_amount" id="cart-paid-amount" step="0.01" class="search-bar"
+                                style="width:100%; height:38px;" placeholder="0.00">
                         </div>
                         <div class="form-group" style="margin-top: 8px;">
-                            <label style="display:block; font-size:11px; color:var(--tx2); margin-bottom:4px;">{{ __('Due Date') }} ({{ __('If Debt') }})</label>
+                            <label
+                                style="display:block; font-size:11px; color:var(--tx2); margin-bottom:4px;">{{ __('Due Date') }}
+                                ({{ __('If Debt') }})</label>
                             <input type="date" name="due_date" class="search-bar" style="width:100%; height:38px;">
                         </div>
                     </div>
@@ -373,18 +392,18 @@
             } else {
                 emptyMsg.style.display = 'none';
                 container.innerHTML = cart.map((item, i) => `
-                                <div class="cart-item">
-                                    <div class="ci-name">${item.name}</div>
-                                    <input class="ci-price-input" type="number" step="0.01" value="${item.price}" oninput="updatePrice(${i}, this.value)">
-                                    <div class="ci-qty">
-                                        <button type="button" onclick="updateQty(${i}, -1)">−</button>
-                                        <span>${item.qty}</span>
-                                        <button type="button" onclick="updateQty(${i}, 1)">+</button>
-                                    </div>
-                                    <div class="ci-total">${(item.price * item.qty).toFixed(2)}</div>
-                                    <button type="button" class="ci-del" onclick="removeFromCart(${i})">✕</button>
-                                </div>
-                            `).join('');
+                                            <div class="cart-item">
+                                                <div class="ci-name">${item.name}</div>
+                                                <input class="ci-price-input" type="number" step="0.01" value="${item.price}" oninput="updatePrice(${i}, this.value)">
+                                                <div class="ci-qty">
+                                                    <button type="button" onclick="updateQty(${i}, -1)">−</button>
+                                                    <span>${item.qty}</span>
+                                                    <button type="button" onclick="updateQty(${i}, 1)">+</button>
+                                                </div>
+                                                <div class="ci-total">${(item.price * item.qty).toFixed(2)}</div>
+                                                <button type="button" class="ci-del" onclick="removeFromCart(${i})">✕</button>
+                                            </div>
+                                        `).join('');
             }
             updateSummary();
         }
@@ -401,22 +420,22 @@
         function openServiceModal() {
             const modal = document.getElementById('modal-box');
             modal.innerHTML = `
-                            <div style="padding:10px">
-                                <h3 style="margin-bottom:16px">➕ {{ __('Add Custom Service / Item') }}</h3>
-                                <div class="form-group" style="margin-bottom:12px">
-                                    <label>{{ __('Item Name') }}</label>
-                                    <input type="text" id="svc-name" placeholder="Service / Repair..." style="width:100%; padding:10px; border:1px solid var(--border); border-radius:6px;">
-                                </div>
-                                <div class="form-group" style="margin-bottom:16px">
-                                    <label>{{ __('Price') }}</label>
-                                    <input type="number" id="svc-price" step="0.1" placeholder="0.00" style="width:100%; padding:10px; border:1px solid var(--border); border-radius:6px;">
-                                </div>
-                                <div style="display:flex; gap:10px">
-                                    <button class="btn btn-pr" onclick="addCustomService()">{{ __('Add to Cart') }}</button>
-                                    <button class="btn btn-o" onclick="closeModal()">{{ __('Cancel') }}</button>
-                                </div>
-                            </div>
-                        `;
+                                        <div style="padding:10px">
+                                            <h3 style="margin-bottom:16px">➕ {{ __('Add Custom Service / Item') }}</h3>
+                                            <div class="form-group" style="margin-bottom:12px">
+                                                <label>{{ __('Item Name') }}</label>
+                                                <input type="text" id="svc-name" placeholder="Service / Repair..." style="width:100%; padding:10px; border:1px solid var(--border); border-radius:6px;">
+                                            </div>
+                                            <div class="form-group" style="margin-bottom:16px">
+                                                <label>{{ __('Price') }}</label>
+                                                <input type="number" id="svc-price" step="0.1" placeholder="0.00" style="width:100%; padding:10px; border:1px solid var(--border); border-radius:6px;">
+                                            </div>
+                                            <div style="display:flex; gap:10px">
+                                                <button class="btn btn-pr" onclick="addCustomService()">{{ __('Add to Cart') }}</button>
+                                                <button class="btn btn-o" onclick="closeModal()">{{ __('Cancel') }}</button>
+                                            </div>
+                                        </div>
+                                    `;
             document.getElementById('modal-overlay').classList.add('show');
         }
 
@@ -440,5 +459,14 @@
         function closeModal() {
             document.getElementById('modal-overlay').classList.remove('show');
         }
+        function updateActiveStorage(id) {
+            document.getElementById('cart-storage-id').value = id;
+        }
+
+        // Initialize storage on load
+        window.addEventListener('DOMContentLoaded', () => {
+            const selector = document.getElementById('pos-storage-selector');
+            if (selector) updateActiveStorage(selector.value);
+        });
     </script>
 @endpush

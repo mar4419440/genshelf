@@ -667,11 +667,17 @@
                     <div class="logo-text"><span class="gen">Gen</span><span class="shelf">Shelf</span></div>
                 </div>
             </a>
-            <nav>
-                @php $roles = is_array(auth()->user()->role) ? auth()->user()->role : (json_decode(auth()->user()->role, true) ?: []);
+                @php 
+                    $role = auth()->user()->role;
+                    $roles = [];
+                    if ($role) {
+                        $permissions = $role->permissions;
+                        $roles = is_array($permissions) ? $permissions : (json_decode($permissions, true) ?: []);
+                    }
                     if (empty($roles)) {
                         $roles = ['dashboard', 'pos', 'inventory', 'suppliers', 'customers', 'offers', 'returns', 'finance', 'reports', 'warranty', 'transfers', 'settings', 'users'];
-                } @endphp
+                    } 
+                @endphp
                 
                    @if(in_array('dashboard', $roles))<a href="{{ route('dashboard') }}"
                     class="{{ request()->routeIs('dashboard') ? 'active' : '' }}">📊

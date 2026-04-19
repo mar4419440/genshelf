@@ -63,6 +63,7 @@ class PosController extends Controller
             $transaction = \App\Models\Transaction::create([
                 'customer_id' => $customerId,
                 'user_id' => auth()->id(),
+                'storage_id' => $request->storage_id,
                 'subtotal' => $subtotal,
                 'tax' => $taxTotal,
                 'total' => $grandTotal,

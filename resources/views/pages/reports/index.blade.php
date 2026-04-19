@@ -170,6 +170,37 @@
         </div>
     </div>
 
+    <!-- Multi-POS Sales Summary -->
+    <div class="card" style="margin-bottom: 20px;">
+        <h3 style="margin-bottom:16px;">🏢 {{ __('Sales by Location / POS') }}</h3>
+        <div class="table-wrap">
+            <table>
+                <tr style="background:#f8fafc;">
+                    <th>{{ __('Location') }}</th>
+                    <th>{{ __('Type') }}</th>
+                    <th>{{ __('Transactions') }}</th>
+                    <th>{{ __('Total Sales') }}</th>
+                </tr>
+                @foreach($salesByPOS as $sp)
+                    <tr>
+                        <td><strong>{{ $sp->storage->name ?? __('Unknown') }}</strong></td>
+                        <td>
+                            <span class="badge {{ ($sp->storage->type ?? '') === 'pos' ? 'badge-gn' : 'badge-o' }}">
+                                {{ ($sp->storage->type ?? '') === 'pos' ? __('Store (POS)') : __('Warehouse') }}
+                            </span>
+                        </td>
+                        <td>{{ $sp->count }}</td>
+                        <td>{{ number_format($sp->revenue, 2) }}</td>
+                    </tr>
+                @endforeach
+                <tr style="background:#f1f5f9; font-weight:700;">
+                    <td colspan="3">{{ __('Global Total') }}</td>
+                    <td>{{ number_format($salesByPOS->sum('revenue'), 2) }}</td>
+                </tr>
+            </table>
+        </div>
+    </div>
+
     <!-- Due Payments Section -->
     <div class="card" style="margin-bottom: 20px; border-left: 4px solid var(--rd);">
         <div style="display:flex; align-items:center; justify-content:space-between; margin-bottom: 16px;">
