@@ -100,12 +100,19 @@ class ReportController extends Controller
 
         $topSelling = array_slice($productSales, 0, 10);
 
-        $leastSelling = $productSales;
-        usort($leastSelling, function ($a, $b) {
-            return $a['units'] <=> $b['units'];
-        });
-        $leastSelling = array_slice($leastSelling, 0, 10);
+        $leastSelling = $this->aggregateSales($query, 'asc');
 
-        return view('pages.reports.index', compact('transactions', 'totalRev', 'totalTxCount', 'avgOrder', 'topSelling', 'leastSelling'));
+        $duePayments = \App\Models\Transaction::where('due_amount', '>', 0)
+            ->with('customer')
+            ->latest('due_date')
+            ->get();
+
+        return view('pages.reports.index', compact(
+            'transactions',
+            'summary',
+            'topSelling',
+            'leastSelling',
+            'duePayments'
+        ));
     }
 }

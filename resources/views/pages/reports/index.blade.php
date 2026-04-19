@@ -170,6 +170,46 @@
         </div>
     </div>
 
+    <!-- Due Payments Section -->
+    <div class="card" style="margin-bottom: 20px; border-left: 4px solid var(--rd);">
+        <div style="display:flex; align-items:center; justify-content:space-between; margin-bottom: 16px;">
+            <h3 style="color:var(--rd)">⚠️ {{ __('Due Payments (Debts)') }}</h3>
+            <span class="badge badge-rd">{{ $duePayments->count() }}</span>
+        </div>
+        <div class="table-wrap">
+            <table>
+                <tr style="background: rgba(var(--rd-rgb), 0.05);">
+                    <th>{{ __('Customer') }}</th>
+                    <th>{{ __('Invoice') }}</th>
+                    <th>{{ __('Total') }}</th>
+                    <th>{{ __('Due Amount') }}</th>
+                    <th>{{ __('Due Date') }}</th>
+                </tr>
+                @forelse($duePayments as $dp)
+                    <tr>
+                        <td><strong>{{ $dp->customer->name ?? __('Walk-in') }}</strong></td>
+                        <td>#{{ $dp->id }}</td>
+                        <td>{{ number_format($dp->total, 2) }}</td>
+                        <td style="color:var(--rd); font-weight:700;">{{ number_format($dp->due_amount, 2) }}</td>
+                        <td>
+                            @if($dp->due_date)
+                                <span style="{{ $dp->due_date < now() ? 'color:var(--rd); font-weight:bold;' : '' }}">
+                                    {{ $dp->due_date }}
+                                </span>
+                            @else
+                                —
+                            @endif
+                        </td>
+                    </tr>
+                @empty
+                    <tr>
+                        <td colspan="5" class="empty-state">{{ __('No outstanding debts found.') }}</td>
+                    </tr>
+                @endforelse
+            </table>
+        </div>
+    </div>
+
     <div class="card">
         <h3 style="margin-bottom:12px">{{ __('Transaction Log') }}</h3>
         <div class="table-wrap" style="max-height: 400px; overflow-y: auto;">
