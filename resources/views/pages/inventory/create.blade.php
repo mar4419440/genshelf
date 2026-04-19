@@ -28,6 +28,14 @@
                         📄 {{ __('Basic Information') }}
                     </h3>
 
+                    <div style="margin-bottom:16px;">
+                        <label
+                            style="display:block; font-size:12px; font-weight:600; color:var(--tx2); margin-bottom:6px;">{{ __('Barcode / SKU') }}</label>
+                        <input type="text" name="barcode"
+                            style="width:100%; padding:12px; border:1px solid var(--border); border-radius:8px; font-family:monospace; font-weight:700; font-size:15px; background:var(--bg3);"
+                            placeholder="Scan or enter barcode">
+                    </div>
+
                     <div style="display:grid; grid-template-columns: 1fr 1fr; gap:16px; margin-bottom:16px;">
                         <div>
                             <label

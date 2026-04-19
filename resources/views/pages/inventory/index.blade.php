@@ -52,6 +52,7 @@
         <div class="table-wrap">
             <table id="inv-table">
                 <tr>
+                    <th>{{ __('Barcode') }}</th>
                     <th>{{ __('Name') }}</th>
                     <th>{{ __('Category') }}</th>
                     <th>{{ __('Storage') }}</th>
@@ -77,6 +78,7 @@
                         $stLabel = $p->is_service ? __('Service') : ($st === 'in' ? __('In Stock') : ($st === 'low' ? __('Low Stock') : __('Out of Stock')));
                     @endphp
                     <tr>
+                        <td style="font-family:monospace; font-weight:700; color:var(--pr); font-size:12px;">{{ $p->barcode ?: '—' }}</td>
                         <td>
                             <strong>{{ $p->name }}</strong>
                             @if($p->is_service)
