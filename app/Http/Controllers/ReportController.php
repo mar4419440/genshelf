@@ -87,14 +87,115 @@ class ReportController extends Controller
             ->with('storage')
             ->get();
 
+        // Dashboard Data (Unified BI)
+        $dashboard = $this->getDashboardData();
+
+        // Hierarchical Grouping (Year > Month > Date) for the list
+        $groupedTransactions = $transactions->groupBy(function ($tx) {
+            return $tx->created_at->format('Y-m');
+        });
+
         return view('pages.reports.index', compact(
             'transactions',
             'summary',
             'topSelling',
             'leastSelling',
             'duePayments',
-            'salesByPOS'
+            'salesByPOS',
+            'dashboard',
+            'groupedTransactions'
         ));
+    }
+
+    public function export(Request $request)
+    {
+        $query = Transaction::query();
+        // Apply same filters as index
+        if ($request->filled('start_date') && $request->filled('end_date')) {
+            $query->whereBetween('created_at', [$request->start_date . ' 00:00:00', $request->end_date . ' 23:59:59']);
+        }
+
+        $transactions = $query->latest()->get();
+
+        $csvFileName = 'transactions_export_' . now()->format('YmdHis') . '.csv';
+        $headers = [
+            "Content-type" => "text/csv",
+            "Content-Disposition" => "attachment; filename=$csvFileName",
+            "Pragma" => "no-cache",
+            "Cache-Control" => "must-revalidate, post-check=0, pre-check=0",
+            "Expires" => "0"
+        ];
+
+        $columns = [__('ID'), __('Date'), __('Customer'), __('Total'), __('Paid'), __('Due'), __('Payment Method'), __('Store')];
+
+        $callback = function () use ($transactions, $columns) {
+            $file = fopen('php://output', 'w');
+            fprintf($file, chr(0xEF) . chr(0xBB) . chr(0xBF)); // UTF-8 BOM
+            fputcsv($file, $columns);
+
+            foreach ($transactions as $tx) {
+                fputcsv($file, [
+                    $tx->id,
+                    $tx->created_at->format('Y-m-d H:i'),
+                    $tx->customer->name ?? 'Walk-in',
+                    $tx->total,
+                    $tx->paid_amount,
+                    $tx->due_amount,
+                    $tx->payment_method,
+                    $tx->storage->name ?? 'Unknown'
+                ]);
+            }
+            fclose($file);
+        };
+
+        return response()->stream($callback, 200, $headers);
+    }
+
+    private function getDashboardData()
+    {
+        $todayStr = now()->format('Y-m-d');
+
+        $todayRevenue = DB::table('transactions')
+            ->whereDate('created_at', $todayStr)
+            ->sum('total');
+
+        $totalStock = DB::table('product_batches')->sum('qty');
+
+        $lowStockDefault = DB::table('settings')->where('key', 'low_stock_default')->value('value') ?? 5;
+        $lowAlerts = DB::table('products')
+            ->where('is_service', false)
+            ->whereExists(function ($query) use ($lowStockDefault) {
+                $query->select(DB::raw(1))
+                    ->from('product_batches')
+                    ->whereColumn('product_batches.product_id', 'products.id')
+                    ->havingRaw('SUM(product_batches.qty) <= products.low_stock_threshold')
+                    ->orHavingRaw("SUM(product_batches.qty) <= {$lowStockDefault}");
+            })
+            ->count();
+
+        $pendingPO = DB::table('purchase_orders')->where('status', 'pending')->count();
+
+        $weekStart = now()->startOfWeek(0); // Sunday
+        $weekData = array_fill(0, 7, 0);
+        $txs = DB::table('transactions')
+            ->where('created_at', '>=', $weekStart)
+            ->get();
+
+        foreach ($txs as $item) {
+            $dayIndex = (new \Carbon\Carbon($item->created_at))->dayOfWeek;
+            $weekData[$dayIndex] += $item->total;
+        }
+
+        return (object) [
+            'todayRevenue' => $todayRevenue,
+            'totalStock' => $totalStock,
+            'lowAlerts' => $lowAlerts,
+            'pendingPO' => $pendingPO,
+            'weekData' => $weekData,
+            'maxSale' => max($weekData) ?: 1,
+            'days' => [__('Sun'), __('Mon'), __('Tue'), __('Wed'), __('Thu'), __('Fri'), __('Sat')],
+            'todayDay' => now()->dayOfWeek
+        ];
     }
 
     private function getSummary($transactions)

@@ -80,8 +80,9 @@ Route::middleware(['auth'])->group(function () {
     Route::post('/finance/expense', [\App\Http\Controllers\FinanceController::class, 'storeExpense'])->name('finance.expense.store');
     Route::post('/finance/drawer', [\App\Http\Controllers\FinanceController::class, 'storeDrawerEvent'])->name('finance.drawer.store');
 
-    // Reports
+    // Reports / BI
     Route::get('/reports', [\App\Http\Controllers\ReportController::class, 'index'])->name('reports');
+    Route::get('/reports/export', [\App\Http\Controllers\ReportController::class, 'export'])->name('reports.export');
 
     // Warranty
     Route::get('/warranty', [\App\Http\Controllers\WarrantyController::class, 'index'])->name('warranty');

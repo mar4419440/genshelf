@@ -1,297 +1,195 @@
 @extends('layouts.app')
 
-@push('styles')
-@endpush
-
 @section('content')
     <div class="page-hdr">
-        <h2>{{ __('Reports') }}</h2>
+        <h2 style="font-size:24px; font-weight:700;">{{ __('Business Intelligence Hub') }}</h2>
         <div style="display:flex;gap:8px">
-            <button class="btn btn-sm btn-o" onclick="exportTransactionsCSV()">📥 {{ __('Export CSV') }}</button>
-            <button class="btn btn-sm btn-gn" onclick="generateDailyClose()">📊 {{ __('Daily Close Report') }}</button>
+            <a href="{{ route('reports.export', request()->all()) }}" class="btn btn-sm btn-o">📥 {{ __('Export CSV') }}</a>
+            <button class="btn btn-sm btn-gn" onclick="location.reload()">🔄 {{ __('Refresh Data') }}</button>
         </div>
     </div>
 
-    <div class="card" style="margin-bottom: 20px;">
-        <form method="GET" action="{{ route('reports') }}" id="filter-form">
-            <div style="display: flex; flex-wrap: wrap; gap: 12px; align-items: flex-end;">
-                <!-- Period Select -->
-                <div style="flex: 1; min-width: 150px;">
-                    <label
-                        style="display:block; font-size:11px; color:var(--tx2); margin-bottom:4px;">{{ __('Quick Period') }}</label>
-                    <select name="period" class="search-bar" style="width:100%; height:38px;" onchange="this.form.submit()">
-                        <option value="all" {{ request('period') == 'all' ? 'selected' : '' }}>{{ __('All Time') }}</option>
-                        <option value="today" {{ request('period') == 'today' ? 'selected' : '' }}>{{ __('Today') }}</option>
-                        <option value="yesterday" {{ request('period') == 'yesterday' ? 'selected' : '' }}>
-                            {{ __('Yesterday') }}
-                        </option>
-                        <option value="this_week" {{ request('period') == 'this_week' ? 'selected' : '' }}>
-                            {{ __('This Week') }}
-                        </option>
-                        <option value="this_month" {{ request('period') == 'this_month' ? 'selected' : '' }}>
-                            {{ __('This Month') }}
-                        </option>
-                        <option value="last_month" {{ request('period') == 'last_month' ? 'selected' : '' }}>
-                            {{ __('Last Month') }}
-                        </option>
-                        <option value="this_quarter" {{ request('period') == 'this_quarter' ? 'selected' : '' }}>
-                            {{ __('This Quarter') }}
-                        </option>
-                        <option value="this_year" {{ request('period') == 'this_year' ? 'selected' : '' }}>
-                            {{ __('This Year') }}
-                        </option>
-                    </select>
-                </div>
+    <!-- BI Tabs -->
+    <div style="display:flex; gap:12px; margin-bottom: 24px; border-bottom: 1px solid var(--border); padding-bottom: 8px;">
+        <button class="tab-btn active" onclick="showTab('tab-dashboard', this)">📊 {{ __('Dashboard') }}</button>
+        <button class="tab-btn" onclick="showTab('tab-analysis', this)">🔬 {{ __('Analysis') }}</button>
+        <button class="tab-btn" onclick="showTab('tab-history', this)">🕒 {{ __('Historical Log') }}</button>
+    </div>
 
-                <!-- Specific Month -->
-                <div style="width: 120px;">
-                    <label
-                        style="display:block; font-size:11px; color:var(--tx2); margin-bottom:4px;">{{ __('Month') }}</label>
-                    <select name="specific_month" class="search-bar" style="width:100%; height:38px;"
-                        onchange="this.form.submit()">
-                        <option value="">--</option>
-                        @for($m = 1; $m <= 12; $m++)
-                            <option value="{{ $m }}" {{ request('specific_month') == $m ? 'selected' : '' }}>
-                                {{ date('F', mktime(0, 0, 0, $m, 1)) }}
-                            </option>
-                        @endfor
-                    </select>
-                </div>
+    <!-- TAB: DASHBOARD -->
+    <div id="tab-dashboard" class="bi-tab active">
+        <div class="card-grid card-grid-4" style="margin-bottom: 24px;">
+            <div class="card metric-card">
+                <div class="metric-val">{{ number_format($dashboard->todayRevenue, 2) }}</div>
+                <div class="metric-lbl">{{ __('Today\'s Revenue') }}</div>
+            </div>
+            <div class="card metric-card">
+                <div class="metric-val">{{ $dashboard->totalStock }}</div>
+                <div class="metric-lbl">{{ __('Total Stock Units') }}</div>
+            </div>
+            <div class="card metric-card {{ $dashboard->lowAlerts > 0 ? 'card-rd' : '' }}">
+                <div class="metric-val">{{ $dashboard->lowAlerts }}</div>
+                <div class="metric-lbl">{{ __('Low Stock Alerts') }}</div>
+            </div>
+            <div class="card metric-card">
+                <div class="metric-val">{{ $dashboard->pendingPO }}</div>
+                <div class="metric-lbl">{{ __('Pending POs') }}</div>
+            </div>
+        </div>
 
-                <!-- Specific Quarter -->
-                <div style="width: 100px;">
-                    <label
-                        style="display:block; font-size:11px; color:var(--tx2); margin-bottom:4px;">{{ __('Quarter') }}</label>
-                    <select name="specific_quarter" class="search-bar" style="width:100%; height:38px;"
-                        onchange="this.form.submit()">
-                        <option value="">--</option>
-                        <option value="1" {{ request('specific_quarter') == '1' ? 'selected' : '' }}>Q1</option>
-                        <option value="2" {{ request('specific_quarter') == '2' ? 'selected' : '' }}>Q2</option>
-                        <option value="3" {{ request('specific_quarter') == '3' ? 'selected' : '' }}>Q3</option>
-                        <option value="4" {{ request('specific_quarter') == '4' ? 'selected' : '' }}>Q4</option>
-                    </select>
+        <div style="display:grid; grid-template-columns: 2fr 1fr; gap:20px; margin-bottom: 20px;">
+            <div class="card">
+                <h3 style="margin-bottom:16px;">📈 {{ __('Weekly Sales Trend') }}</h3>
+                <div style="height: 200px; display: flex; align-items: flex-end; gap: 12px; padding: 10px 0;">
+                    @foreach($dashboard->weekData as $index => $val)
+                        <div style="flex:1; display:flex; flex-direction:column; align-items:center;">
+                            <div style="width:100%; max-width:40px; background:{{ $index == $dashboard->todayDay ? 'var(--pr)' : 'var(--pr-l)' }}; height: {{ ($val/$dashboard->maxSale) * 100 }}%; border-radius: 4px 4px 0 0; position:relative;" title="{{ number_format($val, 2) }}">
+                               @if($val > 0) <span style="position:absolute; top:-18px; font-size:10px; font-weight:700; color:var(--tx2);">{{ number_format($val, 0) }}</span> @endif
+                            </div>
+                            <div style="font-size:11px; margin-top:8px; color:var(--tx2);">{{ $dashboard->days[$index] }}</div>
+                        </div>
+                    @endforeach
                 </div>
-
-                <!-- Specific Year -->
-                <div style="width: 100px;">
-                    <label
-                        style="display:block; font-size:11px; color:var(--tx2); margin-bottom:4px;">{{ __('Year') }}</label>
-                    <select name="specific_year" class="search-bar" style="width:100%; height:38px;"
-                        onchange="this.form.submit()">
-                        <option value="">--</option>
-                        @for($y = date('Y'); $y >= date('Y') - 5; $y--)
-                            <option value="{{ $y }}" {{ request('specific_year') == $y ? 'selected' : '' }}>{{ $y }}</option>
-                        @endfor
-                    </select>
+            </div>
+            <div class="card">
+                <h3 style="margin-bottom:16px;">🏗️ {{ __('Location Mix') }}</h3>
+                <div style="display:flex; flex-direction:column; gap:12px;">
+                    @foreach($salesByPOS as $sp)
+                        <div>
+                            <div style="display:flex; justify-content:space-between; font-size:12px; margin-bottom:4px;">
+                                <span>{{ $sp->storage->name ?? 'Unknown' }}</span>
+                                <span style="font-weight:700;">{{ number_format($sp->revenue, 0) }}</span>
+                            </div>
+                            <div style="height:6px; background:var(--border); border-radius:3px; overflow:hidden;">
+                                <div style="height:100%; background:var(--gn); width:{{ $dashboard->todayRevenue > 0 ? ($sp->revenue / $summary->revenue) * 100 : 0 }}%;"></div>
+                            </div>
+                        </div>
+                    @endforeach
                 </div>
+            </div>
+        </div>
+    </div>
 
-                <!-- Search -->
-                <div style="flex: 2; min-width: 200px;">
-                    <label
-                        style="display:block; font-size:11px; color:var(--tx2); margin-bottom:4px;">{{ __('Search name, item, or value') }}</label>
-                    <div style="display:flex; gap:4px">
-                        <input type="text" name="search" value="{{ request('search') }}" class="search-bar"
-                            style="flex:1; height:38px;" placeholder="{{ __('Search...') }}">
-                        <button type="submit" class="btn btn-pr" style="height:38px;">🔍</button>
-                        <a href="{{ route('reports') }}" class="btn btn-o"
-                            style="height:38px; display:flex; align-items:center;">🔄</a>
+    <!-- TAB: ANALYSIS -->
+    <div id="tab-analysis" class="bi-tab" style="display:none;">
+        <div style="display:grid; grid-template-columns: 1fr 1fr; gap:20px; margin-bottom:20px;">
+            <div class="card">
+                <h3 style="margin-bottom:12px">🔥 {{ __('Top Selling Products') }}</h3>
+                <div class="table-wrap">
+                    <table>
+                        @foreach($topSelling as $index => $p)
+                            <tr>
+                                <td style="width:30px; font-weight:700; color:var(--tx3)">{{ $index + 1 }}</td>
+                                <td>{{ $p['name'] }}</td>
+                                <td style="text-align:right"><strong>{{ number_format($p['revenue'], 2) }}</strong></td>
+                            </tr>
+                        @endforeach
+                    </table>
+                </div>
+            </div>
+            <div class="card">
+                <h3 style="margin-bottom:12px">📉 {{ __('Least Selling Products') }}</h3>
+                <div class="table-wrap">
+                    <table>
+                        @foreach($leastSelling as $index => $p)
+                            <tr>
+                                <td style="width:30px; font-weight:700; color:var(--tx3)">{{ $index + 1 }}</td>
+                                <td>{{ $p['name'] }}</td>
+                                <td style="text-align:right"><strong>{{ number_format($p['revenue'], 2) }}</strong></td>
+                            </tr>
+                        @endforeach
+                    </table>
+                </div>
+            </div>
+        </div>
+
+        <div class="card" style="border-left: 4px solid var(--rd);">
+             <h3 style="color:var(--rd); margin-bottom:16px;">⚠️ {{ __('Outstanding Debts') }}</h3>
+             <div class="table-wrap">
+                 <table>
+                     <tr>
+                         <th>{{ __('Customer') }}</th>
+                         <th>{{ __('Total') }}</th>
+                         <th>{{ __('Due') }}</th>
+                         <th>{{ __('Date') }}</th>
+                     </tr>
+                     @forelse($duePayments as $dp)
+                        <tr>
+                            <td>{{ $dp->customer->name ?? __('Walk-in') }}</td>
+                            <td>{{ number_format($dp->total, 2) }}</td>
+                            <td style="color:var(--rd); font-weight:700;">{{ number_format($dp->due_amount, 2) }}</td>
+                            <td>{{ $dp->due_date ? $dp->due_date->format('Y-m-d') : '—' }}</td>
+                        </tr>
+                     @empty
+                        <tr><td colspan="4" class="empty-state">{{ __('Perfect! No debts found.') }}</td></tr>
+                     @endforelse
+                 </table>
+             </div>
+        </div>
+    </div>
+
+    <!-- TAB: HISTORY (Hierarchical) -->
+    <div id="tab-history" class="bi-tab" style="display:none;">
+        <div class="card">
+            @foreach($groupedTransactions as $month => $monthTransactions)
+                <div style="margin-bottom: 30px;">
+                    <div style="background: var(--bg); padding: 8px 16px; border-radius: var(--radius); border: 1px solid var(--border); font-weight: 700; color: var(--pr); margin-bottom: 12px; display:flex; justify-content:space-between; align-items:center;">
+                        <span>📅 {{ \Carbon\Carbon::parse($month)->format('F Y') }}</span>
+                        <span class="badge badge-pr">{{ $monthTransactions->count() }} {{ __('tx') }}</span>
+                    </div>
+                    
+                    <div class="table-wrap">
+                        <table>
+                            <tr style="background:#f8fafc; font-size:11px; color:var(--tx2);">
+                                <th>{{ __('Day') }}</th>
+                                <th>{{ __('Customer') }}</th>
+                                <th>{{ __('Store') }}</th>
+                                <th>{{ __('Items') }}</th>
+                                <th>{{ __('Total') }}</th>
+                                <th>{{ __('Paid') }}</th>
+                            </tr>
+                            @foreach($monthTransactions as $tx)
+                                <tr>
+                                    <td><strong>{{ $tx->created_at->format('d') }}</strong></td>
+                                    <td>{{ $tx->customer->name ?? __('Walk-in') }}</td>
+                                    <td><small>{{ $tx->storage->name ?? '—' }}</small></td>
+                                    <td>
+                                        @php
+                                            $items = is_string($tx->items) ? json_decode($tx->items, true) : $tx->items;
+                                            $count = is_array($items) ? count($items) : 0;
+                                        @endphp
+                                        <span class="badge badge-o" style="font-size:10px;">{{ $count }} {{ __('items') }}</span>
+                                    </td>
+                                    <td style="font-weight:700;">{{ number_format($tx->total, 2) }}</td>
+                                    <td style="color:var(--gn)">{{ number_format($tx->paid_amount, 2) }}</td>
+                                </tr>
+                            @endforeach
+                        </table>
                     </div>
                 </div>
-            </div>
-        </form>
-    </div>
-
-    <div class="card-grid card-grid-3">
-        <div class="card metric-card">
-            <div class="metric-val">{{ number_format($summary->revenue, 2) }}</div>
-            <div class="metric-lbl">{{ __('Period Revenue') }}</div>
-        </div>
-        <div class="card metric-card">
-            <div class="metric-val">{{ $summary->count }}</div>
-            <div class="metric-lbl">{{ __('Transactions') }}</div>
-        </div>
-        <div class="card metric-card">
-            <div class="metric-val">{{ number_format($summary->avg, 2) }}</div>
-            <div class="metric-lbl">{{ __('Avg Order Value') }}</div>
+            @endforeach
         </div>
     </div>
 
-    <div style="display:grid; grid-template-columns: 1fr 1fr; gap:20px; margin-bottom:20px;">
-        <div class="card">
-            <h3 style="margin-bottom:12px">🔥 {{ __('Top Selling Products') }}</h3>
-            <div class="table-wrap">
-                <table>
-                    <tr>
-                        <th>#</th>
-                        <th>{{ __('Product') }}</th>
-                        <th>{{ __('Units Sold') }}</th>
-                        <th>{{ __('Revenue') }}</th>
-                    </tr>
-                    @forelse($topSelling as $index => $p)
-                        <tr>
-                            <td>{{ $index + 1 }}</td>
-                            <td>{{ $p['name'] }}</td>
-                            <td>{{ $p['units'] }}</td>
-                            <td>{{ number_format($p['revenue'], 2) }}</td>
-                        </tr>
-                    @empty
-                        <tr>
-                            <td colspan="4" class="empty-state">{{ __('No data yet') }}</td>
-                        </tr>
-                    @endforelse
-                </table>
-            </div>
-        </div>
-
-        <div class="card">
-            <h3 style="margin-bottom:12px">📉 {{ __('Least Selling Products') }}</h3>
-            <div class="table-wrap">
-                <table>
-                    <tr>
-                        <th>#</th>
-                        <th>{{ __('Product') }}</th>
-                        <th>{{ __('Units Sold') }}</th>
-                        <th>{{ __('Revenue') }}</th>
-                    </tr>
-                    @forelse($leastSelling as $index => $p)
-                        <tr>
-                            <td>{{ $index + 1 }}</td>
-                            <td>{{ $p['name'] }}</td>
-                            <td>{{ $p['units'] }}</td>
-                            <td>{{ number_format($p['revenue'], 2) }}</td>
-                        </tr>
-                    @empty
-                        <tr>
-                            <td colspan="4" class="empty-state">{{ __('No data yet') }}</td>
-                        </tr>
-                    @endforelse
-                </table>
-            </div>
-        </div>
-    </div>
-
-    <!-- Multi-POS Sales Summary -->
-    <div class="card" style="margin-bottom: 20px;">
-        <h3 style="margin-bottom:16px;">🏢 {{ __('Sales by Location / POS') }}</h3>
-        <div class="table-wrap">
-            <table>
-                <tr style="background:#f8fafc;">
-                    <th>{{ __('Location') }}</th>
-                    <th>{{ __('Type') }}</th>
-                    <th>{{ __('Transactions') }}</th>
-                    <th>{{ __('Total Sales') }}</th>
-                </tr>
-                @foreach($salesByPOS as $sp)
-                    <tr>
-                        <td><strong>{{ $sp->storage->name ?? __('Unknown') }}</strong></td>
-                        <td>
-                            <span class="badge {{ ($sp->storage->type ?? '') === 'pos' ? 'badge-gn' : 'badge-o' }}">
-                                {{ ($sp->storage->type ?? '') === 'pos' ? __('Store (POS)') : __('Warehouse') }}
-                            </span>
-                        </td>
-                        <td>{{ $sp->count }}</td>
-                        <td>{{ number_format($sp->revenue, 2) }}</td>
-                    </tr>
-                @endforeach
-                <tr style="background:#f1f5f9; font-weight:700;">
-                    <td colspan="3">{{ __('Global Total') }}</td>
-                    <td>{{ number_format($salesByPOS->sum('revenue'), 2) }}</td>
-                </tr>
-            </table>
-        </div>
-    </div>
-
-    <!-- Due Payments Section -->
-    <div class="card" style="margin-bottom: 20px; border-left: 4px solid var(--rd);">
-        <div style="display:flex; align-items:center; justify-content:space-between; margin-bottom: 16px;">
-            <h3 style="color:var(--rd)">⚠️ {{ __('Due Payments (Debts)') }}</h3>
-            <span class="badge badge-rd">{{ $duePayments->count() }}</span>
-        </div>
-        <div class="table-wrap">
-            <table>
-                <tr style="background: rgba(var(--rd-rgb), 0.05);">
-                    <th>{{ __('Customer') }}</th>
-                    <th>{{ __('Invoice') }}</th>
-                    <th>{{ __('Total') }}</th>
-                    <th>{{ __('Due Amount') }}</th>
-                    <th>{{ __('Due Date') }}</th>
-                </tr>
-                @forelse($duePayments as $dp)
-                    <tr>
-                        <td><strong>{{ $dp->customer->name ?? __('Walk-in') }}</strong></td>
-                        <td>#{{ $dp->id }}</td>
-                        <td>{{ number_format($dp->total, 2) }}</td>
-                        <td style="color:var(--rd); font-weight:700;">{{ number_format($dp->due_amount, 2) }}</td>
-                        <td>
-                            @if($dp->due_date)
-                                <span style="{{ $dp->due_date < now() ? 'color:var(--rd); font-weight:bold;' : '' }}">
-                                    {{ $dp->due_date }}
-                                </span>
-                            @else
-                                —
-                            @endif
-                        </td>
-                    </tr>
-                @empty
-                    <tr>
-                        <td colspan="5" class="empty-state">{{ __('No outstanding debts found.') }}</td>
-                    </tr>
-                @endforelse
-            </table>
-        </div>
-    </div>
-
-    <div class="card">
-        <h3 style="margin-bottom:12px">{{ __('Transaction Log') }}</h3>
-        <div class="table-wrap" style="max-height: 400px; overflow-y: auto;">
-            <table>
-                <tr>
-                    <th>{{ __('Items') }}</th>
-                    <th>{{ __('Total') }}</th>
-                    <th>{{ __('Paid') }}</th>
-                    <th>{{ __('Due') }}</th>
-                    <th>{{ __('Customer') }}</th>
-                    <th>{{ __('Employee') }}</th>
-                    <th>{{ __('Date') }}</th>
-                </tr>
-                @forelse($transactions->take(50) as $tx)
-                    @php
-                        $itemsStr = '';
-                        $itemsArr = is_string($tx->items) ? json_decode($tx->items, true) : $tx->items;
-                        if (is_array($itemsArr)) {
-                            $itemsStr = implode(', ', array_map(function ($i) {
-                                return $i['name'] ?? 'Item';
-                            }, $itemsArr));
-                        }
-                    @endphp
-                    <tr>
-                        <td><small>{{ $itemsStr }}</small></td>
-                        <td>{{ number_format($tx->total, 2) }}</td>
-                        <td style="color:var(--gn)">{{ number_format($tx->paid_amount, 2) }}</td>
-                        <td style="color:var(--rd)">{{ number_format($tx->due_amount, 2) }}</td>
-                        <td>{{ $tx->customer->name ?? __('Walk-in Customer') }}</td>
-                        <td>{{ $tx->user->displayName ?? ($tx->user->name ?? '') }}</td>
-                        <td>{{ $tx->created_at->format('Y-m-d H:i') }}</td>
-                    </tr>
-                @empty
-                    <tr>
-                        <td colspan="7" class="empty-state">{{ __('No data yet') }}</td>
-                    </tr>
-                @endforelse
-            </table>
-        </div>
-    </div>
-
-    <!-- Modal Container -->
-    <div class="modal-overlay" id="modal-overlay" onclick="if(event.target===this)closeModal()">
-        <div class="modal" id="modal-box"></div>
-    </div>
+    <style>
+        .tab-btn { background:none; border:none; padding: 10px 16px; font-weight: 600; color: var(--tx2); cursor:pointer; }
+        .tab-btn.active { color: var(--pr); border-bottom: 2px solid var(--pr); }
+        .tab-btn:hover { color: var(--pr); }
+        .metric-card { text-align:center; padding: 24px 12px; }
+        .metric-val { font-size: 28px; font-weight: 800; color: var(--tx); margin-bottom: 4px; }
+        .metric-lbl { font-size: 11px; font-weight: 600; color: var(--tx3); text-transform: uppercase; letter-spacing: 0.5px; }
+        .card-rd { background: rgba(var(--rd-rgb), 0.05); border: 1px solid var(--rd); }
+    </style>
 @endsection
 
 @push('scripts')
     <script>
-        function closeModal() { document.getElementById('modal-overlay').classList.remove('show'); }
-        function exportTransactionsCSV() { alert('Export logic'); }
-        function generateDailyClose() { alert('Daily close logic'); }
+        function showTab(tabId, btn) {
+            document.querySelectorAll('.bi-tab').forEach(t => t.style.display = 'none');
+            document.getElementById(tabId).style.display = 'block';
+            
+            document.querySelectorAll('.tab-btn').forEach(b => b.classList.remove('active'));
+            btn.classList.add('active');
+        }
     </script>
 @endpush
