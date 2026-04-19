@@ -52,6 +52,10 @@
             line-height: 1.5
         }
 
+        a {
+            text-decoration: none !important;
+        }
+
         button {
             cursor: pointer;
             font-family: var(--font);
@@ -667,6 +671,7 @@
                     <div class="logo-text"><span class="gen">Gen</span><span class="shelf">Shelf</span></div>
                 </div>
             </a>
+            <nav>
                 @php 
                     $role = auth()->user()->role;
                     $roles = [];
