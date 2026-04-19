@@ -144,6 +144,7 @@ class PosController extends Controller
             $transaction->update([
                 'paid_amount' => $paidAmount,
                 'due_amount' => $dueAmount,
+                'due_date' => $dueAmount > 0 ? $request->input('due_date') : null,
                 'payment_method' => $dueAmount > 0 ? ($paidAmount > 0 ? 'partial' : 'debt') : 'cash'
             ]);
 

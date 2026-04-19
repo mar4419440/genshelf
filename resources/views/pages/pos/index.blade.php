@@ -235,13 +235,13 @@
                         </div>
 
                         <!-- Partial Payment / Debt -->
-                        <div class="form-group"
-                            style="margin-top: 12px; border-top: 1px dashed var(--border); padding-top: 12px;">
-                            <label
-                                style="display:block; font-size:11px; color:var(--tx2); margin-bottom:4px;">{{ __('Amount Paid') }}
-                                ({{ __('Leave empty for full pay') }})</label>
-                            <input type="number" name="paid_amount" id="cart-paid-amount" step="0.01" class="search-bar"
-                                style="width:100%; height:38px;" placeholder="0.00">
+                        <div class="form-group" style="margin-top: 12px; border-top: 1px dashed var(--border); padding-top: 12px;">
+                            <label style="display:block; font-size:11px; color:var(--tx2); margin-bottom:4px;">{{ __('Amount Paid') }} ({{ __('Leave empty for full pay') }})</label>
+                            <input type="number" name="paid_amount" id="cart-paid-amount" step="0.01" class="search-bar" style="width:100%; height:38px;" placeholder="0.00">
+                        </div>
+                        <div class="form-group" style="margin-top: 8px;">
+                            <label style="display:block; font-size:11px; color:var(--tx2); margin-bottom:4px;">{{ __('Due Date') }} ({{ __('If Debt') }})</label>
+                            <input type="date" name="due_date" class="search-bar" style="width:100%; height:38px;">
                         </div>
                     </div>
 
