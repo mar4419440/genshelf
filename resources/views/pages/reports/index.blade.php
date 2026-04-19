@@ -103,15 +103,15 @@
 
     <div class="card-grid card-grid-3">
         <div class="card metric-card">
-            <div class="metric-val">{{ number_format($totalRev, 2) }}</div>
-            <div class="metric-lbl">{{ __('All-Time Revenue') }}</div>
+            <div class="metric-val">{{ number_format($summary->revenue, 2) }}</div>
+            <div class="metric-lbl">{{ __('Period Revenue') }}</div>
         </div>
         <div class="card metric-card">
-            <div class="metric-val">{{ $totalTxCount }}</div>
-            <div class="metric-lbl">{{ __('Total Transactions') }}</div>
+            <div class="metric-val">{{ $summary->count }}</div>
+            <div class="metric-lbl">{{ __('Transactions') }}</div>
         </div>
         <div class="card metric-card">
-            <div class="metric-val">{{ number_format($avgOrder, 2) }}</div>
+            <div class="metric-val">{{ number_format($summary->avg, 2) }}</div>
             <div class="metric-lbl">{{ __('Avg Order Value') }}</div>
         </div>
     </div>
