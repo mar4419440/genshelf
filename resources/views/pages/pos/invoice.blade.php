@@ -211,7 +211,8 @@
         <p>Powered by GenShelf</p>
     </div>
 
-    {{-- Return Section (visible on screen, hidden on print) --}}
+    {{-- Return Section (visible on screen for staff, hidden on print and for public) --}}
+    @auth
     <div class="return-section no-print">
         <h3>🔄 Return Items</h3>
         <table style="width:100%;">
@@ -244,6 +245,7 @@
                 onclick="return confirm('Return ALL items from this invoice?')">↩ Return All Items</button>
         </form>
     </div>
+    @endauth
 
     @if(session('success'))
         <div class="no-print" style="margin-top:10px; padding:8px; background:#e0ffe0; border:1px solid #0a0; border-radius:4px; font-size:11px; text-align:center;">
