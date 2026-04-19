@@ -7,24 +7,14 @@
     <meta name="csrf-token" content="{{ csrf_token() }}">
     <title>@yield('title', config('app.name', 'GenShelf')) - {{ __('Modern POS & Inventory System') }}</title>
     <meta name="description"
-        content="@yield('meta_description', 'GenShelf is a high-performance POS and Inventory management system for modern retail businesses. Optimize your sales and stock management today.')">
-    <meta name="keywords"
-        content="@yield('meta_keywords', 'GenShelf, POS System, Inventory Management, Retail Software, Business Automation')">
+        content="@yield('meta_description', 'GenShelf is a high-performance POS and Inventory management system.')">
+    <meta name="keywords" content="@yield('meta_keywords', 'GenShelf, POS System, Inventory Management')">
     <link rel="canonical" href="{{ url()->current() }}">
 
     <!-- Favicon -->
     <link rel="icon" type="image/png" href="{{ asset('images/logo.png') }}">
 
-    <!-- Search & Social Preview (Open Graph) -->
-    <meta property="og:type" content="website">
-    <meta property="og:title" content="@yield('title', 'GenShelf - Modern POS System')">
-    <meta property="og:description"
-        content="@yield('meta_description', 'Manage your inventory and sales with the state-of-the-art GenShelf POS system.')">
-    <meta property="og:image" content="{{ asset('images/logo.png') }}">
-    <meta property="og:url" content="{{ url()->current() }}">
-    <meta property="og:site_name" content="GenShelf">
-
-    <!-- Structured Data (JSON-LD) -->
+    <!-- Structured Data -->
     <script type="application/ld+json">
     {
       "@context": "https://schema.org",
@@ -32,12 +22,7 @@
       "name": "GenShelf",
       "operatingSystem": "Web",
       "applicationCategory": "BusinessApplication",
-      "description": "GenShelf is a high-performance POS and Inventory management system for modern retail businesses.",
-      "offers": {
-        "@type": "Offer",
-        "price": "0",
-        "priceCurrency": "USD"
-      }
+      "description": "GenShelf is a high-performance POS and Inventory management system for modern retail businesses."
     }
     </script>
 
@@ -65,7 +50,7 @@
             --bl-l: #dbeafe;
             --border: #d1d5db;
             --radius: 8px;
-            --font: 'Outfit', 'Segoe UI', system-ui, -apple-system, sans-serif;
+            --font: 'Outfit', sans-serif;
         }
 
         *,
@@ -82,196 +67,6 @@
             color: var(--tx);
             font-size: 14px;
             line-height: 1.5;
-        }
-
-        button {
-            cursor: pointer;
-            font-family: var(--font);
-            font-size: 13px;
-            border: none;
-            border-radius: var(--radius);
-            padding: 8px 16px;
-            transition: background .15s, opacity .15s;
-        }
-
-        input,
-        select,
-        textarea {
-            font-family: var(--font);
-            font-size: 13px;
-            border: 1px solid var(--border);
-            border-radius: var(--radius);
-            padding: 8px 12px;
-            width: 100%;
-            outline: none;
-            background: var(--bg2);
-        }
-
-        input:focus,
-        select:focus,
-        textarea:focus {
-            border-color: var(--pr);
-        }
-
-        table {
-            width: 100%;
-            border-collapse: collapse;
-        }
-
-        th,
-        td {
-            padding: 10px 12px;
-            text-align: left;
-            border-bottom: 1px solid var(--bg3);
-            font-size: 13px;
-        }
-
-        th {
-            background: var(--bg);
-            font-weight: 600;
-            color: var(--tx2);
-            text-transform: uppercase;
-            font-size: 11px;
-            letter-spacing: .5px;
-            cursor: pointer;
-            position: relative;
-            padding-right: 18px;
-            user-select: none;
-        }
-
-        th::after {
-            content: '↕';
-            position: absolute;
-            right: 5px;
-            opacity: 0.2;
-            font-size: 14px;
-            top: 50%;
-            transform: translateY(-50%);
-        }
-
-        th.sort-asc::after {
-            content: '▲';
-            opacity: 1;
-            color: var(--pr);
-            font-size: 10px;
-        }
-
-        th.sort-desc::after {
-            content: '▼';
-            opacity: 1;
-            color: var(--pr);
-            font-size: 10px;
-        }
-
-        th.no-sort {
-            cursor: default;
-        }
-
-        th.no-sort::after {
-            display: none;
-        }
-
-        tr:hover {
-            background: var(--pr-l);
-        }
-
-        .btn {
-            display: inline-flex;
-            align-items: center;
-            gap: 6px;
-            font-weight: 500;
-            text-decoration: none;
-            justify-content: center;
-        }
-
-        .btn-pr {
-            background: var(--pr);
-            color: #fff;
-        }
-
-        .btn-pr:hover {
-            background: var(--pr-h);
-        }
-
-        .btn-gn {
-            background: var(--gn);
-            color: #fff;
-        }
-
-        .btn-gn:hover {
-            opacity: .9;
-        }
-
-        .btn-rd {
-            background: var(--rd);
-            color: #fff;
-        }
-
-        .btn-rd:hover {
-            opacity: .9;
-        }
-
-        .btn-am {
-            background: var(--am);
-            color: #fff;
-        }
-
-        .btn-am:hover {
-            opacity: .9;
-        }
-
-        .btn-o {
-            background: transparent;
-            border: 1px solid var(--border);
-            color: var(--tx2);
-        }
-
-        .btn-o:hover {
-            border-color: var(--pr);
-            color: var(--pr);
-        }
-
-        .btn-sm {
-            padding: 5px 10px;
-            font-size: 12px;
-        }
-
-        .btn-xs {
-            padding: 3px 8px;
-            font-size: 11px;
-        }
-
-        .badge {
-            display: inline-block;
-            padding: 3px 10px;
-            border-radius: 12px;
-            font-size: 11px;
-            font-weight: 600;
-        }
-
-        .badge-gn {
-            background: var(--gn-l);
-            color: var(--gn);
-        }
-
-        .badge-am {
-            background: var(--am-l);
-            color: var(--am);
-        }
-
-        .badge-rd {
-            background: var(--rd-l);
-            color: var(--rd);
-        }
-
-        .badge-bl {
-            background: var(--bl-l);
-            color: var(--bl);
-        }
-
-        .badge-pr {
-            background: var(--pr-l);
-            color: var(--pr);
         }
 
         .app-container {
@@ -293,11 +88,7 @@
         }
 
         .sidebar .logo {
-            font-size: 24px;
-            font-weight: 700;
-            color: var(--pr);
             padding: 25px 20px;
-            white-space: nowrap;
             text-decoration: none;
             border-bottom: 1px solid var(--bg3);
             display: block;
@@ -353,7 +144,7 @@
             font-size: 14px;
             font-weight: 500;
             border-left: 3px solid transparent;
-            transition: background .15s, color .15s, border-color .15s;
+            transition: all .15s;
             display: flex;
             align-items: center;
             gap: 10px;
@@ -400,7 +191,6 @@
             border: none;
             cursor: pointer;
             text-align: center;
-            width: 100%;
             display: flex;
             justify-content: center;
             align-items: center;
@@ -410,7 +200,6 @@
         .main-content {
             flex: 1;
             padding: 20px 30px;
-            max-width: 1400px;
             display: flex;
             flex-direction: column;
             background: var(--bg);
@@ -422,8 +211,6 @@
             align-items: center;
             justify-content: space-between;
             margin-bottom: 24px;
-            flex-wrap: wrap;
-            gap: 12px;
             border-bottom: 2px solid var(--border);
             padding-bottom: 15px;
         }
@@ -432,7 +219,6 @@
             font-size: 24px;
             font-weight: 700;
             color: var(--tx);
-            margin: 0;
         }
 
         .card {
@@ -453,14 +239,6 @@
             grid-template-columns: repeat(auto-fill, minmax(200px, 1fr));
         }
 
-        .card-grid-3 {
-            grid-template-columns: repeat(auto-fill, minmax(280px, 1fr));
-        }
-
-        .card-grid-2 {
-            grid-template-columns: 1fr 1fr;
-        }
-
         .metric-card {
             text-align: center;
             padding: 24px 16px;
@@ -478,38 +256,33 @@
             color: var(--tx2);
             margin-top: 8px;
             text-transform: uppercase;
-            letter-spacing: 0.5px;
-        }
-
-        .split {
-            display: grid;
-            grid-template-columns: 1fr 1fr;
-            gap: 20px;
-        }
-
-        .split-pos {
-            display: grid;
-            grid-template-columns: 1.2fr .8fr;
-            gap: 20px;
-        }
-
-        .search-bar {
-            margin-bottom: 16px;
-            padding: 10px 14px;
-            font-size: 14px;
         }
 
         .table-wrap {
             overflow-x: auto;
             width: 100%;
-            -webkit-overflow-scrolling: touch;
         }
 
-        .empty-state {
-            text-align: center;
-            padding: 40px 20px;
-            color: var(--tx3);
-            font-style: italic;
+        table {
+            width: 100%;
+            border-collapse: collapse;
+        }
+
+        th,
+        td {
+            padding: 10px 12px;
+            text-align: left;
+            border-bottom: 1px solid var(--bg3);
+            font-size: 13px;
+        }
+
+        th {
+            background: var(--bg);
+            font-weight: 600;
+            color: var(--tx2);
+            text-transform: uppercase;
+            font-size: 11px;
+            cursor: pointer;
         }
 
         .mobile-header {
@@ -553,7 +326,6 @@
                 transition: left 0.3s ease;
                 box-shadow: 2px 0 8px rgba(0, 0, 0, 0.1);
                 height: 100vh;
-                overflow-y: auto;
             }
 
             .sidebar.active {
@@ -567,19 +339,10 @@
             html[dir="rtl"] .sidebar {
                 right: -250px;
                 left: auto;
-                box-shadow: -2px 0 8px rgba(0, 0, 0, 0.1);
             }
 
             html[dir="rtl"] .sidebar.active {
                 right: 0;
-            }
-
-            .split,
-            .split-pos,
-            .card-grid-2,
-            .card-grid-3,
-            .card-grid-4 {
-                grid-template-columns: 1fr;
             }
 
             .main-content {
@@ -610,26 +373,6 @@
             border-right-color: var(--pr);
         }
 
-        html[dir="rtl"] th::after {
-            right: auto;
-            left: 5px;
-        }
-
-        [dir="rtl"] .btn i,
-        [dir="rtl"] .btn svg {
-            margin-left: 6px;
-            margin-right: 0;
-        }
-
-        [dir="rtl"] .sidebar nav a i {
-            margin-left: 10px;
-            margin-right: 0;
-        }
-
-        [dir="rtl"] .logo-brand {
-            flex-direction: row-reverse;
-        }
-
         @stack('styles')
     </style>
 </head>
@@ -644,13 +387,9 @@
                         stroke-linecap="round" stroke-linejoin="round">
                         <path d="M3 9h18v10a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2V9Z" />
                         <path d="M3 9V5a2 2 0 0 1 2-2h14a2 2 0 0 1 2 2v4" />
-                        <path d="M12 12h.01" />
-                        <path d="M12 17h.01" />
                     </svg>
                 </div>
-                <div class="logo-text">
-                    <span class="gen">Gen</span><span class="shelf">Shelf</span>
-                </div>
+                <div class="logo-text"><span class="gen">Gen</span><span class="shelf">Shelf</span></div>
             </div>
         </a>
         <div style="width: 24px;"></div>
@@ -665,26 +404,53 @@
                             stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round">
                             <path d="M3 9h18v10a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2V9Z" />
                             <path d="M3 9V5a2 2 0 0 1 2-2h14a2 2 0 0 1 2 2v4" />
-                            <path d="M12 12h.01" />
-                            <path d="M12 17h.01" />
                         </svg>
                     </div>
-                    <div class="logo-text">
-                        <span class="gen">Gen</span><span class="shelf">Shelf</span>
-                    </div>
+                    <div class="logo-text"><span class="gen">Gen</span><span class="shelf">Shelf</span></div>
                 </div>
             </a>
             <nav>
-                <a href="{{ route('dashboard') }}" class="{{ request()->routeIs('dashboard') ? 'active' : '' }}">📊
-                    {{ __('Dashboard') }}</a>
+                @php
+                    $roles = auth()->user()->role ? (is_string(auth()->user()->role->permissions) ? json_decode(auth()->user()->role->permissions, true) : auth()->user()->role->permissions) : [];
+                    if (empty($roles)) {
+                        $roles = ['dashboard', 'pos', 'inventory', 'suppliers', 'customers', 'offers', 'returns', 'finance', 'reports', 'warranty', 'transfers', 'settings', 'users'];
+                    }
+                @endphp
+                @if(in_array('dashboard', $roles)) <a href="{{ route('dashboard') }}"
+                class="{{ request()->routeIs('dashboard') ? 'active' : '' }}">📊 {{ __('Dashboard') }}</a> @endif
+                @if(in_array('pos', $roles)) <a href="{{ route('pos') }}"
+                class="{{ request()->routeIs('pos') ? 'active' : '' }}">🛒 {{ __('Point of Sale') }}</a> @endif
+                @if(in_array('inventory', $roles)) <a href="{{ route('inventory') }}"
+                class="{{ request()->routeIs('inventory') ? 'active' : '' }}">📦 {{ __('Inventory') }}</a> @endif
+                @if(in_array('suppliers', $roles)) <a href="{{ route('suppliers') }}"
+                    class="{{ request()->routeIs('suppliers') ? 'active' : '' }}">🤝 {{ __('Suppliers & PO') }}</a>
+                @endif
+                @if(in_array('customers', $roles)) <a href="{{ route('customers') }}"
+                class="{{ request()->routeIs('customers') ? 'active' : '' }}">👥 {{ __('Customers') }}</a> @endif
+                @if(in_array('offers', $roles)) <a href="{{ route('offers') }}"
+                class="{{ request()->routeIs('offers') ? 'active' : '' }}">⭐ {{ __('Special Offers') }}</a> @endif
+                @if(in_array('returns', $roles)) <a href="{{ route('returns') }}"
+                class="{{ request()->routeIs('returns') ? 'active' : '' }}">📦 {{ __('Returns') }}</a> @endif
+                @if(in_array('finance', $roles)) <a href="{{ route('finance') }}"
+                class="{{ request()->routeIs('finance') ? 'active' : '' }}">💰 {{ __('Finance') }}</a> @endif
+                @if(in_array('reports', $roles)) <a href="{{ route('reports') }}"
+                class="{{ request()->routeIs('reports') ? 'active' : '' }}">📈 {{ __('Reports') }}</a> @endif
+                @if(in_array('warranty', $roles)) <a href="{{ route('warranty') }}"
+                class="{{ request()->routeIs('warranty') ? 'active' : '' }}">🛡️ {{ __('Warranty') }}</a> @endif
+                @if(in_array('transfers', $roles)) <a href="{{ route('transfers') }}"
+                    class="{{ request()->routeIs('transfers') ? 'active' : '' }}">🚚 {{ __('Stock Transfers') }}</a>
+                @endif
+                @if(in_array('settings', $roles)) <a href="{{ route('settings') }}"
+                class="{{ request()->routeIs('settings') ? 'active' : '' }}">⚙️ {{ __('Settings') }}</a> @endif
+                @if(in_array('users', $roles)) <a href="{{ route('users') }}"
+                class="{{ request()->routeIs('users') ? 'active' : '' }}">🔑 {{ __('Users') }}</a> @endif
             </nav>
             <div class="sidebar-actions">
                 <a href="{{ route('set-language', app()->getLocale() === 'ar' ? 'en' : 'ar') }}"
                     class="lang-btn">{{ app()->getLocale() === 'ar' ? 'English' : 'العربية' }}</a>
                 <form method="POST" action="{{ route('logout') }}" id="logout-form" style="display: none;">@csrf</form>
                 <button class="user-btn"
-                    onclick="document.getElementById('logout-form').submit();">{{ auth()->user()->displayName ?? auth()->user()->name }}
-                    ↗</button>
+                    onclick="document.getElementById('logout-form').submit();">{{ auth()->user()->name }} ↗</button>
             </div>
         </div>
         <div class="main-content">
@@ -700,36 +466,16 @@
             <footer
                 style="margin-top: auto; padding: 25px 0; border-top: 1px solid var(--border); display: flex; flex-direction: column; align-items: center; justify-content: center; gap: 8px; opacity: 0.8;">
                 <span
-                    style="font-size: 11px; color: var(--tx2); text-transform: uppercase; letter-spacing: 0.5px;">{{ __('Copyrights Reserved @ 2026') }}</span>
+                    style="font-size: 11px; color: var(--tx2); text-transform: uppercase; letter-spacing: 0.5px;">{{ __('Copyrights Reserved © 2026') }}</span>
                 <a href="https://gen-code-delta.vercel.app/" target="_blank" style="text-decoration: none;"><span
                         style="font-weight: 700; color: var(--pr); font-size: 13px;">Gen Code</span></a>
             </footer>
         </div>
     </div>
     <script>
-        document.addEventListener('DOMContentLoaded', () => {
-            const getCellValue = (tr, idx) => tr.children[idx].innerText || tr.children[idx].textContent;
-            const comparer = (idx, asc) => (a, b) => ((v1, v2) =>
-                v1 !== '' && v2 !== '' && !isNaN(v1) && !isNaN(v2) ? v1 - v2 : v1.toString().localeCompare(v2)
-            )(getCellValue(asc ? a : b, idx), getCellValue(asc ? b : a, idx));
-            document.querySelectorAll('th').forEach(th => th.addEventListener('click', function () {
-                const table = th.closest('table'); if (!table) return;
-                const tbody = table.querySelector('tbody') || table;
-                const text = th.innerText.toLowerCase();
-                if (text.includes('action') || text.includes('permission') || th.classList.contains('no-sort')) return;
-                this.asc = !this.asc;
-                const rows = Array.from(tbody.querySelectorAll('tr:nth-child(n+2)'));
-                if (rows.length === 0) return;
-                rows.sort(comparer(Array.from(th.parentNode.children).indexOf(th), this.asc)).forEach(tr => tbody.appendChild(tr));
-                table.querySelectorAll('th').forEach(th => th.classList.remove('sort-asc', 'sort-desc'));
-                th.classList.toggle('sort-asc', this.asc); th.classList.toggle('sort-desc', !this.asc);
-            }));
-        });
         function toggleSidebar() {
-            const sidebar = document.getElementById('app-sidebar');
-            const overlay = document.getElementById('mobile-overlay');
-            if (sidebar) sidebar.classList.toggle('active');
-            if (overlay) overlay.classList.toggle('active');
+            document.getElementById('app-sidebar').classList.toggle('active');
+            document.getElementById('mobile-overlay').classList.toggle('active');
         }
     </script>
     @stack('scripts')
