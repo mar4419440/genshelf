@@ -12,7 +12,7 @@ class InventoryController extends Controller
 {
     public function index(Request $request)
     {
-        $query = Product::query()->with('batches');
+        $query = Product::with(['batches.storage']);
 
         if ($request->filled('search')) {
             $search = strtolower($request->search);
@@ -21,6 +21,10 @@ class InventoryController extends Controller
 
         $products = $query->get()->map(function ($p) {
             $p->current_stock = $p->batches->sum('qty');
+            // Extract unique storage names
+            $p->storage_names = $p->batches->map(function ($b) {
+                return $b->storage ? $b->storage->name : null;
+            })->filter()->unique()->implode(', ');
             return $p;
         });
 
@@ -30,6 +34,17 @@ class InventoryController extends Controller
         $categories = \App\Models\Category::all();
 
         return view('pages.inventory.index', compact('products', 'lowStockDefault', 'suppliers', 'categories'));
+    }
+
+    public function create()
+    {
+        $suppliers = Supplier::all();
+        $categories = \App\Models\Category::all();
+        $storages = \App\Models\Storage::where('is_active', true)->get();
+        $lowStockDefault = \DB::table('settings')->where('key', 'low_stock_default')->value('value') ?? 5;
+        $costMode = \DB::table('settings')->where('key', 'cost_display_mode')->value('value') ?? 'unit';
+
+        return view('pages.inventory.create', compact('suppliers', 'categories', 'storages', 'lowStockDefault', 'costMode'));
     }
 
     public function downloadTemplate()
@@ -84,12 +99,18 @@ class InventoryController extends Controller
             'category_id' => 'required|exists:categories,id',
             'default_price' => 'required|numeric|min:0',
             'low_stock_threshold' => 'integer|min:0',
-            'is_service' => 'boolean'
+            'is_service' => 'boolean',
+            'has_warranty' => 'boolean',
+            'warranty_duration' => 'nullable|integer|min:0',
+            'has_expiration' => 'boolean',
+            'expiration_date' => 'nullable|date',
         ];
 
         if (!$request->has('is_service')) {
             $rules['supplier_id'] = 'required|exists:suppliers,id';
+            $rules['storage_id'] = 'required|exists:storages,id';
             $rules['cost'] = 'required|numeric|min:0';
+            $rules['initial_qty'] = 'required|integer|min:0';
         }
 
         $validated = $request->validate($rules);
@@ -97,18 +118,26 @@ class InventoryController extends Controller
         $category = \App\Models\Category::find($validated['category_id']);
         $validated['category'] = $category->name;
         $validated['category_en'] = $category->name_en;
-        unset($validated['category_id']);
+        $supplier_id = $validated['supplier_id'] ?? null;
+        $storage_id = $validated['storage_id'] ?? null;
+        $cost = $validated['cost'] ?? 0;
+        $qty = $validated['initial_qty'] ?? 0;
 
+        $validated['has_warranty'] = $request->has('has_warranty');
+        $validated['has_expiration'] = $request->has('has_expiration');
         $validated['is_service'] = $request->has('is_service') ? 1 : 0;
+
+        unset($validated['category_id'], $validated['supplier_id'], $validated['cost'], $validated['initial_qty'], $validated['storage_id']);
 
         $product = Product::create($validated);
 
-        if (!$product->is_service) {
-            ProductBatch::create([
+        if (!$product->is_service && $supplier_id) {
+            \App\Models\ProductBatch::create([
                 'product_id' => $product->id,
-                'supplier_id' => $request->supplier_id,
-                'qty' => 0,
-                'cost' => $request->cost,
+                'supplier_id' => $supplier_id,
+                'storage_id' => $storage_id,
+                'qty' => $qty,
+                'cost' => $cost,
                 'batch_number' => 'INITIAL-' . time()
             ]);
         }

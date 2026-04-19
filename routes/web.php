@@ -28,8 +28,15 @@ Route::middleware(['auth'])->group(function () {
     Route::put('/categories/{category}', [\App\Http\Controllers\CategoryController::class, 'update'])->name('categories.update');
     Route::delete('/categories/{category}', [\App\Http\Controllers\CategoryController::class, 'destroy'])->name('categories.destroy');
 
+    // Storages
+    Route::get('/storages', [\App\Http\Controllers\StorageController::class, 'index'])->name('storages');
+    Route::post('/storages', [\App\Http\Controllers\StorageController::class, 'store'])->name('storages.store');
+    Route::put('/storages/{storage}', [\App\Http\Controllers\StorageController::class, 'update'])->name('storages.update');
+    Route::delete('/storages/{storage}', [\App\Http\Controllers\StorageController::class, 'destroy'])->name('storages.destroy');
+
     // Inventory
     Route::get('/inventory', [\App\Http\Controllers\InventoryController::class, 'index'])->name('inventory');
+    Route::get('/inventory/create', [\App\Http\Controllers\InventoryController::class, 'create'])->name('inventory.create');
     Route::post('/inventory', [\App\Http\Controllers\InventoryController::class, 'store'])->name('inventory.store');
     Route::put('/inventory/{product}', [\App\Http\Controllers\InventoryController::class, 'update'])->name('inventory.update');
     Route::delete('/inventory/{product}', [\App\Http\Controllers\InventoryController::class, 'destroy'])->name('inventory.destroy');
