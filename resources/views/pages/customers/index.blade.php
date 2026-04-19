@@ -88,46 +88,46 @@
             let c = isEdit ? customer : { name: '', phone: '', email: '', loyalty_points: '0', credit_balance: '0.00' };
 
             const html = `
-                    <h3>${isEdit ? '{{ __('Edit Customer') }}' : '{{ __('Add Customer') }}'}</h3>
-                    <form action="${actionUrl}" method="POST">
-                        @csrf
-                        ${methodField}
-                        <div style="display:flex; gap:10px; margin-bottom: 12px;">
-                            <div style="flex:1;">
-                                <label style="display:block;font-size:12px;font-weight:600;color:var(--tx2);margin-bottom:4px;">{{ __('Arabic Name') }}</label>
-                                <input name="name" value="${c.name || ''}" required>
+                        <h3>${isEdit ? '{{ __('Edit Customer') }}' : '{{ __('Add Customer') }}'}</h3>
+                        <form action="${actionUrl}" method="POST">
+                            @csrf
+                            ${methodField}
+                            <div style="display:flex; gap:10px; margin-bottom: 12px;">
+                                <div style="flex:1;">
+                                    <label style="display:block;font-size:12px;font-weight:600;color:var(--tx2);margin-bottom:4px;">{{ __('Arabic Name') }}</label>
+                                    <input name="name" value="${c.name || ''}" required>
+                                </div>
+                                <div style="flex:1;">
+                                    <label style="display:block;font-size:12px;font-weight:600;color:var(--tx2);margin-bottom:4px;">{{ __('English Name') }} ({{ __('Optional') }})</label>
+                                    <input name="name_en" value="${c.name_en || ''}">
+                                </div>
                             </div>
-                            <div style="flex:1;">
-                                <label style="display:block;font-size:12px;font-weight:600;color:var(--tx2);margin-bottom:4px;">{{ __('English Name') }} ({{ __('Optional') }})</label>
-                                <input name="name_en" value="${c.name_en || ''}">
+                            <div style="display:flex; gap:10px; margin-bottom: 12px;">
+                                <div style="flex:1;">
+                                    <label style="display:block;font-size:12px;font-weight:600;color:var(--tx2);margin-bottom:4px;">{{ __('Phone') }}</label>
+                                    <input name="phone" type="text" value="${c.phone || ''}" required>
+                                </div>
+                                <div style="flex:1;">
+                                    <label style="display:block;font-size:12px;font-weight:600;color:var(--tx2);margin-bottom:4px;">{{ __('Email') }}</label>
+                                    <input name="email" type="email" value="${c.email || ''}">
+                                </div>
                             </div>
-                        </div>
-                        <div style="display:flex; gap:10px; margin-bottom: 12px;">
-                            <div style="flex:1;">
-                                <label style="display:block;font-size:12px;font-weight:600;color:var(--tx2);margin-bottom:4px;">{{ __('Phone') }}</label>
-                                <input name="phone" type="text" value="${c.phone || ''}" required>
+                            <div style="display:flex; gap:10px; margin-bottom: 16px;">
+                                <div style="flex:1;">
+                                    <label style="display:block;font-size:12px;font-weight:600;color:var(--tx2);margin-bottom:4px;">{{ __('Loyalty Points') }}</label>
+                                    <input name="loyalty_points" type="number" value="${c.loyalty_points || 0}">
+                                </div>
+                                <div style="flex:1;">
+                                    <label style="display:block;font-size:12px;font-weight:600;color:var(--tx2);margin-bottom:4px;">{{ __('Credit Balance') }} (-)</label>
+                                    <input name="credit_balance" type="number" step="0.01" value="${c.credit_balance || 0}">
+                                </div>
                             </div>
-                            <div style="flex:1;">
-                                <label style="display:block;font-size:12px;font-weight:600;color:var(--tx2);margin-bottom:4px;">{{ __('Email') }}</label>
-                                <input name="email" type="email" value="${c.email || ''}">
+                            <div style="display:flex; gap:8px;">
+                                <button type="button" class="btn btn-o" onclick="closeModal()">{{ __('Cancel') }}</button>
+                                <button type="submit" class="btn btn-pr" style="flex:1;">${isEdit ? '{{ __('Update') }}' : '{{ __('Save') }}'}</button>
                             </div>
-                        </div>
-                        <div style="display:flex; gap:10px; margin-bottom: 16px;">
-                            <div style="flex:1;">
-                                <label style="display:block;font-size:12px;font-weight:600;color:var(--tx2);margin-bottom:4px;">{{ __('Loyalty Points') }}</label>
-                                <input name="loyalty_points" type="number" value="${c.loyalty_points || 0}">
-                            </div>
-                            <div style="flex:1;">
-                                <label style="display:block;font-size:12px;font-weight:600;color:var(--tx2);margin-bottom:4px;">{{ __('Credit Balance') }} (-)</label>
-                                <input name="credit_balance" type="number" step="0.01" value="${c.credit_balance || 0}">
-                            </div>
-                        </div>
-                        <div style="display:flex; gap:8px;">
-                            <button type="button" class="btn btn-o" onclick="closeModal()">{{ __('Cancel') }}</button>
-                            <button type="submit" class="btn btn-pr" style="flex:1;">${isEdit ? '{{ __('Update') }}' : '{{ __('Save') }}'}</button>
-                        </div>
-                    </form>
-                `;
+                        </form>
+                    `;
             document.getElementById('modal-box').innerHTML = html;
             document.getElementById('modal-overlay').classList.add('active');
             document.getElementById('modal-overlay').style.display = 'flex';
@@ -140,7 +140,46 @@
             document.getElementById('modal-overlay').style.display = 'none';
         }
 
-        function viewCustomerHistory(id) { alert('History logic pending'); }
-        function recordPayment(id) { alert('Payment logic pending'); }
+        function viewCustomerHistory(id) {
+            document.getElementById('modal-box').innerHTML = `<h3>{{ __('Loading...') }}</h3>`;
+            document.getElementById('modal-overlay').style.display = 'flex';
+
+            fetch(`{{ url('customers') }}/${id}/history`)
+                .then(res => res.json())
+                .then(data => {
+                    let html = `<h3 style="margin-bottom:16px">{{ __('Transaction History') }}</h3>`;
+                    if (data.length === 0) {
+                        html += `<p class="empty-state">{{ __('No transactions found.') }}</p>`;
+                    } else {
+                        html += `
+                                <div class="table-wrap" style="max-height:400px; overflow-y:auto;">
+                                    <table>
+                                        <tr>
+                                            <th>{{ __('Date') }}</th>
+                                            <th>{{ __('Amount') }}</th>
+                                            <th>{{ __('Paid') }}</th>
+                                            <th>{{ __('Due') }}</th>
+                                            <th>{{ __('Status') }}</th>
+                                        </tr>
+                            `;
+                        data.forEach(tx => {
+                            const date = new Date(tx.created_at).toLocaleString();
+                            html += `
+                                    <tr>
+                                        <td style="font-size:11px">${date}</td>
+                                        <td>${parseFloat(tx.total).toFixed(2)}</td>
+                                        <td>${parseFloat(tx.paid_amount || 0).toFixed(2)}</td>
+                                        <td style="color:var(--rd)">${parseFloat(tx.due_amount || 0).toFixed(2)}</td>
+                                        <td style="text-transform:capitalize;">${tx.payment_method}</td>
+                                    </tr>
+                                `;
+                        });
+                        html += `</table></div>`;
+                    }
+                    html += `<button class="btn btn-o" onclick="closeModal()" style="margin-top:16px; width:100%">{{ __('Close') }}</button>`;
+                    document.getElementById('modal-box').innerHTML = html;
+                });
+        }
+        function recordPayment(id) { alert('Go to Finance or POS to record payment'); }
     </script>
 @endpush

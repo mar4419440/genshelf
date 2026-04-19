@@ -52,4 +52,14 @@ class CustomerController extends Controller
         $customer->delete();
         return redirect()->back()->with('success', __('Customer deleted successfully.'));
     }
+
+    public function history(Customer $customer)
+    {
+        $history = \App\Models\Transaction::where('customer_id', $customer->id)
+            ->latest()
+            ->take(50)
+            ->get();
+
+        return response()->json($history);
+    }
 }

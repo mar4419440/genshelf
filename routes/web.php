@@ -58,6 +58,7 @@ Route::middleware(['auth'])->group(function () {
 
     // Customers
     Route::get('/customers', [\App\Http\Controllers\CustomerController::class, 'index'])->name('customers');
+    Route::get('/customers/{customer}/history', [\App\Http\Controllers\CustomerController::class, 'history'])->name('customers.history');
     Route::post('/customers', [\App\Http\Controllers\CustomerController::class, 'store'])->name('customers.store');
     Route::put('/customers/{customer}', [\App\Http\Controllers\CustomerController::class, 'update'])->name('customers.update');
     Route::delete('/customers/{customer}', [\App\Http\Controllers\CustomerController::class, 'destroy'])->name('customers.destroy');
