@@ -183,13 +183,26 @@
 
                 <form action="{{ route('pos.checkout') }}" method="POST" id="checkout-form">
                     @csrf
-                    <div class="form-group" style="margin-bottom: 14px;">
-                        <select name="customer_id" id="cart-customer" style="width: 100%; padding: 8px;">
-                            <option value="">{{ __('Walk-in Customer') }}</option>
+                    <div class="form-group" style="margin-bottom: 14px; position: relative;">
+                        <input type="hidden" name="customer_id" id="selected-customer-id" value="">
+                        <input type="text" id="customer-search" class="search-bar" style="width: 100%; padding: 10px;"
+                            placeholder="{{ __('Select Customer (Search...)') }}" onfocus="showCustomerList()"
+                            oninput="filterCustomers(this.value)">
+
+                        <div id="customer-dropdown" class="card"
+                            style="position: absolute; width: 100%; z-index: 100; display: none; max-height: 250px; overflow-y: auto; padding: 0; box-shadow: 0 4px 12px rgba(0,0,0,0.15);">
+                            <div class="customer-item" onclick="selectCustomer('', '{{ __('Walk-in Customer') }}')"
+                                style="padding: 10px; cursor: pointer; border-bottom: 1px solid var(--border);">
+                                {{ __('Walk-in Customer') }}
+                            </div>
                             @foreach($customers as $c)
-                                <option value="{{ $c->id }}">{{ $c->name }}</option>
+                                <div class="customer-item" data-name="{{ strtolower($c->name) }}"
+                                    onclick="selectCustomer('{{ $c->id }}', '{{ addslashes($c->name) }}')"
+                                    style="padding: 10px; cursor: pointer; border-bottom: 1px solid var(--border);">
+                                    {{ $c->name }} {{ $c->phone ? '(' . $c->phone . ')' : '' }}
+                                </div>
                             @endforeach
-                        </select>
+                        </div>
                     </div>
 
                     @if($toggleCredit)
@@ -246,6 +259,32 @@
     <script>
         let cart = [];
         const taxRate = {{ $taxRate }};
+
+        // Customer Search Logic
+        function showCustomerList() {
+            document.getElementById('customer-dropdown').style.display = 'block';
+        }
+
+        function filterCustomers(q) {
+            q = q.toLowerCase();
+            document.querySelectorAll('.customer-item').forEach(item => {
+                const name = item.getAttribute('data-name') || '';
+                item.style.display = name.includes(q) || item.innerText.toLowerCase().includes(q) ? 'block' : 'none';
+            });
+        }
+
+        function selectCustomer(id, name) {
+            document.getElementById('selected-customer-id').value = id;
+            document.getElementById('customer-search').value = name;
+            document.getElementById('customer-dropdown').style.display = 'none';
+        }
+
+        // Close dropdown on click outside
+        window.addEventListener('click', (e) => {
+            if (!e.target.closest('#customer-search') && !e.target.closest('#customer-dropdown')) {
+                document.getElementById('customer-dropdown').style.display = 'none';
+            }
+        });
 
         // Quick search logic
         document.getElementById('pos-search').addEventListener('input', function (e) {
@@ -334,18 +373,18 @@
             } else {
                 emptyMsg.style.display = 'none';
                 container.innerHTML = cart.map((item, i) => `
-                        <div class="cart-item">
-                            <div class="ci-name">${item.name}</div>
-                            <input class="ci-price-input" type="number" step="0.01" value="${item.price}" oninput="updatePrice(${i}, this.value)">
-                            <div class="ci-qty">
-                                <button type="button" onclick="updateQty(${i}, -1)">−</button>
-                                <span>${item.qty}</span>
-                                <button type="button" onclick="updateQty(${i}, 1)">+</button>
-                            </div>
-                            <div class="ci-total">${(item.price * item.qty).toFixed(2)}</div>
-                            <button type="button" class="ci-del" onclick="removeFromCart(${i})">✕</button>
-                        </div>
-                    `).join('');
+                                <div class="cart-item">
+                                    <div class="ci-name">${item.name}</div>
+                                    <input class="ci-price-input" type="number" step="0.01" value="${item.price}" oninput="updatePrice(${i}, this.value)">
+                                    <div class="ci-qty">
+                                        <button type="button" onclick="updateQty(${i}, -1)">−</button>
+                                        <span>${item.qty}</span>
+                                        <button type="button" onclick="updateQty(${i}, 1)">+</button>
+                                    </div>
+                                    <div class="ci-total">${(item.price * item.qty).toFixed(2)}</div>
+                                    <button type="button" class="ci-del" onclick="removeFromCart(${i})">✕</button>
+                                </div>
+                            `).join('');
             }
             updateSummary();
         }
@@ -362,22 +401,22 @@
         function openServiceModal() {
             const modal = document.getElementById('modal-box');
             modal.innerHTML = `
-                    <div style="padding:10px">
-                        <h3 style="margin-bottom:16px">➕ {{ __('Add Custom Service / Item') }}</h3>
-                        <div class="form-group" style="margin-bottom:12px">
-                            <label>{{ __('Item Name') }}</label>
-                            <input type="text" id="svc-name" placeholder="Service / Repair..." style="width:100%; padding:10px; border:1px solid var(--border); border-radius:6px;">
-                        </div>
-                        <div class="form-group" style="margin-bottom:16px">
-                            <label>{{ __('Price') }}</label>
-                            <input type="number" id="svc-price" step="0.1" placeholder="0.00" style="width:100%; padding:10px; border:1px solid var(--border); border-radius:6px;">
-                        </div>
-                        <div style="display:flex; gap:10px">
-                            <button class="btn btn-pr" onclick="addCustomService()">{{ __('Add to Cart') }}</button>
-                            <button class="btn btn-o" onclick="closeModal()">{{ __('Cancel') }}</button>
-                        </div>
-                    </div>
-                `;
+                            <div style="padding:10px">
+                                <h3 style="margin-bottom:16px">➕ {{ __('Add Custom Service / Item') }}</h3>
+                                <div class="form-group" style="margin-bottom:12px">
+                                    <label>{{ __('Item Name') }}</label>
+                                    <input type="text" id="svc-name" placeholder="Service / Repair..." style="width:100%; padding:10px; border:1px solid var(--border); border-radius:6px;">
+                                </div>
+                                <div class="form-group" style="margin-bottom:16px">
+                                    <label>{{ __('Price') }}</label>
+                                    <input type="number" id="svc-price" step="0.1" placeholder="0.00" style="width:100%; padding:10px; border:1px solid var(--border); border-radius:6px;">
+                                </div>
+                                <div style="display:flex; gap:10px">
+                                    <button class="btn btn-pr" onclick="addCustomService()">{{ __('Add to Cart') }}</button>
+                                    <button class="btn btn-o" onclick="closeModal()">{{ __('Cancel') }}</button>
+                                </div>
+                            </div>
+                        `;
             document.getElementById('modal-overlay').classList.add('show');
         }
 
