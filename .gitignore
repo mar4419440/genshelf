@@ -18,11 +18,8 @@ user.ini
 /storage/framework/views/*
 /storage/logs/*
 .phpunit.cache
-/tests/Feature/ExampleTest.php
-/tests/Unit/ExampleTest.php
 /auth.json
 /.vscode
 /.idea
-/.github/workflows/deploy.yml
 database/database.sqlite
 database/database.sqlite-journal
