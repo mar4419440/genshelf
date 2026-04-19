@@ -53,9 +53,15 @@
                     @foreach($recentTx as $tx)
                         <tr>
                             <td>
-                                @foreach($tx->items as $item)
-                                    {{ $item->name }}@if(!$loop->last), @endif
-                                @endforeach
+                                @php
+                                    $items = is_array($tx->items) ? $tx->items : json_decode($tx->items, true);
+                                @endphp
+                                @if(is_array($items))
+                                    @foreach($items as $item)
+                                        <span class="badge badge-gn" style="font-size: 10px;">{{ $item['name'] ?? 'Item' }}
+                                            ({{ $item['qty'] ?? 1 }})</span>
+                                    @endforeach
+                                @endif
                             </td>
                             <td>{{ number_format($tx->total, 2) }}</td>
                             <td>{{ $tx->created_at->format('Y-m-d H:i') }}</td>

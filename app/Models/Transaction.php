@@ -13,6 +13,11 @@ class Transaction extends Model
         return $this->hasMany(TransactionItem::class);
     }
 
+    protected $casts = [
+        'items' => 'array',
+        'due_date' => 'date'
+    ];
+
     public function customer()
     {
         return $this->belongsTo(Customer::class);
