@@ -14,6 +14,9 @@ Route::get('/login', [AuthController::class, 'showLogin'])->name('login');
 Route::post('/login', [AuthController::class, 'login'])->name('login.post');
 Route::post('/logout', [AuthController::class, 'logout'])->name('logout');
 
+// Public Invoice View (for scanning QR)
+Route::get('/invoice/{transaction}', [\App\Http\Controllers\PosController::class, 'showInvoice'])->name('pos.invoice');
+
 // Authenticated Routes
 Route::middleware(['auth'])->group(function () {
     Route::get('/dashboard', [DashboardController::class, 'index'])->name('dashboard');
@@ -21,6 +24,7 @@ Route::middleware(['auth'])->group(function () {
     // POS
     Route::get('/pos', [\App\Http\Controllers\PosController::class, 'index'])->name('pos');
     Route::post('/pos/checkout', [\App\Http\Controllers\PosController::class, 'checkout'])->name('pos.checkout');
+    Route::get('/pos/barcode/{product}', [\App\Http\Controllers\PosController::class, 'showBarcode'])->name('pos.barcode');
 
     // Categories
     Route::get('/categories', [\App\Http\Controllers\CategoryController::class, 'index'])->name('categories');

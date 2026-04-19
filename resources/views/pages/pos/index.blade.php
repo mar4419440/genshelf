@@ -211,8 +211,9 @@
             <div class="pos-header">
                 <div style="display:flex; gap:12px; align-items:center;">
                     <h2 style="font-weight:800;">🛒 {{ __('POS') }}</h2>
-                    <input type="text" id="pos-search" class="search-bar" placeholder="{{ __('Search products...') }}"
-                        style="width: 250px;">
+                    <input type="text" id="pos-search" class="search-bar"
+                        placeholder="{{ __('Search or scan barcode...') }}" style="width: 250px;"
+                        onkeypress="if(event.key === 'Enter') handleBarcodeScan(this.value)">
                 </div>
                 <select id="pos-storage-selector" class="search-bar" onchange="updateActiveStorage(this.value)">
                     @foreach(\App\Models\Storage::where('type', 'pos')->get() as $s)
@@ -317,8 +318,25 @@
 
 @push('scripts')
     <script>
+        let products = @json($products);
         let cart = [];
         const taxRate = {{ $taxRate }};
+
+        @if(session('print_invoice'))
+            window.open("{{ route('pos.invoice', session('print_invoice')) }}", "_blank", "width=400,height=600");
+        @endif
+
+            function handleBarcodeScan(code) {
+                code = code.trim();
+                if (!code) return;
+
+                // Look for exact match in barcodes
+                const product = products.find(p => p.barcode === code);
+                if (product) {
+                    addToCart(product.id, product.name, product.default_price, product.current_stock);
+                    document.getElementById('pos-search').value = '';
+                }
+            }
 
         function updateActiveStorage(id) { document.getElementById('cart-storage-id').value = id; }
 
@@ -379,20 +397,20 @@
                 container.innerHTML = '<div class="empty-state" style="margin-top:40px;">Cart is empty</div>';
             } else {
                 container.innerHTML = cart.map((item, i) => `
-                                <div class="cart-item-row">
-                                    <div class="cir-top">
-                                        <span class="cir-name">${item.name}</span>
-                                        <button type="button" class="cir-del" onclick="removeFromCart(${i})">✕</button>
-                                    </div>
-                                    <div class="cir-actions">
-                                        <div style="display:flex; gap:8px; align-items:center;">
-                                            <input type="number" class="qty-input" value="${item.qty}" min="1" onchange="setQty(${i}, this.value)">
-                                            <input type="number" step="0.01" class="search-bar" value="${item.price}" onchange="setPrice(${i}, this.value)" style="width: 90px; height: 32px; padding: 4px; font-size: 13px; font-weight: 700; border-radius: 6px;">
+                                    <div class="cart-item-row">
+                                        <div class="cir-top">
+                                            <span class="cir-name">${item.name}</span>
+                                            <button type="button" class="cir-del" onclick="removeFromCart(${i})">✕</button>
                                         </div>
-                                        <div style="font-weight:700; width: 80px; text-align: right;">${(item.price * item.qty).toFixed(2)}</div>
+                                        <div class="cir-actions">
+                                            <div style="display:flex; gap:8px; align-items:center;">
+                                                <input type="number" class="qty-input" value="${item.qty}" min="1" onchange="setQty(${i}, this.value)">
+                                                <input type="number" step="0.01" class="search-bar" value="${item.price}" onchange="setPrice(${i}, this.value)" style="width: 90px; height: 32px; padding: 4px; font-size: 13px; font-weight: 700; border-radius: 6px;">
+                                            </div>
+                                            <div style="font-weight:700; width: 80px; text-align: right;">${(item.price * item.qty).toFixed(2)}</div>
+                                        </div>
                                     </div>
-                                </div>
-                            `).join('');
+                                `).join('');
             }
             updateSummary();
         }

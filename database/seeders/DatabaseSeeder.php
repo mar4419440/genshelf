@@ -14,9 +14,21 @@ class DatabaseSeeder extends Seeder
         $roleId = DB::table('roles')->insertGetId([
             'name' => 'Admin',
             'permissions' => json_encode([
-                'dashboard','pos','inventory','suppliers','customers',
-                'offers','returns','finance','reports','warranty',
-                'transfers','settings','users'
+                'dashboard',
+                'pos',
+                'inventory',
+                'suppliers',
+                'customers',
+                'offers',
+                'returns',
+                'finance',
+                'reports',
+                'warranty',
+                'transfers',
+                'settings',
+                'users',
+                'categories',
+                'storages'
             ]),
             'created_at' => now(),
             'updated_at' => now(),
