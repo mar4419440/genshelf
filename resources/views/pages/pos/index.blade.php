@@ -222,9 +222,13 @@
                         </div>
 
                         <!-- Partial Payment / Debt -->
-                        <div class="form-group" style="margin-top: 12px; border-top: 1px dashed var(--border); padding-top: 12px;">
-                            <label style="display:block; font-size:11px; color:var(--tx2); margin-bottom:4px;">{{ __('Amount Paid') }} ({{ __('Leave empty for full pay') }})</label>
-                            <input type="number" name="paid_amount" id="cart-paid-amount" step="0.01" class="search-bar" style="width:100%; height:38px;" placeholder="0.00">
+                        <div class="form-group"
+                            style="margin-top: 12px; border-top: 1px dashed var(--border); padding-top: 12px;">
+                            <label
+                                style="display:block; font-size:11px; color:var(--tx2); margin-bottom:4px;">{{ __('Amount Paid') }}
+                                ({{ __('Leave empty for full pay') }})</label>
+                            <input type="number" name="paid_amount" id="cart-paid-amount" step="0.01" class="search-bar"
+                                style="width:100%; height:38px;" placeholder="0.00">
                         </div>
                     </div>
 
@@ -266,9 +270,9 @@
         function updateQty(index, delta) {
             const item = cart[index];
             if (!item) return;
-            
+
             let newQty = parseInt(item.qty) + delta;
-            
+
             if (newQty <= 0) {
                 cart.splice(index, 1);
             } else if (!item.isService && newQty > item.maxStock) {
@@ -280,8 +284,33 @@
         }
 
         function updatePrice(index, price) {
-            cart[index].price = parseFloat(price) || 0;
-            renderCart();
+            price = parseFloat(price) || 0;
+            cart[index].price = price;
+
+            // Surgically update totals instead of full renderCart to preserve focus
+            const item = cart[index];
+            const itemsContainer = document.getElementById('cart-items-container');
+            const itemRow = itemsContainer.querySelectorAll('.cart-item')[index];
+            if (itemRow) {
+                itemRow.querySelector('.ci-total').innerText = (price * item.qty).toFixed(2);
+            }
+
+            updateSummary();
+        }
+
+        function updateSummary() {
+            let subtotal = cart.reduce((sum, item) => sum + (item.price * item.qty), 0);
+            let tax = subtotal * (taxRate / 100);
+            let total = subtotal + tax;
+
+            document.getElementById('summary-subtotal').innerText = subtotal.toFixed(2);
+            if (document.getElementById('summary-tax')) {
+                document.getElementById('summary-tax').innerText = tax.toFixed(2);
+            }
+            document.getElementById('summary-total').innerText = total.toFixed(2);
+
+            // Sync to hidden input
+            document.getElementById('cart-data-input').value = JSON.stringify(cart);
         }
 
         function removeFromCart(index) {
@@ -305,31 +334,20 @@
             } else {
                 emptyMsg.style.display = 'none';
                 container.innerHTML = cart.map((item, i) => `
-                    <div class="cart-item">
-                        <div class="ci-name">${item.name}</div>
-                        <input class="ci-price-input" type="number" step="0.01" value="${item.price}" oninput="updatePrice(${i}, this.value)">
-                        <div class="ci-qty">
-                            <button type="button" onclick="updateQty(${i}, -1)">−</button>
-                            <span>${item.qty}</span>
-                            <button type="button" onclick="updateQty(${i}, 1)">+</button>
+                        <div class="cart-item">
+                            <div class="ci-name">${item.name}</div>
+                            <input class="ci-price-input" type="number" step="0.01" value="${item.price}" oninput="updatePrice(${i}, this.value)">
+                            <div class="ci-qty">
+                                <button type="button" onclick="updateQty(${i}, -1)">−</button>
+                                <span>${item.qty}</span>
+                                <button type="button" onclick="updateQty(${i}, 1)">+</button>
+                            </div>
+                            <div class="ci-total">${(item.price * item.qty).toFixed(2)}</div>
+                            <button type="button" class="ci-del" onclick="removeFromCart(${i})">✕</button>
                         </div>
-                        <div class="ci-total">${(item.price * item.qty).toFixed(2)}</div>
-                        <button type="button" class="ci-del" onclick="removeFromCart(${i})">✕</button>
-                    </div>
-                `).join('');
+                    `).join('');
             }
-
-            // Update Totals
-            let subtotal = cart.reduce((sum, item) => sum + (item.price * item.qty), 0);
-            let tax = subtotal * (taxRate / 100);
-            let total = subtotal + tax;
-
-            document.getElementById('summary-subtotal').innerText = subtotal.toFixed(2);
-            @if($taxRate > 0) document.getElementById('summary-tax').innerText = tax.toFixed(2); @endif
-            document.getElementById('summary-total').innerText = total.toFixed(2);
-
-            // Sync to hidden input
-            document.getElementById('cart-data-input').value = JSON.stringify(cart);
+            updateSummary();
         }
 
         function submitCheckout() {
@@ -344,22 +362,22 @@
         function openServiceModal() {
             const modal = document.getElementById('modal-box');
             modal.innerHTML = `
-                <div style="padding:10px">
-                    <h3 style="margin-bottom:16px">➕ {{ __('Add Custom Service / Item') }}</h3>
-                    <div class="form-group" style="margin-bottom:12px">
-                        <label>{{ __('Item Name') }}</label>
-                        <input type="text" id="svc-name" placeholder="Service / Repair..." style="width:100%; padding:10px; border:1px solid var(--border); border-radius:6px;">
+                    <div style="padding:10px">
+                        <h3 style="margin-bottom:16px">➕ {{ __('Add Custom Service / Item') }}</h3>
+                        <div class="form-group" style="margin-bottom:12px">
+                            <label>{{ __('Item Name') }}</label>
+                            <input type="text" id="svc-name" placeholder="Service / Repair..." style="width:100%; padding:10px; border:1px solid var(--border); border-radius:6px;">
+                        </div>
+                        <div class="form-group" style="margin-bottom:16px">
+                            <label>{{ __('Price') }}</label>
+                            <input type="number" id="svc-price" step="0.1" placeholder="0.00" style="width:100%; padding:10px; border:1px solid var(--border); border-radius:6px;">
+                        </div>
+                        <div style="display:flex; gap:10px">
+                            <button class="btn btn-pr" onclick="addCustomService()">{{ __('Add to Cart') }}</button>
+                            <button class="btn btn-o" onclick="closeModal()">{{ __('Cancel') }}</button>
+                        </div>
                     </div>
-                    <div class="form-group" style="margin-bottom:16px">
-                        <label>{{ __('Price') }}</label>
-                        <input type="number" id="svc-price" step="0.1" placeholder="0.00" style="width:100%; padding:10px; border:1px solid var(--border); border-radius:6px;">
-                    </div>
-                    <div style="display:flex; gap:10px">
-                        <button class="btn btn-pr" onclick="addCustomService()">{{ __('Add to Cart') }}</button>
-                        <button class="btn btn-o" onclick="closeModal()">{{ __('Cancel') }}</button>
-                    </div>
-                </div>
-            `;
+                `;
             document.getElementById('modal-overlay').classList.add('show');
         }
 
