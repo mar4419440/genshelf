@@ -99,6 +99,13 @@
                             </div>
                         </div>
                         <div style="margin-bottom: 12px;">
+                            <label style="display:block;font-size:12px;font-weight:600;color:var(--tx2);margin-bottom:4px;">{{ __('Location Type') }}</label>
+                            <select name="type" style="width:100%; padding:10px; border:1px solid var(--border); border-radius:var(--radius);" required>
+                                <option value="storage" ${s.type === 'storage' ? 'selected' : ''}>{{ __('Warehouse / Storage') }}</option>
+                                <option value="pos" ${s.type === 'pos' ? 'selected' : ''}>{{ __('Point of Sale (Store)') }}</option>
+                            </select>
+                        </div>
+                        <div style="margin-bottom: 12px;">
                             <label style="display:block;font-size:12px;font-weight:600;color:var(--tx2);margin-bottom:4px;">{{ __('Conditions') }} ({{ __('temperature, humidity, etc.') }})</label>
                             <textarea name="conditions" style="width:100%; padding:10px; border:1px solid var(--border); border-radius:var(--radius); min-height:80px;">${s.conditions || ''}</textarea>
                         </div>

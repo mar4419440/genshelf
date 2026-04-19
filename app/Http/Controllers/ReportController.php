@@ -82,12 +82,18 @@ class ReportController extends Controller
             ->latest('due_date')
             ->get();
 
+        $salesByPOS = Transaction::select('storage_id', DB::raw('SUM(total) as revenue'), DB::raw('COUNT(*) as count'))
+            ->groupBy('storage_id')
+            ->with('storage')
+            ->get();
+
         return view('pages.reports.index', compact(
             'transactions',
             'summary',
             'topSelling',
             'leastSelling',
-            'duePayments'
+            'duePayments',
+            'salesByPOS'
         ));
     }
 
