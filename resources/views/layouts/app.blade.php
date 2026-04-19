@@ -4,7 +4,22 @@
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
 <meta name="csrf-token" content="{{ csrf_token() }}">
-<title>{{ config('app.name', 'GenShelf') }}</title>
+<title>{{ config('app.name', 'GenShelf') }} - Modern POS System</title>
+<meta name="description" content="GenShelf is a high-performance POS and Inventory management system for modern retail businesses.">
+
+<!-- Favicon -->
+<link rel="icon" type="image/png" href="{{ asset('images/logo.png') }}">
+
+<!-- Search & Social Preview (Open Graph) -->
+<meta property="og:type" content="website">
+<meta property="og:title" content="GenShelf - Modern POS System">
+<meta property="og:description" content="Manage your inventory and sales with the state-of-the-art GenShelf POS system.">
+<meta property="og:image" content="{{ asset('images/logo.png') }}">
+<meta property="og:url" content="{{ url()->current() }}">
+
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Outfit:wght@400;500;600;700;800&display=swap" rel="stylesheet">
 <style>
 /* ===== CSS RESET & VARIABLES ===== */
 :root {
@@ -16,7 +31,7 @@
   --rd: #dc2626; --rd-l: #fee2e2;
   --bl: #2563eb; --bl-l: #dbeafe;
   --border: #d1d5db; --radius: 8px;
-  --font: 'Segoe UI', system-ui, -apple-system, sans-serif;
+  --font: 'Outfit', 'Segoe UI', system-ui, -apple-system, sans-serif;
 }
 *, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
 body { font-family: var(--font); background: var(--bg); color: var(--tx); font-size: 14px; line-height: 1.5; }
@@ -54,7 +69,12 @@ tr:hover { background: var(--pr-l); }
 /* ===== APP LAYOUT & SIDEBAR ===== */
 .app-container { display: flex; min-height: 100vh; }
 .sidebar { width: 250px; background: var(--bg2); border-right: 1px solid var(--border); display: flex; flex-direction: column; position: sticky; top: 0; height: 100vh; overflow-y: auto; z-index: 100; }
-.sidebar .logo { font-size: 24px; font-weight: 700; color: var(--pr); padding: 20px; white-space: nowrap; text-decoration: none; border-bottom: 1px solid var(--bg3); display: block; text-align: center; }
+.sidebar .logo { font-size: 24px; font-weight: 700; color: var(--pr); padding: 25px 20px; white-space: nowrap; text-decoration: none; border-bottom: 1px solid var(--bg3); display: block; }
+.logo-brand { display: flex; align-items: center; gap: 10px; justify-content: center; }
+.logo-icon { background: var(--pr); color: #fff; width: 32px; height: 32px; border-radius: 8px; display: flex; align-items: center; justify-content: center; box-shadow: 0 4px 12px rgba(79, 70, 229, 0.3); }
+.logo-text { font-size: 20px; font-weight: 800; letter-spacing: -0.5px; display: flex; align-items: center; direction: ltr; }
+.logo-text .gen { color: var(--pr); }
+.logo-text .shelf { color: var(--tx); }
 .sidebar nav { display: flex; flex-direction: column; padding: 10px 0; flex: 1; }
 .sidebar nav a { text-decoration: none; color: var(--tx2); padding: 12px 20px; font-size: 14px; font-weight: 500; border-left: 3px solid transparent; transition: background .15s, color .15s, border-color .15s; display: flex; align-items: center; gap: 10px;}
 .sidebar nav a:hover { background: var(--bg); color: var(--pr); }
@@ -106,17 +126,32 @@ html[dir="rtl"] th, html[dir="rtl"] td { text-align: right; }
 html[dir="rtl"] .sidebar { border-right: none; border-left: 1px solid var(--border); }
 html[dir="rtl"] .sidebar nav a { border-left: none; border-right: 3px solid transparent; }
 html[dir="rtl"] .sidebar nav a.active { border-right-color: var(--pr); }
+html[dir="rtl"] th::after { right: auto; left: 5px; }
+
+[dir="rtl"] .btn i, [dir="rtl"] .btn svg { margin-left: 6px; margin-right: 0; }
+[dir="rtl"] .sidebar nav a i { margin-left: 10px; margin-right: 0; }
+
+[dir="rtl"] .logo-brand { flex-direction: row-reverse; }
 
 @stack('styles')
 
 </style>
 </head>
-<body>
+<body dir="{{ app()->getLocale() === 'ar' ? 'rtl' : 'ltr' }}">
 
   <!-- MOBILE HEADER (Only visible on small screens) -->
   <div class="mobile-header">
       <button class="mobile-menu-btn" onclick="toggleSidebar()">☰</button>
-      <a href="{{ route('dashboard') }}" style="text-decoration:none; font-weight:700; color:var(--pr); font-size: 18px;">GenShelf</a>
+      <a href="{{ route('dashboard') }}" style="text-decoration:none;">
+          <div class="logo-brand">
+              <div class="logo-icon">
+                  <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"><path d="M3 9h18v10a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2V9Z"/><path d="M3 9V5a2 2 0 0 1 2-2h14a2 2 0 0 1 2 2v4"/><path d="M12 12h.01"/><path d="M12 17h.01"/></svg>
+              </div>
+              <div class="logo-text">
+                  <span class="gen">Gen</span><span class="shelf">Shelf</span>
+              </div>
+          </div>
+      </a>
       <div style="width: 24px;"></div> <!-- Spacer for flex alignment -->
   </div>
 
@@ -126,7 +161,14 @@ html[dir="rtl"] .sidebar nav a.active { border-right-color: var(--pr); }
       <!-- SIDEBAR -->
       <div class="sidebar" id="app-sidebar">
         <a href="{{ route('dashboard') }}" class="logo">
-           <img src="{{ asset('images/logo.png') }}" alt="{{ config('app.name') }}" style="max-width: 100%; height: auto; max-height: 50px;">
+           <div class="logo-brand">
+                <div class="logo-icon">
+                    <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"><path d="M3 9h18v10a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2V9Z"/><path d="M3 9V5a2 2 0 0 1 2-2h14a2 2 0 0 1 2 2v4"/><path d="M12 12h.01"/><path d="M12 17h.01"/></svg>
+                </div>
+                <div class="logo-text">
+                    <span class="gen">Gen</span><span class="shelf">Shelf</span>
+                </div>
+           </div>
         </a>
         <nav>
             @php
@@ -168,7 +210,7 @@ html[dir="rtl"] .sidebar nav a.active { border-right-color: var(--pr); }
                 <a href="{{ route('warranty') }}" class="{{ request()->routeIs('warranty') ? 'active' : '' }}">🛡️ {{ __('Warranty') }}</a>
             @endif
             @if(in_array('transfers', $roles))
-                <a href="{{ route('transfers') }}" class="{{ request()->routeIs('transfers') ? 'active' : '' }}">🚚 {{ __('Transfers') }}</a>
+                <a href="{{ route('transfers') }}" class="{{ request()->routeIs('transfers') ? 'active' : '' }}">🚚 {{ __('Stock Transfers') }}</a>
             @endif
             @if(in_array('settings', $roles))
                 <a href="{{ route('settings') }}" class="{{ request()->routeIs('settings') ? 'active' : '' }}">⚙️ {{ __('Settings') }}</a>
@@ -180,7 +222,9 @@ html[dir="rtl"] .sidebar nav a.active { border-right-color: var(--pr); }
         
         <div class="sidebar-actions">
             <!-- Lang Toggle -->
-            <a href="#" class="lang-btn">{{ app()->getLocale() === 'ar' ? 'English' : 'العربية' }}</a>
+            <a href="{{ route('set-language', app()->getLocale() === 'ar' ? 'en' : 'ar') }}" class="lang-btn">
+                {{ app()->getLocale() === 'ar' ? 'English' : 'العربية' }}
+            </a>
             <!-- User Dropdown / Logout -->
             <form method="POST" action="{{ route('logout') }}" id="logout-form" style="display: none;">
                 @csrf
@@ -207,11 +251,10 @@ html[dir="rtl"] .sidebar nav a.active { border-right-color: var(--pr); }
           @yield('content')
 
           <!-- GEN CODE FOOTER -->
-          <footer style="margin-top: auto; padding: 20px 0; border-top: 1px solid var(--border); display: flex; align-items: center; justify-content: center; gap: 10px; opacity: 0.8;">
-              <span style="font-size: 12px; color: var(--tx2);">{{ __('Created by') }}</span>
-              <a href="https://gen-code-delta.vercel.app/" target="_blank" style="display: flex; align-items: center; gap: 6px; text-decoration: none;">
-                  <img src="{{ asset('images/gen_code_logo.png') }}" alt="Gen Code" style="height: 20px; width: auto;">
-                  <span style="font-weight: 700; color: var(--tx); font-size: 13px;">Gen Code</span>
+          <footer style="margin-top: auto; padding: 25px 0; border-top: 1px solid var(--border); display: flex; flex-direction: column; align-items: center; justify-content: center; gap: 8px; opacity: 0.8;">
+              <span style="font-size: 11px; color: var(--tx2); text-transform: uppercase; letter-spacing: 0.5px;">{{ __('Copyrights Reserved @ 2026') }}</span>
+              <a href="https://gen-code-delta.vercel.app/" target="_blank" style="text-decoration: none;">
+                  <span style="font-weight: 700; color: var(--pr); font-size: 13px;">Gen Code</span>
               </a>
           </footer>
       </div>

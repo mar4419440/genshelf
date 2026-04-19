@@ -30,4 +30,11 @@ class SettingController extends Controller
         }
         return redirect()->back()->with('success', __('Toggles updated successfully.'));
     }
+    public function setLanguage($lang)
+    {
+        if (in_array($lang, ['en', 'ar'])) {
+            Setting::updateOrCreate(['key' => 'language'], ['value' => $lang]);
+        }
+        return redirect()->back();
+    }
 }

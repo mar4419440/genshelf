@@ -64,16 +64,17 @@
                     <td>{{ $p->is_service ? '—' : $stock }}</td>
                     <td><span class="badge {{ $badge }}">{{ $stLabel }}</span></td>
                     <td>
-                        @if(!$p->is_service)
+                        <div style="display:flex;gap:4px">
+                            @if(!$p->is_service)
+                                <button class="btn btn-xs btn-gn" onclick='openRestockModal(@json($p))'>📦 {{ __('Restock') }}</button>
+                            @endif
                             <button class="btn btn-xs btn-o" onclick='openProductModal(@json($p))'>{{ __('Edit') }}</button>
-                        @else
-                            <button class="btn btn-xs btn-o" onclick='openProductModal(@json($p))'>{{ __('Edit') }}</button>
-                        @endif
-                        <form action="{{ route('inventory.destroy', $p->id) }}" method="POST" style="display:inline;" onsubmit="return confirm('{{ __('Are you sure?') }}')">
-                            @csrf
-                            @method('DELETE')
-                            <button type="submit" class="btn btn-xs btn-rd">{{ __('Delete') }}</button>
-                        </form>
+                            <form action="{{ route('inventory.destroy', $p->id) }}" method="POST" style="display:inline;" onsubmit="return confirm('{{ __('Are you sure?') }}')">
+                                @csrf
+                                @method('DELETE')
+                                <button type="submit" class="btn btn-xs btn-rd">{{ __('Delete') }}</button>
+                            </form>
+                        </div>
                     </td>
                 </tr>
             @empty
@@ -92,12 +93,17 @@
 
 @push('scripts')
 <script>
+    const suppliers = @json($suppliers);
+    const costMode = '{{ \DB::table('settings')->where('key', 'cost_display_mode')->value('value') ?? 'unit' }}';
+
     function openProductModal(product = null) {
-        const isEdit = product !== null;
-        const actionUrl = isEdit ? `{{ url('inventory') }}/${product.id}` : `{{ route('inventory.store') }}`;
-        const methodField = isEdit ? `@method('PUT')` : '';
-        
+        let isEdit = !!product;
+        let actionUrl = isEdit ? `{{ url('inventory') }}/${product.id}` : `{{ route('inventory.store') }}`;
+        let methodField = isEdit ? `@method('PUT')` : '';
         let p = isEdit ? product : { name: '', category: '', default_price: '', low_stock_threshold: '{{ $lowStockDefault }}', is_service: false };
+
+        let supplierOptions = `<option value="">{{ __('Select Supplier') }}</option>` + 
+            suppliers.map(s => `<option value="${s.id}">${s.name}</option>`).join('');
 
         const html = `
             <h3>${isEdit ? '{{ __('Edit Product') }}' : '{{ __('Add Product') }}'}</h3>
@@ -122,9 +128,25 @@
                         <input name="low_stock_threshold" type="number" value="${p.low_stock_threshold}">
                     </div>
                 </div>
+
+                ${!isEdit ? `
+                <div id="cost-fields" style="display: block;">
+                    <div style="display:flex; gap:10px; margin-bottom: 12px;">
+                        <div style="flex:1;">
+                            <label style="display:block;font-size:12px;font-weight:600;color:var(--tx2);margin-bottom:4px;">{{ __('Initial Cost') }} (${costMode === 'unit' ? '{{ __("Unit") }}' : '{{ __("Total") }}'})</label>
+                            <input name="cost" type="number" step="0.01" required>
+                        </div>
+                        <div style="flex:1;">
+                            <label style="display:block;font-size:12px;font-weight:600;color:var(--tx2);margin-bottom:4px;">{{ __('Supplier') }}</label>
+                            <select name="supplier_id" required>${supplierOptions}</select>
+                        </div>
+                    </div>
+                </div>
+                ` : ''}
+
                 <div style="margin-bottom: 16px;">
                     <label style="display:flex;align-items:center;gap:6px;font-size:13px;cursor:pointer;">
-                        <input type="checkbox" name="is_service" ${p.is_service ? 'checked' : ''}>
+                        <input type="checkbox" name="is_service" ${p.is_service ? 'checked' : ''} onchange="document.getElementById('cost-fields')?.style.setProperty('display', this.checked ? 'none' : 'block')">
                         {{ __('This is a Service (No Stock Tracking)') }}
                     </label>
                 </div>
@@ -134,6 +156,41 @@
                 </div>
             </form>
         `;
+        renderModal(html);
+    }
+
+    function openRestockModal(product) {
+        let supplierOptions = `<option value="">{{ __('Select Supplier') }}</option>` + 
+            suppliers.map(s => `<option value="${s.id}">${s.name}</option>`).join('');
+
+        const html = `
+            <h3>{{ __('Restock') }}: ${product.name}</h3>
+            <form action="{{ url('inventory') }}/${product.id}/restock" method="POST">
+                @csrf
+                <div style="margin-bottom: 12px;">
+                    <label style="display:block;font-size:12px;font-weight:600;color:var(--tx2);margin-bottom:4px;">{{ __('Supplier') }}</label>
+                    <select name="supplier_id" required>${supplierOptions}</select>
+                </div>
+                <div style="display:flex; gap:10px; margin-bottom: 16px;">
+                    <div style="flex:1;">
+                        <label style="display:block;font-size:12px;font-weight:600;color:var(--tx2);margin-bottom:4px;">{{ __('Quantity') }}</label>
+                        <input name="qty" type="number" required min="1">
+                    </div>
+                    <div style="flex:1;">
+                        <label style="display:block;font-size:12px;font-weight:600;color:var(--tx2);margin-bottom:4px;">{{ __('New Cost') }} ({{ __('Optional') }})</label>
+                        <input name="cost" type="number" step="0.01" placeholder="${costMode === 'unit' ? '{{ __("Unit Cost") }}' : '{{ __("Total Cost") }}'}">
+                    </div>
+                </div>
+                <div style="display:flex; gap:8px;">
+                    <button type="button" class="btn btn-o" onclick="closeModal()">{{ __('Cancel') }}</button>
+                    <button type="submit" class="btn btn-gn" style="flex:1;">📦 {{ __('Restock') }}</button>
+                </div>
+            </form>
+        `;
+        renderModal(html);
+    }
+
+    function renderModal(html) {
         document.getElementById('modal-box').innerHTML = html;
         document.getElementById('modal-overlay').classList.add('active');
         document.getElementById('modal-overlay').style.display = 'flex';

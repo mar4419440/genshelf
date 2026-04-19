@@ -4,6 +4,8 @@ namespace App\Http\Controllers;
 
 use Illuminate\Http\Request;
 use App\Models\Product;
+use App\Models\Supplier;
+use App\Models\ProductBatch;
 use Illuminate\Support\Facades\DB;
 
 class InventoryController extends Controller
@@ -24,8 +26,9 @@ class InventoryController extends Controller
 
         // Use the global low stock default if the product's threshold isn't set
         $lowStockDefault = \DB::table('settings')->where('key', 'low_stock_default')->value('value') ?? 5;
+        $suppliers = Supplier::all();
 
-        return view('pages.inventory.index', compact('products', 'lowStockDefault'));
+        return view('pages.inventory.index', compact('products', 'lowStockDefault', 'suppliers'));
     }
 
     public function downloadTemplate()
@@ -73,18 +76,62 @@ class InventoryController extends Controller
 
     public function store(Request $request)
     {
-        $validated = $request->validate([
+        $rules = [
             'name' => 'required|string|max:255',
             'category' => 'required|string|max:255',
             'default_price' => 'required|numeric|min:0',
             'low_stock_threshold' => 'integer|min:0',
             'is_service' => 'boolean'
-        ]);
+        ];
+
+        if (!$request->has('is_service')) {
+            $rules['supplier_id'] = 'required|exists:suppliers,id';
+            $rules['cost'] = 'required|numeric|min:0';
+        }
+
+        $validated = $request->validate($rules);
         
         $validated['is_service'] = $request->has('is_service') ? 1 : 0;
 
-        Product::create($validated);
+        $product = Product::create($validated);
+
+        if (!$product->is_service) {
+            ProductBatch::create([
+                'product_id' => $product->id,
+                'supplier_id' => $request->supplier_id,
+                'qty' => 0,
+                'cost' => $request->cost,
+                'batch_number' => 'INITIAL-' . time()
+            ]);
+        }
+
         return redirect()->back()->with('success', __('Product created successfully.'));
+    }
+
+    public function restock(Request $request, Product $product)
+    {
+        $validated = $request->validate([
+            'supplier_id' => 'required|exists:suppliers,id',
+            'qty' => 'required|integer|min:1',
+            'cost' => 'nullable|numeric|min:0',
+        ]);
+
+        $costMode = DB::table('settings')->where('key', 'cost_display_mode')->value('value') ?? 'unit';
+        $cost = $validated['cost'] ?? 0;
+
+        if ($costMode === 'total' && $cost > 0) {
+            $cost = $cost / $validated['qty'];
+        }
+
+        ProductBatch::create([
+            'product_id' => $product->id,
+            'supplier_id' => $validated['supplier_id'],
+            'qty' => $validated['qty'],
+            'cost' => $cost,
+            'batch_number' => 'RESTOCK-' . time()
+        ]);
+
+        return redirect()->back()->with('success', __('Stock updated successfully.'));
     }
 
     public function update(Request $request, Product $product)

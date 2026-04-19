@@ -28,6 +28,7 @@ Route::middleware(['auth'])->group(function () {
     Route::put('/inventory/{product}', [\App\Http\Controllers\InventoryController::class, 'update'])->name('inventory.update');
     Route::delete('/inventory/{product}', [\App\Http\Controllers\InventoryController::class, 'destroy'])->name('inventory.destroy');
     Route::post('/inventory/import', [\App\Http\Controllers\InventoryController::class, 'importCSV'])->name('inventory.import');
+    Route::post('/inventory/{product}/restock', [\App\Http\Controllers\InventoryController::class, 'restock'])->name('inventory.restock');
     Route::get('/inventory/template', [\App\Http\Controllers\InventoryController::class, 'downloadTemplate'])->name('inventory.template');
 
     // Suppliers & PO
@@ -80,6 +81,7 @@ Route::middleware(['auth'])->group(function () {
     Route::get('/settings', [\App\Http\Controllers\SettingController::class, 'index'])->name('settings');
     Route::post('/settings/update', [\App\Http\Controllers\SettingController::class, 'update'])->name('settings.update');
     Route::post('/settings/toggles', [\App\Http\Controllers\SettingController::class, 'updateToggles'])->name('settings.updateToggles');
+    Route::get('/set-language/{lang}', [\App\Http\Controllers\SettingController::class, 'setLanguage'])->name('set-language');
 
     // Users
     Route::get('/users', [\App\Http\Controllers\UserController::class, 'index'])->name('users');
