@@ -1,2 +1,9 @@
 User-agent: *
-Disallow:
+Allow: /
+Allow: /images/
+Disallow: /admin/
+Disallow: /login
+Disallow: /register
+
+# Update the URL below to your production URL
+# Sitemap: https://yourdomain.com/sitemap.xml
