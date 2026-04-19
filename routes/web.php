@@ -109,4 +109,17 @@ Route::middleware(['auth'])->group(function () {
     Route::post('/roles/store', [\App\Http\Controllers\UserController::class, 'storeRole'])->name('roles.store');
     Route::put('/roles/{role}', [\App\Http\Controllers\UserController::class, 'updateRole'])->name('roles.update');
     Route::delete('/roles/{role}', [\App\Http\Controllers\UserController::class, 'destroyRole'])->name('roles.destroy');
+
+    // MIGRATION HUB (FOR PRODUCTION)
+    Route::get('/migrate', function () {
+        if (auth()->user()->role !== 'admin' && !empty(auth()->user()->role)) {
+            return "Unauthorized. Admin only.";
+        }
+        try {
+            \Illuminate\Support\Facades\Artisan::call('migrate', ['--force' => true]);
+            return "Migrations successful!<br><pre>" . \Illuminate\Support\Facades\Artisan::output() . "</pre>";
+        } catch (\Exception $e) {
+            return "Migration failed: " . $e->getMessage();
+        }
+    })->name('migrate.hub');
 });
