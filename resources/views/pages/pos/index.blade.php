@@ -265,12 +265,16 @@
 
         function updateQty(index, delta) {
             const item = cart[index];
-            item.qty += delta;
-            if (item.qty <= 0) {
+            if (!item) return;
+            
+            let newQty = parseInt(item.qty) + delta;
+            
+            if (newQty <= 0) {
                 cart.splice(index, 1);
-            } else if (!item.isService && item.qty > item.maxStock) {
-                item.qty--;
+            } else if (!item.isService && newQty > item.maxStock) {
                 alert("{{ __('Not enough stock') }}");
+            } else {
+                item.qty = newQty;
             }
             renderCart();
         }
