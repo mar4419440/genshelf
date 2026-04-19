@@ -350,6 +350,13 @@
             renderCart();
         }
 
+        function setPrice(index, val) {
+            const item = cart[index];
+            if (!item) return;
+            item.price = parseFloat(val) || 0;
+            renderCart();
+        }
+
         function updateQty(index, delta) {
             const item = cart[index];
             let n = item.qty + delta;
@@ -369,8 +376,9 @@
                                     <button type="button" class="cir-del" onclick="removeFromCart(${i})">✕</button>
                                 </div>
                                 <div class="cir-actions">
-                                    <div class="cir-qty">
+                                    <div style="display:flex; gap:8px; align-items:center;">
                                         <input type="number" class="qty-input" value="${item.qty}" min="1" onchange="setQty(${i}, this.value)">
+                                        <input type="number" step="0.01" class="search-bar" value="${item.price}" onchange="setPrice(${i}, this.value)" style="width: 90px; height: 32px; padding: 4px; font-size: 13px; font-weight: 700; border-radius: 6px;">
                                     </div>
                                     <div style="font-weight:700; width: 80px; text-align: right;">${(item.price * item.qty).toFixed(2)}</div>
                                 </div>
