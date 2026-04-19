@@ -138,7 +138,8 @@ class InventoryController extends Controller
                 'supplier_id' => $supplier_id,
                 'storage_id' => $storage_id,
                 'qty' => $qty,
-                'cost' => $cost,
+                'unit_cost' => $cost,
+                'expiration_date' => $validated['expiration_date'] ?? null,
                 'batch_number' => 'INITIAL-' . time()
             ]);
         }
@@ -165,7 +166,8 @@ class InventoryController extends Controller
             'product_id' => $product->id,
             'supplier_id' => $validated['supplier_id'],
             'qty' => $validated['qty'],
-            'cost' => $cost,
+            'unit_cost' => $cost,
+            'expiration_date' => $request->input('expiration_date'),
             'batch_number' => 'RESTOCK-' . time()
         ]);
 

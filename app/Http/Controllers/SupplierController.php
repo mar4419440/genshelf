@@ -192,7 +192,7 @@ class SupplierController extends Controller
                 'product_id' => $po->product_id,
                 'supplier_id' => $po->supplier_id,
                 'qty' => $po->qty,
-                'cost' => $po->unit_cost,
+                'unit_cost' => $po->unit_cost,
                 'batch_number' => 'PO-' . $po->id . '-' . time()
             ]);
         });
