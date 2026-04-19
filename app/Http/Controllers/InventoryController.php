@@ -112,6 +112,7 @@ class InventoryController extends Controller
             'warranty_duration' => 'nullable|integer|min:0',
             'has_expiration' => 'boolean',
             'expiration_date' => 'nullable|date',
+            'barcode' => 'nullable|string|max:255|unique:products,barcode',
         ];
 
         if (!$request->has('is_service')) {
@@ -135,6 +136,13 @@ class InventoryController extends Controller
         $validated['warranty_duration'] = $validated['warranty_duration'] ?? 0;
         $validated['has_expiration'] = $request->has('has_expiration');
         $validated['is_service'] = $request->has('is_service') ? 1 : 0;
+
+        // Auto-generate barcode if empty
+        if (empty($request->barcode)) {
+            $validated['barcode'] = '2026' . str_pad(mt_rand(1, 999999999), 9, '0', STR_PAD_LEFT);
+        } else {
+            $validated['barcode'] = $request->barcode;
+        }
 
         unset($validated['category_id'], $validated['supplier_id'], $validated['cost'], $validated['initial_qty'], $validated['storage_id']);
 
@@ -190,7 +198,8 @@ class InventoryController extends Controller
             'category_id' => 'required|exists:categories,id',
             'default_price' => 'required|numeric|min:0',
             'low_stock_threshold' => 'integer|min:0',
-            'is_service' => 'boolean'
+            'is_service' => 'boolean',
+            'barcode' => 'nullable|string|max:255|unique:products,barcode,' . $product->id,
         ]);
 
         $category = \App\Models\Category::find($validated['category_id']);
@@ -199,6 +208,12 @@ class InventoryController extends Controller
         unset($validated['category_id']);
 
         $validated['is_service'] = $request->has('is_service') ? 1 : 0;
+
+        if (!empty($request->barcode)) {
+            $validated['barcode'] = $request->barcode;
+        } elseif (empty($product->barcode)) {
+            $validated['barcode'] = '2026' . str_pad(mt_rand(1, 999999999), 9, '0', STR_PAD_LEFT);
+        }
 
         $product->update($validated);
         return redirect()->back()->with('success', __('Product updated successfully.'));
