@@ -73,7 +73,7 @@ class ReportController extends Controller
 
         $transactions = $query->latest()->get();
         $summary = $this->getSummary($transactions);
-        
+
         $topSelling = $this->aggregateSales($transactions, 'desc');
         $leastSelling = $this->aggregateSales($transactions, 'asc');
 
@@ -95,7 +95,7 @@ class ReportController extends Controller
     {
         $totalRev = $transactions->sum('total');
         $count = $transactions->count();
-        return (object)[
+        return (object) [
             'revenue' => $totalRev,
             'count' => $count,
             'avg' => $count > 0 ? $totalRev / $count : 0
@@ -113,8 +113,8 @@ class ReportController extends Controller
                     if (!isset($productSales[$name])) {
                         $productSales[$name] = ['name' => $name, 'units' => 0, 'revenue' => 0];
                     }
-                    $qty = (int)($item['qty'] ?? 0);
-                    $price = (float)($item['price'] ?? 0);
+                    $qty = (int) ($item['qty'] ?? 0);
+                    $price = (float) ($item['price'] ?? 0);
                     $productSales[$name]['units'] += $qty;
                     $productSales[$name]['revenue'] += $price * $qty;
                 }
@@ -122,12 +122,11 @@ class ReportController extends Controller
         }
 
         usort($productSales, function ($a, $b) use ($order) {
-            return $order === 'desc' 
-                ? $b['revenue'] <=> $a['revenue'] 
+            return $order === 'desc'
+                ? $b['revenue'] <=> $a['revenue']
                 : $a['revenue'] <=> $b['revenue'];
         });
 
         return array_slice($productSales, 0, 10);
     }
-}
 }
