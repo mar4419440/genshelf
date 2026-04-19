@@ -139,54 +139,54 @@
             let s = isEdit ? supplier : { name: '', category: '', email: '', phone: '', contact_person: '', address: '' };
 
             const html = `
-                <h3>${isEdit ? '{{ __('Edit Supplier') }}' : '{{ __('Add Supplier') }}'}</h3>
-                <form action="${actionUrl}" method="POST">
-                    @csrf
-                    ${methodField}
-                    <div style="display:flex; gap:10px; margin-bottom: 12px;">
-                        <div style="flex:1;">
-                            <label style="display:block;font-size:12px;font-weight:600;color:var(--tx2);margin-bottom:4px;">{{ __('Arabic Name') }}</label>
-                            <input name="name" value="${s.name || ''}" required>
+                    <h3>${isEdit ? '{{ __('Edit Supplier') }}' : '{{ __('Add Supplier') }}'}</h3>
+                    <form action="${actionUrl}" method="POST">
+                        @csrf
+                        ${methodField}
+                        <div style="display:flex; gap:10px; margin-bottom: 12px;">
+                            <div style="flex:1;">
+                                <label style="display:block;font-size:12px;font-weight:600;color:var(--tx2);margin-bottom:4px;">{{ __('Arabic Name') }}</label>
+                                <input name="name" value="${s.name || ''}" required>
+                            </div>
+                            <div style="flex:1;">
+                                <label style="display:block;font-size:12px;font-weight:600;color:var(--tx2);margin-bottom:4px;">{{ __('English Name') }} ({{ __('Optional') }})</label>
+                                <input name="name_en" value="${s.name_en || ''}">
+                            </div>
                         </div>
-                        <div style="flex:1;">
-                            <label style="display:block;font-size:12px;font-weight:600;color:var(--tx2);margin-bottom:4px;">{{ __('English Name') }} ({{ __('Optional') }})</label>
-                            <input name="name_en" value="${s.name_en || ''}">
+                        <div style="display:flex; gap:10px; margin-bottom: 12px;">
+                            <div style="flex:1;">
+                                <label style="display:block;font-size:12px;font-weight:600;color:var(--tx2);margin-bottom:4px;">{{ __('Arabic Category') }}</label>
+                                <input name="category" value="${s.category || ''}" required>
+                            </div>
+                            <div style="flex:1;">
+                                <label style="display:block;font-size:12px;font-weight:600;color:var(--tx2);margin-bottom:4px;">{{ __('English Category') }} ({{ __('Optional') }})</label>
+                                <input name="category_en" value="${s.category_en || ''}">
+                            </div>
                         </div>
-                    </div>
-                    <div style="display:flex; gap:10px; margin-bottom: 12px;">
-                        <div style="flex:1;">
-                            <label style="display:block;font-size:12px;font-weight:600;color:var(--tx2);margin-bottom:4px;">{{ __('Arabic Category') }}</label>
-                            <input name="category" value="${s.category || ''}" required>
+                        <div style="display:flex; gap:10px; margin-bottom: 12px;">
+                            <div style="flex:1;">
+                                <label style="display:block;font-size:12px;font-weight:600;color:var(--tx2);margin-bottom:4px;">{{ __('Email') }}</label>
+                                <input name="email" type="email" value="${s.email || ''}">
+                            </div>
+                            <div style="flex:1;">
+                                <label style="display:block;font-size:12px;font-weight:600;color:var(--tx2);margin-bottom:4px;">{{ __('Phone') }}</label>
+                                <input name="phone" type="text" value="${s.phone || ''}" required>
+                            </div>
                         </div>
-                        <div style="flex:1;">
-                            <label style="display:block;font-size:12px;font-weight:600;color:var(--tx2);margin-bottom:4px;">{{ __('English Category') }} ({{ __('Optional') }})</label>
-                            <input name="category_en" value="${s.category_en || ''}">
+                        <div style="margin-bottom: 12px;">
+                            <label style="display:block;font-size:12px;font-weight:600;color:var(--tx2);margin-bottom:4px;">{{ __('Contact Person') }}</label>
+                            <input name="contact_person" value="${s.contact_person || ''}">
                         </div>
-                    </div>
-                    <div style="display:flex; gap:10px; margin-bottom: 12px;">
-                        <div style="flex:1;">
-                            <label style="display:block;font-size:12px;font-weight:600;color:var(--tx2);margin-bottom:4px;">{{ __('Email') }}</label>
-                            <input name="email" type="email" value="${s.email || ''}">
+                        <div style="margin-bottom: 16px;">
+                            <label style="display:block;font-size:12px;font-weight:600;color:var(--tx2);margin-bottom:4px;">{{ __('Address') }}</label>
+                            <textarea name="address" rows="2" style="width:100%; border:1px solid var(--border); border-radius:var(--radius); padding:8px;">${s.address || ''}</textarea>
                         </div>
-                        <div style="flex:1;">
-                            <label style="display:block;font-size:12px;font-weight:600;color:var(--tx2);margin-bottom:4px;">{{ __('Phone') }}</label>
-                            <input name="phone" type="text" value="${s.phone || ''}">
+                        <div style="display:flex; gap:8px;">
+                            <button type="button" class="btn btn-o" onclick="closeModal()">{{ __('Cancel') }}</button>
+                            <button type="submit" class="btn btn-pr" style="flex:1;">${isEdit ? '{{ __('Update') }}' : '{{ __('Save') }}'}</button>
                         </div>
-                    </div>
-                    <div style="margin-bottom: 12px;">
-                        <label style="display:block;font-size:12px;font-weight:600;color:var(--tx2);margin-bottom:4px;">{{ __('Contact Person') }}</label>
-                        <input name="contact_person" value="${s.contact_person || ''}">
-                    </div>
-                    <div style="margin-bottom: 16px;">
-                        <label style="display:block;font-size:12px;font-weight:600;color:var(--tx2);margin-bottom:4px;">{{ __('Address') }}</label>
-                        <textarea name="address" rows="2" style="width:100%; border:1px solid var(--border); border-radius:var(--radius); padding:8px;">${s.address || ''}</textarea>
-                    </div>
-                    <div style="display:flex; gap:8px;">
-                        <button type="button" class="btn btn-o" onclick="closeModal()">{{ __('Cancel') }}</button>
-                        <button type="submit" class="btn btn-pr" style="flex:1;">${isEdit ? '{{ __('Update') }}' : '{{ __('Save') }}'}</button>
-                    </div>
-                </form>
-            `;
+                    </form>
+                `;
             document.getElementById('modal-box').innerHTML = html;
             document.getElementById('modal-overlay').classList.add('active');
             document.getElementById('modal-overlay').style.display = 'flex';
@@ -198,45 +198,45 @@
             const actionUrl = `{{ route('purchase-orders.store') }}`;
 
             const html = `
-                <h3>{{ __('New Purchase Order') }}</h3>
-                <form action="${actionUrl}" method="POST">
-                    @csrf
-                    <div style="margin-bottom: 12px;">
-                        <label style="display:block;font-size:12px;font-weight:600;color:var(--tx2);margin-bottom:4px;">{{ __('Supplier') }}</label>
-                        <select name="supplier_id" required style="width:100%; padding:8px; border:1px solid var(--border); border-radius:var(--radius);">
-                            <option value="">-- {{ __('Select Supplier') }} --</option>
-                            @foreach($suppliers as $supplier)
-                                <option value="{{ $supplier->id }}">{{ $supplier->name }}</option>
-                            @endforeach
-                        </select>
-                    </div>
-                    <div style="margin-bottom: 12px;">
-                        <label style="display:block;font-size:12px;font-weight:600;color:var(--tx2);margin-bottom:4px;">{{ __('Product') }}</label>
-                        <select name="product_id" required style="width:100%; padding:8px; border:1px solid var(--border); border-radius:var(--radius);">
-                            <option value="">-- {{ __('Select Product') }} --</option>
-                            @foreach($products as $product)
-                                <option value="{{ $product->id }}">{{ $product->name }}</option>
-                            @endforeach
-                        </select>
-                    </div>
-                    <div style="display:flex; gap:10px; margin-bottom: 16px;">
-                        <div style="flex:1;">
-                            <label style="display:block;font-size:12px;font-weight:600;color:var(--tx2);margin-bottom:4px;">{{ __('Quantity') }}</label>
-                            <input name="qty" type="number" value="1" min="1" required>
+                    <h3>{{ __('New Purchase Order') }}</h3>
+                    <form action="${actionUrl}" method="POST">
+                        @csrf
+                        <div style="margin-bottom: 12px;">
+                            <label style="display:block;font-size:12px;font-weight:600;color:var(--tx2);margin-bottom:4px;">{{ __('Supplier') }}</label>
+                            <select name="supplier_id" required style="width:100%; padding:8px; border:1px solid var(--border); border-radius:var(--radius);">
+                                <option value="">-- {{ __('Select Supplier') }} --</option>
+                                @foreach($suppliers as $supplier)
+                                    <option value="{{ $supplier->id }}">{{ $supplier->name }}</option>
+                                @endforeach
+                            </select>
                         </div>
-                    </div>
-                    <div style="margin-bottom: 12px;">
-                        <label id="cost-label" style="display:block;font-size:12px;font-weight:600;color:var(--tx2);margin-bottom:4px;">
-                            {{ ($costMode ?? 'unit') === 'unit' ? __('Unit Cost') : __('Total Cost') }}
-                        </label>
-                        <input name="cost" type="number" step="0.01" value="0.00" required>
-                    </div>
-                    <div style="display:flex; gap:8px;">
-                        <button type="button" class="btn btn-o" onclick="closeModal()">{{ __('Cancel') }}</button>
-                        <button type="submit" class="btn btn-pr" style="flex:1;">{{ __('Submit PO') }}</button>
-                    </div>
-                </form>
-            `;
+                        <div style="margin-bottom: 12px;">
+                            <label style="display:block;font-size:12px;font-weight:600;color:var(--tx2);margin-bottom:4px;">{{ __('Product') }}</label>
+                            <select name="product_id" required style="width:100%; padding:8px; border:1px solid var(--border); border-radius:var(--radius);">
+                                <option value="">-- {{ __('Select Product') }} --</option>
+                                @foreach($products as $product)
+                                    <option value="{{ $product->id }}">{{ $product->name }}</option>
+                                @endforeach
+                            </select>
+                        </div>
+                        <div style="display:flex; gap:10px; margin-bottom: 16px;">
+                            <div style="flex:1;">
+                                <label style="display:block;font-size:12px;font-weight:600;color:var(--tx2);margin-bottom:4px;">{{ __('Quantity') }}</label>
+                                <input name="qty" type="number" value="1" min="1" required>
+                            </div>
+                        </div>
+                        <div style="margin-bottom: 12px;">
+                            <label id="cost-label" style="display:block;font-size:12px;font-weight:600;color:var(--tx2);margin-bottom:4px;">
+                                {{ ($costMode ?? 'unit') === 'unit' ? __('Unit Cost') : __('Total Cost') }}
+                            </label>
+                            <input name="cost" type="number" step="0.01" value="0.00" required>
+                        </div>
+                        <div style="display:flex; gap:8px;">
+                            <button type="button" class="btn btn-o" onclick="closeModal()">{{ __('Cancel') }}</button>
+                            <button type="submit" class="btn btn-pr" style="flex:1;">{{ __('Submit PO') }}</button>
+                        </div>
+                    </form>
+                `;
             document.getElementById('modal-box').innerHTML = html;
             document.getElementById('modal-overlay').classList.add('active');
             document.getElementById('modal-overlay').style.display = 'flex';

@@ -62,7 +62,8 @@
                 @empty
                     <tr>
                         <td colspan="{{ 4 + ($toggleCredit ? 1 : 0) + ($toggleLoyalty ? 1 : 0) }}" class="empty-state">
-                            {{ __('No data yet') }}</td>
+                            {{ __('No data yet') }}
+                        </td>
                     </tr>
                 @endforelse
             </table>
@@ -87,46 +88,46 @@
             let c = isEdit ? customer : { name: '', phone: '', email: '', loyalty_points: '0', credit_balance: '0.00' };
 
             const html = `
-                <h3>${isEdit ? '{{ __('Edit Customer') }}' : '{{ __('Add Customer') }}'}</h3>
-                <form action="${actionUrl}" method="POST">
-                    @csrf
-                    ${methodField}
-                    <div style="display:flex; gap:10px; margin-bottom: 12px;">
-                        <div style="flex:1;">
-                            <label style="display:block;font-size:12px;font-weight:600;color:var(--tx2);margin-bottom:4px;">{{ __('Arabic Name') }}</label>
-                            <input name="name" value="${c.name || ''}" required>
+                    <h3>${isEdit ? '{{ __('Edit Customer') }}' : '{{ __('Add Customer') }}'}</h3>
+                    <form action="${actionUrl}" method="POST">
+                        @csrf
+                        ${methodField}
+                        <div style="display:flex; gap:10px; margin-bottom: 12px;">
+                            <div style="flex:1;">
+                                <label style="display:block;font-size:12px;font-weight:600;color:var(--tx2);margin-bottom:4px;">{{ __('Arabic Name') }}</label>
+                                <input name="name" value="${c.name || ''}" required>
+                            </div>
+                            <div style="flex:1;">
+                                <label style="display:block;font-size:12px;font-weight:600;color:var(--tx2);margin-bottom:4px;">{{ __('English Name') }} ({{ __('Optional') }})</label>
+                                <input name="name_en" value="${c.name_en || ''}">
+                            </div>
                         </div>
-                        <div style="flex:1;">
-                            <label style="display:block;font-size:12px;font-weight:600;color:var(--tx2);margin-bottom:4px;">{{ __('English Name') }} ({{ __('Optional') }})</label>
-                            <input name="name_en" value="${c.name_en || ''}">
+                        <div style="display:flex; gap:10px; margin-bottom: 12px;">
+                            <div style="flex:1;">
+                                <label style="display:block;font-size:12px;font-weight:600;color:var(--tx2);margin-bottom:4px;">{{ __('Phone') }}</label>
+                                <input name="phone" type="text" value="${c.phone || ''}" required>
+                            </div>
+                            <div style="flex:1;">
+                                <label style="display:block;font-size:12px;font-weight:600;color:var(--tx2);margin-bottom:4px;">{{ __('Email') }}</label>
+                                <input name="email" type="email" value="${c.email || ''}">
+                            </div>
                         </div>
-                    </div>
-                    <div style="display:flex; gap:10px; margin-bottom: 12px;">
-                        <div style="flex:1;">
-                            <label style="display:block;font-size:12px;font-weight:600;color:var(--tx2);margin-bottom:4px;">{{ __('Phone') }}</label>
-                            <input name="phone" type="text" value="${c.phone || ''}">
+                        <div style="display:flex; gap:10px; margin-bottom: 16px;">
+                            <div style="flex:1;">
+                                <label style="display:block;font-size:12px;font-weight:600;color:var(--tx2);margin-bottom:4px;">{{ __('Loyalty Points') }}</label>
+                                <input name="loyalty_points" type="number" value="${c.loyalty_points || 0}">
+                            </div>
+                            <div style="flex:1;">
+                                <label style="display:block;font-size:12px;font-weight:600;color:var(--tx2);margin-bottom:4px;">{{ __('Credit Balance') }} (-)</label>
+                                <input name="credit_balance" type="number" step="0.01" value="${c.credit_balance || 0}">
+                            </div>
                         </div>
-                        <div style="flex:1;">
-                            <label style="display:block;font-size:12px;font-weight:600;color:var(--tx2);margin-bottom:4px;">{{ __('Email') }}</label>
-                            <input name="email" type="email" value="${c.email || ''}">
+                        <div style="display:flex; gap:8px;">
+                            <button type="button" class="btn btn-o" onclick="closeModal()">{{ __('Cancel') }}</button>
+                            <button type="submit" class="btn btn-pr" style="flex:1;">${isEdit ? '{{ __('Update') }}' : '{{ __('Save') }}'}</button>
                         </div>
-                    </div>
-                    <div style="display:flex; gap:10px; margin-bottom: 16px;">
-                        <div style="flex:1;">
-                            <label style="display:block;font-size:12px;font-weight:600;color:var(--tx2);margin-bottom:4px;">{{ __('Loyalty Points') }}</label>
-                            <input name="loyalty_points" type="number" value="${c.loyalty_points || 0}">
-                        </div>
-                        <div style="flex:1;">
-                            <label style="display:block;font-size:12px;font-weight:600;color:var(--tx2);margin-bottom:4px;">{{ __('Credit Balance') }} (-)</label>
-                            <input name="credit_balance" type="number" step="0.01" value="${c.credit_balance || 0}">
-                        </div>
-                    </div>
-                    <div style="display:flex; gap:8px;">
-                        <button type="button" class="btn btn-o" onclick="closeModal()">{{ __('Cancel') }}</button>
-                        <button type="submit" class="btn btn-pr" style="flex:1;">${isEdit ? '{{ __('Update') }}' : '{{ __('Save') }}'}</button>
-                    </div>
-                </form>
-            `;
+                    </form>
+                `;
             document.getElementById('modal-box').innerHTML = html;
             document.getElementById('modal-overlay').classList.add('active');
             document.getElementById('modal-overlay').style.display = 'flex';

@@ -707,10 +707,17 @@
             
                
                         <div class="main-content">
-@if(session('success'))<div style="background:var(--gn-l);color:var(--gn);padding:12px 16px;border-radius:var(--radius);margin-bottom:16px;font-weight:600;">{{ session('success') }}</div>@endif
-@if(session('error'))
-       <div style="background:var(--rd-l);color:var(--rd);padding:12px 16px;border-radius:var(--radius);margin-bottom:16px;fon
-   t-weight:600;">{{ session('error') }}</div>@endif
+@if(session('success'))<div style="background:var(--gn-l, #dcfce7);color:var(--gn);padding:12px 16px;border-radius:var(--radius);margin-bottom:16px;font-weight:600;">{{ session('success') }}</div>@endif
+@if(session('error'))<div style="background:var(--rd-l, #fee2e2);color:var(--rd);padding:12px 16px;border-radius:var(--radius);margin-bottom:16px;font-weight:600;">{{ session('error') }}</div>@endif
+@if($errors->any())
+    <div style="background:var(--rd-l, #fee2e2);color:var(--rd);padding:12px 16px;border-radius:var(--radius);margin-bottom:16px;border:1px solid #fecaca;">
+        <ul style="margin-left: 20px; font-weight:600; font-size:13px;">
+            @foreach($errors->all() as $error)
+                <li>{{ $error }}</li>
+            @endforeach
+        </ul>
+    </div>
+@endif
             @yield('content')
 
                                    <footer style="margin-top:auto;padding:25px 0;border-top:1px solid var(--border);display:flex;flex-direction:column;align-items:center;justify-content:center;gap:8px;opacity:0.8;">

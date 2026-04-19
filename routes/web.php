@@ -17,7 +17,7 @@ Route::post('/logout', [AuthController::class, 'logout'])->name('logout');
 // Authenticated Routes
 Route::middleware(['auth'])->group(function () {
     Route::get('/dashboard', [DashboardController::class, 'index'])->name('dashboard');
-    
+
     // POS
     Route::get('/pos', [\App\Http\Controllers\PosController::class, 'index'])->name('pos');
     Route::post('/pos/checkout', [\App\Http\Controllers\PosController::class, 'checkout'])->name('pos.checkout');
@@ -34,6 +34,8 @@ Route::middleware(['auth'])->group(function () {
     // Suppliers & PO
     Route::get('/suppliers', [\App\Http\Controllers\SupplierController::class, 'index'])->name('suppliers');
     Route::post('/suppliers', [\App\Http\Controllers\SupplierController::class, 'store'])->name('suppliers.store');
+    Route::put('/suppliers/{supplier}', [\App\Http\Controllers\SupplierController::class, 'update'])->name('suppliers.update');
+    Route::delete('/suppliers/{supplier}', [\App\Http\Controllers\SupplierController::class, 'destroy'])->name('suppliers.destroy');
     Route::post('/suppliers/po', [\App\Http\Controllers\SupplierController::class, 'storePO'])->name('suppliers.po.store');
     Route::post('/suppliers/receive/{purchaseOrder}', [\App\Http\Controllers\SupplierController::class, 'receivePO'])->name('suppliers.po.receive');
     Route::post('/suppliers/po/import', [\App\Http\Controllers\SupplierController::class, 'importPOs'])->name('suppliers.po.import');

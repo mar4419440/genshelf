@@ -100,5 +100,13 @@
     "Update": "تحديث",
     "Submit": "إرسال",
     "Total Items": "إجمالي الأصناف",
-    "Copyrights Reserved @ 2026": "جميع الحقوق محفوظة @ 2026"
+    "Copyrights Reserved @ 2026": "جميع الحقوق محفوظة @ 2026",
+    "Invalid credentials.": "بيانات الدخول غير صحيحة.",
+    "Page Not Found": "الصفحة غير موجودة",
+    "Server Error": "خطأ في السيرفر",
+    "Forbidden": "غير مصرح لك",
+    "Back to Dashboard": "العودة للوحة التحكم",
+    "The page you are looking for doesn't exist or has been moved.": "الصفحة التي تبحث عنها غير موجودة أو تم نقلها.",
+    "You do not have permission to access this page.": "ليس لديك صلاحية للوصول لهذه الصفحة.",
+    "Internal Server Error": "خطأ داخلي في الخادم"
 }
