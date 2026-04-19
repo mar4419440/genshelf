@@ -216,9 +216,9 @@
             <table>
                 <tr>
                     <th>{{ __('Items') }}</th>
-                    <th>{{ __('Subtotal') }}</th>
-                    <th>{{ __('Tax') }}</th>
                     <th>{{ __('Total') }}</th>
+                    <th>{{ __('Paid') }}</th>
+                    <th>{{ __('Due') }}</th>
                     <th>{{ __('Customer') }}</th>
                     <th>{{ __('Employee') }}</th>
                     <th>{{ __('Date') }}</th>
@@ -234,10 +234,10 @@
                         }
                     @endphp
                     <tr>
-                        <td>{{ $itemsStr }}</td>
-                        <td>{{ number_format($tx->subtotal, 2) }}</td>
-                        <td>{{ number_format($tx->tax, 2) }}</td>
+                        <td><small>{{ $itemsStr }}</small></td>
                         <td>{{ number_format($tx->total, 2) }}</td>
+                        <td style="color:var(--gn)">{{ number_format($tx->paid_amount, 2) }}</td>
+                        <td style="color:var(--rd)">{{ number_format($tx->due_amount, 2) }}</td>
                         <td>{{ $tx->customer->name ?? __('Walk-in Customer') }}</td>
                         <td>{{ $tx->user->displayName ?? ($tx->user->name ?? '') }}</td>
                         <td>{{ $tx->created_at->format('Y-m-d H:i') }}</td>

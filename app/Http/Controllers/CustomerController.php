@@ -79,6 +79,28 @@ class CustomerController extends Controller
         return redirect()->back()->with('success', __('Payment recorded successfully.'));
     }
 
+    public function addDebt(Request $request, Customer $customer)
+    {
+        $request->validate(['amount' => 'required|numeric|min:0.01', 'notes' => 'nullable|string']);
+        $amount = $request->amount;
+
+        \DB::transaction(function () use ($customer, $amount, $request) {
+            $customer->increment('credit_balance', $amount);
+
+            \App\Models\Transaction::create([
+                'customer_id' => $customer->id,
+                'user_id' => auth()->id(),
+                'total' => $amount,
+                'paid_amount' => 0,
+                'due_amount' => $amount,
+                'payment_method' => 'debt',
+                'items' => json_encode([['name' => $request->notes ?: __('Manual Debt Adjustment'), 'qty' => 1, 'price' => $amount]])
+            ]);
+        });
+
+        return redirect()->back()->with('success', __('Debt added successfully.'));
+    }
+
     public function history(Customer $customer)
     {
         $history = \App\Models\Transaction::where('customer_id', $customer->id)

@@ -60,6 +60,7 @@ Route::middleware(['auth'])->group(function () {
     Route::get('/customers', [\App\Http\Controllers\CustomerController::class, 'index'])->name('customers');
     Route::get('/customers/{customer}/history', [\App\Http\Controllers\CustomerController::class, 'history'])->name('customers.history');
     Route::post('/customers/{customer}/pay', [\App\Http\Controllers\CustomerController::class, 'pay'])->name('customers.pay');
+    Route::post('/customers/{customer}/add-debt', [\App\Http\Controllers\CustomerController::class, 'addDebt'])->name('customers.add-debt');
     Route::post('/customers', [\App\Http\Controllers\CustomerController::class, 'store'])->name('customers.store');
     Route::put('/customers/{customer}', [\App\Http\Controllers\CustomerController::class, 'update'])->name('customers.update');
     Route::delete('/customers/{customer}', [\App\Http\Controllers\CustomerController::class, 'destroy'])->name('customers.destroy');

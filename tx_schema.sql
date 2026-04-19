@@ -1,0 +1,23 @@
+CREATE TABLE `transactions` (
+  `id` bigint unsigned NOT NULL AUTO_INCREMENT,
+  `customer_id` bigint unsigned DEFAULT NULL,
+  `user_id` bigint unsigned DEFAULT NULL,
+  `subtotal` decimal(12,2) NOT NULL DEFAULT '0.00',
+  `tax` decimal(12,2) NOT NULL DEFAULT '0.00',
+  `total` decimal(12,2) NOT NULL DEFAULT '0.00',
+  `paid_amount` decimal(12,2) NOT NULL DEFAULT '0.00',
+  `due_amount` decimal(12,2) NOT NULL DEFAULT '0.00',
+  `due_date` date DEFAULT NULL,
+  `payment_method` enum('cash','credit','card','partial','debt') COLLATE utf8mb4_unicode_ci DEFAULT 'cash',
+  `items` text COLLATE utf8mb4_unicode_ci,
+  `created_at` timestamp NULL DEFAULT NULL,
+  `updated_at` timestamp NULL DEFAULT NULL,
+  `storage_id` bigint unsigned DEFAULT NULL,
+  PRIMARY KEY (`id`),
+  KEY `transactions_customer_id_foreign` (`customer_id`),
+  KEY `transactions_user_id_foreign` (`user_id`),
+  KEY `transactions_storage_id_foreign` (`storage_id`),
+  CONSTRAINT `transactions_customer_id_foreign` FOREIGN KEY (`customer_id`) REFERENCES `customers` (`id`) ON DELETE SET NULL,
+  CONSTRAINT `transactions_storage_id_foreign` FOREIGN KEY (`storage_id`) REFERENCES `storages` (`id`) ON DELETE SET NULL,
+  CONSTRAINT `transactions_user_id_foreign` FOREIGN KEY (`user_id`) REFERENCES `users` (`id`) ON DELETE SET NULL
+) ENGINE=InnoDB AUTO_INCREMENT=6 DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_unicode_ci

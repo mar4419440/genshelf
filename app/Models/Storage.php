@@ -9,5 +9,11 @@ class Storage extends Model
 {
     use HasFactory;
 
-    protected $guarded = [];
+    protected $fillable = [
+        'name',
+        'type',
+        'name_en',
+        'conditions',
+        'is_active'
+    ];
 }
