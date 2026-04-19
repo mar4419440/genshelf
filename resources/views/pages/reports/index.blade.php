@@ -23,17 +23,23 @@
                         <option value="all" {{ request('period') == 'all' ? 'selected' : '' }}>{{ __('All Time') }}</option>
                         <option value="today" {{ request('period') == 'today' ? 'selected' : '' }}>{{ __('Today') }}</option>
                         <option value="yesterday" {{ request('period') == 'yesterday' ? 'selected' : '' }}>
-                            {{ __('Yesterday') }}</option>
+                            {{ __('Yesterday') }}
+                        </option>
                         <option value="this_week" {{ request('period') == 'this_week' ? 'selected' : '' }}>
-                            {{ __('This Week') }}</option>
+                            {{ __('This Week') }}
+                        </option>
                         <option value="this_month" {{ request('period') == 'this_month' ? 'selected' : '' }}>
-                            {{ __('This Month') }}</option>
+                            {{ __('This Month') }}
+                        </option>
                         <option value="last_month" {{ request('period') == 'last_month' ? 'selected' : '' }}>
-                            {{ __('Last Month') }}</option>
+                            {{ __('Last Month') }}
+                        </option>
                         <option value="this_quarter" {{ request('period') == 'this_quarter' ? 'selected' : '' }}>
-                            {{ __('This Quarter') }}</option>
+                            {{ __('This Quarter') }}
+                        </option>
                         <option value="this_year" {{ request('period') == 'this_year' ? 'selected' : '' }}>
-                            {{ __('This Year') }}</option>
+                            {{ __('This Year') }}
+                        </option>
                     </select>
                 </div>
 
@@ -110,29 +116,57 @@
         </div>
     </div>
 
-    <div class="card">
-        <h3 style="margin-bottom:12px">{{ __('Top Selling Products') }}</h3>
-        <div class="table-wrap">
-            <table>
-                <tr>
-                    <th>#</th>
-                    <th>{{ __('Product') }}</th>
-                    <th>{{ __('Units Sold') }}</th>
-                    <th>{{ __('Revenue') }}</th>
-                </tr>
-                @forelse($topSelling as $index => $p)
+    <div style="display:grid; grid-template-columns: 1fr 1fr; gap:20px; margin-bottom:20px;">
+        <div class="card">
+            <h3 style="margin-bottom:12px">🔥 {{ __('Top Selling Products') }}</h3>
+            <div class="table-wrap">
+                <table>
                     <tr>
-                        <td>{{ $index + 1 }}</td>
-                        <td>{{ $p['name'] }}</td>
-                        <td>{{ $p['units'] }}</td>
-                        <td>{{ number_format($p['revenue'], 2) }}</td>
+                        <th>#</th>
+                        <th>{{ __('Product') }}</th>
+                        <th>{{ __('Units Sold') }}</th>
+                        <th>{{ __('Revenue') }}</th>
                     </tr>
-                @empty
+                    @forelse($topSelling as $index => $p)
+                        <tr>
+                            <td>{{ $index + 1 }}</td>
+                            <td>{{ $p['name'] }}</td>
+                            <td>{{ $p['units'] }}</td>
+                            <td>{{ number_format($p['revenue'], 2) }}</td>
+                        </tr>
+                    @empty
+                        <tr>
+                            <td colspan="4" class="empty-state">{{ __('No data yet') }}</td>
+                        </tr>
+                    @endforelse
+                </table>
+            </div>
+        </div>
+
+        <div class="card">
+            <h3 style="margin-bottom:12px">📉 {{ __('Least Selling Products') }}</h3>
+            <div class="table-wrap">
+                <table>
                     <tr>
-                        <td colspan="4" class="empty-state">{{ __('No data yet') }}</td>
+                        <th>#</th>
+                        <th>{{ __('Product') }}</th>
+                        <th>{{ __('Units Sold') }}</th>
+                        <th>{{ __('Revenue') }}</th>
                     </tr>
-                @endforelse
-            </table>
+                    @forelse($leastSelling as $index => $p)
+                        <tr>
+                            <td>{{ $index + 1 }}</td>
+                            <td>{{ $p['name'] }}</td>
+                            <td>{{ $p['units'] }}</td>
+                            <td>{{ number_format($p['revenue'], 2) }}</td>
+                        </tr>
+                    @empty
+                        <tr>
+                            <td colspan="4" class="empty-state">{{ __('No data yet') }}</td>
+                        </tr>
+                    @endforelse
+                </table>
+            </div>
         </div>
     </div>
 
@@ -155,7 +189,8 @@
                         $itemsArr = is_string($tx->items) ? json_decode($tx->items, true) : $tx->items;
                         if (is_array($itemsArr)) {
                             $itemsStr = implode(', ', array_map(function ($i) {
-                                return $i['name'] ?? 'Item'; }, $itemsArr));
+                                return $i['name'] ?? 'Item';
+                            }, $itemsArr));
                         }
                     @endphp
                     <tr>

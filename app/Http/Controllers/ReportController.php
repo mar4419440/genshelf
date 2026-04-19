@@ -100,6 +100,12 @@ class ReportController extends Controller
 
         $topSelling = array_slice($productSales, 0, 10);
 
-        return view('pages.reports.index', compact('transactions', 'totalRev', 'totalTxCount', 'avgOrder', 'topSelling'));
+        $leastSelling = $productSales;
+        usort($leastSelling, function ($a, $b) {
+            return $a['units'] <=> $b['units'];
+        });
+        $leastSelling = array_slice($leastSelling, 0, 10);
+
+        return view('pages.reports.index', compact('transactions', 'totalRev', 'totalTxCount', 'avgOrder', 'topSelling', 'leastSelling'));
     }
 }
