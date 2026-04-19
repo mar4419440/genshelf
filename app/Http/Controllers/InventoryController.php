@@ -116,7 +116,7 @@ class InventoryController extends Controller
         $validated = $request->validate($rules);
 
         $category = \App\Models\Category::find($validated['category_id']);
-        $validated['category'] = $category->name;
+        $validated['category'] = $category->full_path;
         $validated['category_en'] = $category->name_en;
         $supplier_id = $validated['supplier_id'] ?? null;
         $storage_id = $validated['storage_id'] ?? null;
@@ -186,7 +186,7 @@ class InventoryController extends Controller
         ]);
 
         $category = \App\Models\Category::find($validated['category_id']);
-        $validated['category'] = $category->name;
+        $validated['category'] = $category->full_path;
         $validated['category_en'] = $category->name_en;
         unset($validated['category_id']);
 
