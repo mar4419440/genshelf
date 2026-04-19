@@ -1,4 +1,11 @@
-@extends('layouts.app')
+@push('styles')
+    <style>
+        .category-item:hover {
+            background-color: var(--pr-l) !important;
+            color: var(--pr) !important;
+        }
+    </style>
+@endpush
 
 @section('content')
     <div style="margin-bottom: 24px;">
@@ -36,17 +43,40 @@
                         </div>
                     </div>
 
-                    <div style="margin-bottom:16px;">
+                    <div style="margin-bottom:16px; position:relative;" id="category-search-container">
                         <label
                             style="display:block; font-size:12px; font-weight:600; color:var(--tx2); margin-bottom:6px;">{{ __('Category') }}</label>
-                        <select name="category_id" required
-                            style="width:100%; padding:12px; border:1px solid var(--border); border-radius:8px;">
-                            <option value="">{{ __('Select Category') }}</option>
-                            @foreach ($categories as $c)
-                                <option value="{{ $c->id }}">{{ $c->name }} {{ $c->name_en ? ' - ' . $c->name_en : '' }}
-                                </option>
-                            @endforeach
-                        </select>
+
+                        <!-- Searchable Select Trigger -->
+                        <div id="category-select-trigger" onclick="toggleCategorySearch()"
+                            style="width:100%; padding:12px; border:1px solid var(--border); border-radius:8px; background:var(--bg); cursor:pointer; display:flex; justify-content:space-between; align-items:center;">
+                            <span id="selected-category-text" style="color:var(--tx);">{{ __('Select Category') }}</span>
+                            <span style="color:var(--tx2); font-size:12px;">▼</span>
+                        </div>
+
+                        <!-- Hidden Input for Form Submission -->
+                        <input type="hidden" name="category_id" id="category_id_input" required>
+
+                        <!-- Dropdown Menu -->
+                        <div id="category-dropdown"
+                            style="display:none; position:absolute; top:100%; left:0; right:0; background:var(--bg2); border:1px solid var(--border); border-radius:8px; margin-top:4px; z-index:1000; box-shadow:0 4px 12px rgba(0,0,0,0.1); overflow:hidden;">
+                            <div style="padding:8px; border-bottom:1px solid var(--border);">
+                                <input type="text" id="category-search-input" onkeyup="filterCategories()"
+                                    placeholder="{{ __('Search...') }}"
+                                    style="width:100%; padding:8px; border:1px solid var(--border); border-radius:6px; background:var(--bg); color:var(--tx);">
+                            </div>
+                            <ul id="category-list"
+                                style="list-style:none; padding:0; margin:0; max-height:200px; overflow-y:auto;">
+                                @foreach ($categories as $c)
+                                    <li class="category-item" data-id="{{ $c->id }}"
+                                        data-name="{{ strtolower($c->name . ' ' . $c->name_en) }}"
+                                        onclick="selectCategory('{{ $c->id }}', '{{ $c->name }}{{ $c->name_en ? ' - ' . $c->name_en : '' }}')"
+                                        style="padding:10px 12px; cursor:pointer; font-size:14px; color:var(--tx); border-bottom:1px solid var(--bg2);">
+                                        {{ $c->name }} {{ $c->name_en ? ' - ' . $c->name_en : '' }}
+                                    </li>
+                                @endforeach
+                            </ul>
+                        </div>
                     </div>
 
                     <div
@@ -187,5 +217,38 @@
             document.getElementById('supplier_id').required = !isService;
             document.getElementById('cost').required = !isService;
         }
+
+        // Searchable Category Select Logic
+        function toggleCategorySearch() {
+            const dropdown = document.getElementById('category-dropdown');
+            const isHidden = dropdown.style.display === 'none';
+            dropdown.style.display = isHidden ? 'block' : 'none';
+            if (isHidden) {
+                document.getElementById('category-search-input').focus();
+            }
+        }
+
+        function filterCategories() {
+            const input = document.getElementById('category-search-input').value.toLowerCase();
+            const items = document.querySelectorAll('.category-item');
+            items.forEach(item => {
+                const text = item.getAttribute('data-name');
+                item.style.display = text.includes(input) ? 'block' : 'none';
+            });
+        }
+
+        function selectCategory(id, name) {
+            document.getElementById('category_id_input').value = id;
+            document.getElementById('selected-category-text').innerText = name;
+            document.getElementById('category-dropdown').style.display = 'none';
+        }
+
+        // Close dropdown when clicking outside
+        window.addEventListener('click', function (e) {
+            const container = document.getElementById('category-search-container');
+            if (!container.contains(e.target)) {
+                document.getElementById('category-dropdown').style.display = 'none';
+            }
+        });
     </script>
 @endpush
