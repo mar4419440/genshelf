@@ -18,7 +18,7 @@ class TransferController extends Controller
         $transfers = StockTransfer::with('product')->get();
         // Useful for the actual stock transfer modal form later
         $products = Product::where('is_service', false)->get();
-        
+
         return view('pages.transfers.index', compact('transfers', 'products'));
     }
 
@@ -29,12 +29,13 @@ class TransferController extends Controller
             'from_location' => 'required|string',
             'to_location' => 'required|string',
             'qty' => 'required|integer|min:1',
-            'reason' => 'nullable|string'
+            'reason' => 'required|string',
+            'reason_en' => 'nullable|string'
         ]);
 
         $validated['user_id'] = auth()->id();
 
-        DB::transaction(function() use ($validated) {
+        DB::transaction(function () use ($validated) {
             StockTransfer::create($validated);
 
             // Subtract stock from oldest batches (FIFO)
@@ -45,7 +46,8 @@ class TransferController extends Controller
                 ->get();
 
             foreach ($batches as $batch) {
-                if ($qtyToDeduct <= 0) break;
+                if ($qtyToDeduct <= 0)
+                    break;
 
                 if ($batch->qty >= $qtyToDeduct) {
                     $batch->decrement('qty', $qtyToDeduct);

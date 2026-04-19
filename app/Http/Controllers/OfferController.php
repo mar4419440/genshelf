@@ -22,6 +22,7 @@ class OfferController extends Controller
     {
         $validated = $request->validate([
             'name' => 'required|string|max:255',
+            'name_en' => 'nullable|string|max:255',
             'type' => 'required|in:fixed,pct,bogo',
             'value' => 'required|numeric|min:0',
             'start_date' => 'required|date',
@@ -39,6 +40,7 @@ class OfferController extends Controller
     {
         $validated = $request->validate([
             'name' => 'required|string|max:255',
+            'name_en' => 'nullable|string|max:255',
             'type' => 'required|in:fixed,pct,bogo',
             'value' => 'required|numeric|min:0',
             'start_date' => 'required|date',

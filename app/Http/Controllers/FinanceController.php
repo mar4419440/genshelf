@@ -13,7 +13,7 @@ class FinanceController extends Controller
         $totalRev = DB::table('transactions')->sum('total');
         $totalExp = DB::table('expenses')->sum('amount');
         $cogs = DB::table('purchase_orders')->where('status', 'received')->sum('total_cost');
-        
+
         $net = $totalRev - $cogs - $totalExp;
 
         $expenses = Expense::latest()->take(20)->get();
@@ -21,7 +21,7 @@ class FinanceController extends Controller
 
         $lastOpen = \App\Models\CashDrawerEvent::where('type', 'open')->latest()->first();
         $isDrawerOpen = false;
-        
+
         if ($lastOpen) {
             $closedAfter = \App\Models\CashDrawerEvent::where('type', 'close')
                 ->where('created_at', '>', $lastOpen->created_at)
@@ -38,6 +38,7 @@ class FinanceController extends Controller
             'category' => 'required|string',
             'amount' => 'required|numeric|min:0',
             'description' => 'required|string',
+            'description_en' => 'nullable|string',
             'is_recurring' => 'boolean'
         ]);
 

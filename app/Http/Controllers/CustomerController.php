@@ -10,10 +10,10 @@ class CustomerController extends Controller
     public function index()
     {
         $customers = Customer::all();
-        
+
         $toggleCredit = \DB::table('settings')->where('key', 'toggle_credit')->value('value') == '1';
         $toggleLoyalty = \DB::table('settings')->where('key', 'toggle_loyalty')->value('value') == '1';
-        
+
         return view('pages.customers.index', compact('customers', 'toggleCredit', 'toggleLoyalty'));
     }
 
@@ -21,7 +21,8 @@ class CustomerController extends Controller
     {
         $validated = $request->validate([
             'name' => 'required|string|max:255',
-            'phone' => 'nullable|string|max:20',
+            'name_en' => 'nullable|string|max:255',
+            'phone' => 'required|string|max:20',
             'email' => 'nullable|email|max:255',
             'loyalty_points' => 'integer|min:0',
             'credit_balance' => 'numeric'
@@ -35,7 +36,8 @@ class CustomerController extends Controller
     {
         $validated = $request->validate([
             'name' => 'required|string|max:255',
-            'phone' => 'nullable|string|max:20',
+            'name_en' => 'nullable|string|max:255',
+            'phone' => 'required|string|max:20',
             'email' => 'nullable|email|max:255',
             'loyalty_points' => 'integer|min:0',
             'credit_balance' => 'numeric'

@@ -15,7 +15,7 @@ class SupplierController extends Controller
         $suppliers = Supplier::all();
         $purchaseOrders = PurchaseOrder::with(['supplier', 'product'])->get();
         $products = Product::where('is_service', false)->get(); // For new PO dropdown
-        
+
         $costMode = DB::table('settings')->where('key', 'cost_display_mode')->value('value') ?? 'unit';
 
         return view('pages.suppliers.index', compact('suppliers', 'purchaseOrders', 'products', 'costMode'));
@@ -28,7 +28,7 @@ class SupplierController extends Controller
             'Content-Disposition' => 'attachment; filename="po_template.csv"',
         ];
 
-        $callback = function() {
+        $callback = function () {
             $file = fopen('php://output', 'w');
             fputcsv($file, ['Supplier Name', 'Product Name', 'Quantity', 'Unit Cost']);
             fputcsv($file, ['Main Supplier', 'Classic Widget', '50', '15.50']);
@@ -52,12 +52,13 @@ class SupplierController extends Controller
         DB::beginTransaction();
         try {
             foreach ($data as $index => $row) {
-                if (count($row) < 4) continue;
+                if (count($row) < 4)
+                    continue;
 
                 $supplierName = trim($row[0]);
                 $productName = trim($row[1]);
-                $qty = (int)$row[2];
-                $unitCost = (float)$row[3];
+                $qty = (int) $row[2];
+                $unitCost = (float) $row[3];
 
                 $supplier = Supplier::where('name', $supplierName)->first();
                 $product = Product::where('name', $productName)->first();
@@ -95,8 +96,11 @@ class SupplierController extends Controller
     {
         $validated = $request->validate([
             'name' => 'required|string|max:255',
+            'name_en' => 'nullable|string|max:255',
+            'category' => 'required|string|max:255',
+            'category_en' => 'nullable|string|max:255',
             'contact_person' => 'nullable|string|max:255',
-            'phone' => 'nullable|string|max:20',
+            'phone' => 'required|string|max:20',
             'email' => 'nullable|email|max:255',
             'address' => 'nullable|string',
         ]);
@@ -109,8 +113,11 @@ class SupplierController extends Controller
     {
         $validated = $request->validate([
             'name' => 'required|string|max:255',
+            'name_en' => 'nullable|string|max:255',
+            'category' => 'required|string|max:255',
+            'category_en' => 'nullable|string|max:255',
             'contact_person' => 'nullable|string|max:255',
-            'phone' => 'nullable|string|max:20',
+            'phone' => 'required|string|max:20',
             'email' => 'nullable|email|max:255',
             'address' => 'nullable|string',
         ]);
@@ -168,7 +175,7 @@ class SupplierController extends Controller
             return redirect()->back()->with('error', __('This PO has already been received.'));
         }
 
-        \DB::transaction(function() use ($po) {
+        \DB::transaction(function () use ($po) {
             $po->update(['status' => 'received']);
 
             // Add stock via batch

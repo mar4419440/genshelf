@@ -19,7 +19,7 @@ class InventoryController extends Controller
             $query->whereRaw('LOWER(name) like ?', ['%' . $search . '%']);
         }
 
-        $products = $query->get()->map(function($p) {
+        $products = $query->get()->map(function ($p) {
             $p->current_stock = $p->batches->sum('qty');
             return $p;
         });
@@ -38,7 +38,7 @@ class InventoryController extends Controller
             'Content-Disposition' => 'attachment; filename="product_template.csv"',
         ];
 
-        $callback = function() {
+        $callback = function () {
             $file = fopen('php://output', 'w');
             fputcsv($file, ['Name', 'Category', 'Default Price', 'Low Stock Threshold', 'Is Service (0 or 1)']);
             fputcsv($file, ['Example Product', 'Electronics', '99.99', '10', '0']);
@@ -59,7 +59,8 @@ class InventoryController extends Controller
         $count = 0;
 
         foreach ($data as $row) {
-            if (count($row) < 3) continue;
+            if (count($row) < 3)
+                continue;
 
             Product::create([
                 'name' => $row[0],
@@ -78,7 +79,9 @@ class InventoryController extends Controller
     {
         $rules = [
             'name' => 'required|string|max:255',
+            'name_en' => 'nullable|string|max:255',
             'category' => 'required|string|max:255',
+            'category_en' => 'nullable|string|max:255',
             'default_price' => 'required|numeric|min:0',
             'low_stock_threshold' => 'integer|min:0',
             'is_service' => 'boolean'
@@ -90,7 +93,7 @@ class InventoryController extends Controller
         }
 
         $validated = $request->validate($rules);
-        
+
         $validated['is_service'] = $request->has('is_service') ? 1 : 0;
 
         $product = Product::create($validated);
@@ -138,7 +141,9 @@ class InventoryController extends Controller
     {
         $validated = $request->validate([
             'name' => 'required|string|max:255',
+            'name_en' => 'nullable|string|max:255',
             'category' => 'required|string|max:255',
+            'category_en' => 'nullable|string|max:255',
             'default_price' => 'required|numeric|min:0',
             'low_stock_threshold' => 'integer|min:0',
             'is_service' => 'boolean'
@@ -156,7 +161,7 @@ class InventoryController extends Controller
         if ($product->batches()->count() > 0) {
             return redirect()->back()->with('error', __('Cannot delete product with active stock batches.'));
         }
-        
+
         $product->delete();
         return redirect()->back()->with('success', __('Product deleted successfully.'));
     }
