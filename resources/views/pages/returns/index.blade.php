@@ -5,7 +5,7 @@
 
 @section('content')
 <div class="page-hdr">
-    <h2>{{ __('Returns') }}</h2>
+    <h2>{{ __('Invoices & Returns') }}</h2>
     <div style="display:flex;gap:8px">
         <button class="btn btn-pr" onclick="openReturnModal('invoice')">📄 {{ __('Invoice Return') }}</button>
         <button class="btn btn-am" onclick="openReturnModal('defective')">⚠ {{ __('Defective Return') }}</button>
@@ -14,7 +14,16 @@
 </div>
 
 <div class="card">
-    <h3 style="margin-bottom:12px">{{ __('Returns') }}</h3>
+    <div style="display:flex; justify-content:space-between; align-items:center; margin-bottom:12px;">
+        <h3>{{ __('Returns Log') }}</h3>
+        <form method="GET" action="{{ route('returns') }}" style="display:flex; gap:8px;">
+            <input type="text" name="search_log" value="{{ request('search_log') }}" class="search-bar" style="margin-bottom:0; width:200px;" placeholder="{{ __('Value, Reason, Date...') }}">
+            <button type="submit" class="btn btn-sm btn-pr">{{ __('Search') }}</button>
+            @if(request()->filled('search_log'))
+                <a href="{{ route('returns') }}" class="btn btn-sm btn-o">✕</a>
+            @endif
+        </form>
+    </div>
     <div class="table-wrap">
         <table>
             <tr>
@@ -44,7 +53,54 @@
 </div>
 
 <div class="card">
-    <h3 style="margin-bottom:12px">{{ __('Defective Products Log') }}</h3>
+    <h3 style="margin-bottom:12px">🔍 {{ __('Find Invoice to Return') }}</h3>
+    <form method="GET" action="{{ route('returns') }}" style="display:flex; gap:8px; margin-bottom:12px;">
+        <input type="text" name="search_invoice" value="{{ request('search_invoice') }}" class="search-bar" style="margin-bottom:0; flex:1;" placeholder="{{ __('Search Invoice ID, Customer, Date, Total, or Item Name...') }}">
+        <button type="submit" class="btn btn-pr">{{ __('Search') }}</button>
+        @if(request()->filled('search_invoice'))
+            <a href="{{ route('returns') }}" class="btn btn-o">{{ __('Clear') }}</a>
+        @endif
+    </form>
+    <div class="table-wrap">
+        <table>
+            <tr style="background:var(--bg3); font-size:11px;">
+                <th>#</th>
+                <th>{{ __('Customer') }}</th>
+                <th>{{ __('Total') }}</th>
+                <th>{{ __('Date') }}</th>
+                <th>{{ __('Actions') }}</th>
+            </tr>
+            @forelse($transactions as $t)
+                <tr>
+                    <td><strong>{{ $t->id }}</strong></td>
+                    <td>{{ $t->customer->name ?? __('Walk-in') }}</td>
+                    <td>{{ number_format($t->total, 2) }}</td>
+                    <td>{{ $t->created_at->format('Y-m-d') }}</td>
+                    <td>
+                        <div style="display:flex; gap:4px;">
+                            <a href="{{ route('pos.invoice', $t->id) }}" target="_blank" class="btn btn-xs btn-o" title="{{ __('View Invoice') }}">📄</a>
+                            <button class="btn btn-xs btn-rd" onclick="openReturnModal('invoice', {id: '{{ $t->id }}', total: '{{ $t->total }}'})">↩ {{ __('Process Return') }}</button>
+                        </div>
+                    </td>
+                </tr>
+            @empty
+                <tr><td colspan="5" class="empty-state">{{ __('No invoices found.') }}</td></tr>
+            @endforelse
+        </table>
+    </div>
+</div>
+
+<div class="card">
+    <div style="display:flex; justify-content:space-between; align-items:center; margin-bottom:12px;">
+        <h3>{{ __('Defective Products Log') }}</h3>
+        <form method="GET" action="{{ route('returns') }}" style="display:flex; gap:8px;">
+            <input type="text" name="search_defective" value="{{ request('search_defective') }}" class="search-bar" style="margin-bottom:0; width:200px;" placeholder="{{ __('Item, Supplier, Issue...') }}">
+            <button type="submit" class="btn btn-sm btn-pr">{{ __('Search') }}</button>
+            @if(request()->filled('search_defective'))
+                <a href="{{ route('returns') }}" class="btn btn-sm btn-o">✕</a>
+            @endif
+        </form>
+    </div>
     <div class="table-wrap">
         <table>
             <tr>
@@ -89,18 +145,41 @@
     
     @push('scripts')
     <script>
-        function openReturnModal(type) {
+        @if(isset($preFilledProduct) && $preFilledProduct)
+            window.addEventListener('DOMContentLoaded', () => {
+                openReturnModal('defective', { product_id: '{{ $preFilledProduct->id }}' });
+            });
+        @endif
+
+        function openReturnModal(type, preFill = null) {
             let html = '';
+            
+            // Unified header
+            let title = '';
+            if(type === 'defective') title = '{{ __("Log Defective Product") }}';
+            else if(type === 'invoice') title = '{{ __("Return from Invoice") }}';
+            else title = '{{ __("General Return") }}';
+
+            html = `<h3>${title}</h3>`;
+
             if (type === 'defective') {
-                html = `
-                    <h3>{{ __('Log Defective Product') }}</h3>
+                html += `
                     <form action="{{ route('defective.store') }}" method="POST">
                         @csrf
+                        <div style="margin-bottom: 12px; background:var(--bg3); padding:10px; border-radius:8px;">
+                            <label style="display:block;font-size:11px;font-weight:700;color:var(--tx3);margin-bottom:4px;">{{ __('Step 1: Link to Invoice (Optional)') }}</label>
+                            <select name="transaction_id" style="width:100%; padding:6px; font-size:12px;">
+                                <option value="">-- {{ __('Not linked to an invoice') }} --</option>
+                                @foreach($transactions as $t)
+                                    <option value="{{ $t->id }}">ID: {{ $t->id }} - {{ $t->customer->name ?? 'Walk-in' }} - {{ number_format($t->total, 2) }}</option>
+                                @endforeach
+                            </select>
+                        </div>
                         <div style="margin-bottom: 12px;">
                             <label style="display:block;font-size:12px;font-weight:600;color:var(--tx2);margin-bottom:4px;">{{ __('Product') }}</label>
                             <select name="product_id" required style="width:100%; padding:8px; border:1px solid var(--border); border-radius:var(--radius);">
                                 @foreach($products as $p)
-                                    <option value="{{ $p->id }}">{{ $p->name }}</option>
+                                    <option value="{{ $p->id }}" ${preFill && preFill.product_id == '{{ $p->id }}' ? 'selected' : ''}>{{ $p->name }}</option>
                                 @endforeach
                             </select>
                         </div>
@@ -124,30 +203,41 @@
                     </form>
                 `;
             } else {
-                html = `
-                    <h3>${type === 'invoice' ? '{{ __('Return from Invoice') }}' : '{{ __('General Return') }}'}</h3>
+                html += `
                     <form action="{{ route('returns.store') }}" method="POST">
                         @csrf
                         <input type="hidden" name="type" value="${type}">
-                        ${type === 'invoice' ? `
+                        
+                        <div style="margin-bottom: 12px; background:var(--bg3); padding:10px; border-radius:8px;">
+                            <label style="display:block;font-size:11px;font-weight:700;color:var(--tx3);margin-bottom:4px;">{{ __('Step 1: Link to Invoice (Required for Invoice Return)') }}</label>
+                            <select name="transaction_id" ${type === 'invoice' ? 'required' : ''} style="width:100%; padding:8px;">
+                                <option value="">-- ${type === 'invoice' ? '{{ __("Select Transaction") }}' : '{{ __("No Invoice (Unknown Origin)") }}'} --</option>
+                                @foreach($transactions as $t)
+                                    <option value="{{ $t->id }}" ${preFill && preFill.id == '{{ $t->id }}' ? 'selected' : ''}>ID: {{ $t->id }} - {{ $t->customer->name ?? 'Walk-in' }} - {{ number_format($t->total, 2) }}</option>
+                                @endforeach
+                            </select>
+                        </div>
+
+                        ${type !== 'invoice' ? `
                             <div style="margin-bottom: 12px;">
-                                <label style="display:block;font-size:12px;font-weight:600;color:var(--tx2);margin-bottom:4px;">{{ __('Invoice (TransactionID)') }}</label>
-                                <select name="transaction_id" required style="width:100%; padding:8px; border:1px solid var(--border); border-radius:var(--radius);">
-                                    <option value="">-- {{ __('Select Transaction') }} --</option>
-                                    @foreach($transactions as $t)
-                                        <option value="{{ $t->id }}">ID: {{ $t->id }} - {{ number_format($t->total, 2) }} - {{ $t->created_at->format('Y-m-d') }}</option>
+                                <label style="display:block;font-size:12px;font-weight:600;color:var(--tx2);margin-bottom:4px;">{{ __('Select Product') }}</label>
+                                <select name="product_id" style="width:100%; padding:8px;">
+                                    <option value="">-- {{ __('Optional') }} --</option>
+                                    @foreach($products as $p)
+                                        <option value="{{ $p->id }}" ${preFill && preFill.product_id == '{{ $p->id }}' ? 'selected' : ''}>{{ $p->name }}</option>
                                     @endforeach
                                 </select>
                             </div>
                         ` : ''}
+
                         <div style="margin-bottom: 12px;">
                             <label style="display:block;font-size:12px;font-weight:600;color:var(--tx2);margin-bottom:4px;">{{ __('Reason') }}</label>
-                            <input name="reason" required>
+                            <input name="reason" required value="${type === 'invoice' ? 'Invoice Return' : ''}">
                         </div>
                         <div style="display:flex; gap:10px; margin-bottom: 12px;">
                             <div style="flex:1;">
                                 <label style="display:block;font-size:12px;font-weight:600;color:var(--tx2);margin-bottom:4px;">{{ __('Refund Amount') }}</label>
-                                <input name="refund_amount" type="number" step="0.01" required>
+                                <input name="refund_amount" type="number" step="0.01" required value="${preFill ? preFill.total : ''}">
                             </div>
                             <div style="flex:1;">
                                 <label style="display:block;font-size:12px;font-weight:600;color:var(--tx2);margin-bottom:4px;">{{ __('Refund Method') }}</label>
@@ -159,7 +249,7 @@
                         </div>
                         <div style="margin-bottom: 16px;">
                             <label style="display:flex;align-items:center;gap:6px;font-size:13px;cursor:pointer;">
-                                <input type="checkbox" name="restocked">
+                                <input type="checkbox" name="restocked" checked>
                                 {{ __('Restock Items') }}
                             </label>
                         </div>

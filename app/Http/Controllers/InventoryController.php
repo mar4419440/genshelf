@@ -30,10 +30,11 @@ class InventoryController extends Controller
 
         // Use the global low stock default if the product's threshold isn't set
         $lowStockDefault = \DB::table('settings')->where('key', 'low_stock_default')->value('value') ?? 5;
+        $costMode = \DB::table('settings')->where('key', 'cost_display_mode')->value('value') ?? 'unit';
         $suppliers = Supplier::all();
-        $categories = \App\Models\Category::all();
+        $categories = \App\Models\Category::with('parent')->get();
 
-        return view('pages.inventory.index', compact('products', 'lowStockDefault', 'suppliers', 'categories'));
+        return view('pages.inventory.index', compact('products', 'lowStockDefault', 'costMode', 'suppliers', 'categories'));
     }
 
     public function create()
@@ -149,15 +150,30 @@ class InventoryController extends Controller
         $product = Product::create($validated);
 
         if (!$product->is_service && $supplier_id) {
+            // Convert total cost to unit cost if setting is 'total'
+            $costMode = \DB::table('settings')->where('key', 'cost_display_mode')->value('value') ?? 'unit';
+            $unitCost = $cost;
+            if ($costMode === 'total' && $qty > 0) {
+                $unitCost = $cost / $qty;
+            }
+
             \App\Models\ProductBatch::create([
                 'product_id' => $product->id,
                 'supplier_id' => $supplier_id,
                 'storage_id' => $storage_id,
                 'qty' => $qty,
-                'unit_cost' => $cost,
+                'unit_cost' => $unitCost,
                 'expiration_date' => $validated['expiration_date'] ?? null,
                 'batch_number' => 'INITIAL-' . time()
             ]);
+        }
+
+        // Finalize structured barcode if it was auto-generated
+        if (substr($product->barcode, 0, 4) === '2026') {
+            $sCode = str_pad($storage_id ?? 0, 2, '0', STR_PAD_LEFT);
+            $cCode = str_pad($category->id, 4, '0', STR_PAD_LEFT);
+            $pCode = str_pad($product->id, 6, '0', STR_PAD_LEFT);
+            $product->update(['barcode' => $sCode . $cCode . $pCode]);
         }
 
         return redirect()->back()->with('success', __('Product created successfully.'));
@@ -209,10 +225,15 @@ class InventoryController extends Controller
 
         $validated['is_service'] = $request->has('is_service') ? 1 : 0;
 
+        // Handle barcode
         if (!empty($request->barcode)) {
             $validated['barcode'] = $request->barcode;
         } elseif (empty($product->barcode)) {
-            $validated['barcode'] = '2026' . str_pad(mt_rand(1, 999999999), 9, '0', STR_PAD_LEFT);
+            // Auto-generate structured barcode: StorageID(2) + CategoryID(4) + ProductID(6)
+            $sCode = str_pad($product->batches()->first()?->storage_id ?? 0, 2, '0', STR_PAD_LEFT);
+            $cCode = str_pad($category->id, 4, '0', STR_PAD_LEFT);
+            $pCode = str_pad($product->id, 6, '0', STR_PAD_LEFT);
+            $validated['barcode'] = $sCode . $cCode . $pCode;
         }
 
         $product->update($validated);

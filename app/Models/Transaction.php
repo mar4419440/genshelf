@@ -14,7 +14,7 @@ class Transaction extends Model
     }
 
     protected $casts = [
-        'items' => 'array',
+        'items_snapshot' => 'array',
         'due_date' => 'date'
     ];
 

@@ -3,6 +3,7 @@
 namespace App\Http\Controllers;
 
 use Illuminate\Http\Request;
+use Illuminate\Support\Facades\DB;
 use App\Models\Returns;
 use App\Models\DefectiveProduct;
 
@@ -10,25 +11,73 @@ class ReturnController extends Controller
 {
     public function index()
     {
-        // Eloquent Models 'Returns' (plural used to avoid PHP keyword `return`)
-        $returns = Returns::all();
-        $defectiveProducts = DefectiveProduct::with(['product', 'supplier'])->get();
+        $returnsQuery = Returns::latest();
+        if (request()->filled('search_log')) {
+            $s = request('search_log');
+            $returnsQuery->where(function($q) use ($s) {
+                $q->where('reason', 'like', "%$s%")
+                  ->orWhere('refund_amount', 'like', "%$s%")
+                  ->orWhere('created_at', 'like', "%$s%");
+            });
+        }
+        $returns = $returnsQuery->get();
+
+        $defectiveQuery = DefectiveProduct::with(['product', 'supplier'])->latest();
+        if (request()->filled('search_defective')) {
+            $s = request('search_defective');
+            $defectiveQuery->where(function($q) use ($s) {
+                $q->where('description', 'like', "%$s%")
+                  ->orWhere('status', 'like', "%$s%")
+                  ->orWhere('created_at', 'like', "%$s%")
+                  ->orWhereHas('product', function($sub) use ($s) {
+                      $sub->where('name', 'like', "%$s%");
+                  })
+                  ->orWhereHas('supplier', function($sub) use ($s) {
+                      $sub->where('name', 'like', "%$s%");
+                  });
+            });
+        }
+        $defectiveProducts = $defectiveQuery->get();
+
         $products = \App\Models\Product::all();
         $suppliers = \App\Models\Supplier::all();
-        $transactions = \App\Models\Transaction::latest()->take(100)->get();
         
-        return view('pages.returns.index', compact('returns', 'defectiveProducts', 'products', 'suppliers', 'transactions'));
+        $preFilledProduct = null;
+        if (request()->filled('product_id')) {
+            $preFilledProduct = \App\Models\Product::find(request('product_id'));
+        }
+
+        $transactionsQuery = \App\Models\Transaction::with('customer')->latest();
+        if (request()->filled('search_invoice')) {
+            $search = request('search_invoice');
+            $transactionsQuery->where(function($q) use ($search) {
+                $q->where('id', 'like', "%$search%")
+                  ->orWhere('total', 'like', "%$search%")
+                  ->orWhere('created_at', 'like', "%$search%")
+                  ->orWhereHas('customer', function($sub) use ($search) {
+                      $sub->where('name', 'like', "%$search%");
+                  })
+                  ->orWhere('items_snapshot', 'like', "%$search%");
+            });
+        }
+        $transactions = $transactionsQuery->take(50)->get();
+        
+        return view('pages.returns.index', compact('returns', 'defectiveProducts', 'products', 'suppliers', 'transactions', 'preFilledProduct'));
     }
 
     public function storeReturn(Request $request)
     {
+        // Handle checkbox input before validation
+        $request->merge(['restocked' => $request->has('restocked')]);
+
         $validated = $request->validate([
             'transaction_id' => 'nullable|exists:transactions,id',
+            'product_id' => 'nullable|exists:products,id',
             'type' => 'required|in:invoice,general',
             'reason' => 'required|string|max:255',
             'refund_amount' => 'required|numeric|min:0',
             'refund_method' => 'required|in:cash,credit',
-            'restocked' => 'boolean'
+            'restocked' => 'nullable|boolean'
         ]);
 
         $validated['restocked'] = $request->has('restocked') ? 1 : 0;
@@ -54,6 +103,7 @@ class ReturnController extends Controller
     public function storeDefective(Request $request)
     {
         $validated = $request->validate([
+            'transaction_id' => 'nullable|exists:transactions,id',
             'product_id' => 'required|exists:products,id',
             'supplier_id' => 'required|exists:suppliers,id',
             'description' => 'required|string',

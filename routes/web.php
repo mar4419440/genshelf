@@ -25,6 +25,7 @@ Route::middleware(['auth'])->group(function () {
     Route::get('/pos', [\App\Http\Controllers\PosController::class, 'index'])->name('pos');
     Route::post('/pos/checkout', [\App\Http\Controllers\PosController::class, 'checkout'])->name('pos.checkout');
     Route::get('/pos/barcode/{product}', [\App\Http\Controllers\PosController::class, 'showBarcode'])->name('pos.barcode');
+    Route::post('/pos/invoice/return', [\App\Http\Controllers\PosController::class, 'processInvoiceReturn'])->name('pos.invoice.return');
 
     // Categories
     Route::get('/categories', [\App\Http\Controllers\CategoryController::class, 'index'])->name('categories');
@@ -87,6 +88,10 @@ Route::middleware(['auth'])->group(function () {
     // Reports / BI
     Route::get('/reports', [\App\Http\Controllers\ReportController::class, 'index'])->name('reports');
     Route::get('/reports/export', [\App\Http\Controllers\ReportController::class, 'export'])->name('reports.export');
+
+    // Transaction Edit
+    Route::get('/transactions/{transaction}/edit', [\App\Http\Controllers\TransactionEditController::class, 'edit'])->name('transactions.edit');
+    Route::put('/transactions/{transaction}', [\App\Http\Controllers\TransactionEditController::class, 'update'])->name('transactions.update');
 
     // Warranty
     Route::get('/warranty', [\App\Http\Controllers\WarrantyController::class, 'index'])->name('warranty');

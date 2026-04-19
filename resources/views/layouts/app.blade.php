@@ -695,7 +695,7 @@
                 @if(in_array('offers', $roles))<a href="{{ route('offers') }}" c
                    lass="{{ request()->routeIs('offers') ? 'active' : '' }}">⭐ {{ __('Special Offers') }}</a>@endif
                 @if(in_array('returns', $roles))<a href="{{ route('returns') }}" c
-                   lass="{{ request()->routeIs('returns') ? 'active' : '' }}">📦 {{ __('Returns') }}</a>@endif
+                   lass="{{ request()->routeIs('returns') ? 'active' : '' }}">🔄 {{ __('Invoices & Returns') }}</a>@endif
                 @if(in_array('finance', $roles))<a href="{{ route('finance') }}" cla
                    ss="{{ request()->routeIs('finance') ? 'active' : '' }}">💰 {{ __('Finance') }}</a>@endif
                 @if(in_array('reports', $roles))<a href="{{ route('reports') }}" c

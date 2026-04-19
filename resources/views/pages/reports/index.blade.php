@@ -39,7 +39,7 @@
     <div style="display:flex; gap:12px; margin-bottom: 24px; border-bottom: 1px solid var(--border); padding-bottom: 8px;">
         <button class="tab-btn active" onclick="showTab('tab-dashboard', this)">📊 {{ __('Dashboard') }}</button>
         <button class="tab-btn" onclick="showTab('tab-analysis', this)">🔬 {{ __('Analysis') }}</button>
-        <button class="tab-btn" onclick="showTab('tab-history', this)">🕒 {{ __('Historical Log') }}</button>
+        <button class="tab-btn" onclick="showTab('tab-history', this)">📑 {{ __('Sales Management') }}</button>
     </div>
 
     <!-- TAB: DASHBOARD -->
@@ -173,6 +173,7 @@
                                 <th>{{ __('Items') }}</th>
                                 <th>{{ __('Total') }}</th>
                                 <th>{{ __('Paid') }}</th>
+                                <th style="text-align:right;">{{ __('Action') }}</th>
                             </tr>
                             @foreach($monthTransactions as $tx)
                                 <tr>
@@ -188,6 +189,13 @@
                                     </td>
                                     <td style="font-weight:700;">{{ number_format($tx->total, 2) }}</td>
                                     <td style="color:var(--gn)">{{ number_format($tx->paid_amount, 2) }}</td>
+                                    <td style="text-align:right;">
+                                        <div style="display:flex; gap:4px; justify-content:flex-end;">
+                                            <a href="{{ route('pos.invoice', $tx->id) }}" target="_blank" class="btn btn-xs btn-o" title="{{ __('Print Receipt') }}">📄</a>
+                                            <a href="{{ route('transactions.edit', $tx->id) }}" class="btn btn-xs btn-am" title="{{ __('Edit Invoice') }}">✏️</a>
+                                            <a href="{{ route('returns', ['search_invoice' => $tx->id]) }}" class="btn btn-xs btn-rd" title="{{ __('Return Items') }}">↩</a>
+                                        </div>
+                                    </td>
                                 </tr>
                             @endforeach
                         </table>

@@ -90,6 +90,50 @@
             padding-top: 3mm;
         }
 
+        .return-section {
+            margin-top: 6mm;
+            border-top: 2px solid #d00;
+            padding-top: 4mm;
+        }
+
+        .return-section h3 {
+            font-size: 13px;
+            color: #d00;
+            margin: 0 0 3mm 0;
+            text-align: center;
+        }
+
+        .return-btn {
+            background: #d00;
+            color: #fff;
+            border: none;
+            padding: 3px 8px;
+            font-size: 10px;
+            border-radius: 3px;
+            cursor: pointer;
+        }
+
+        .return-btn:hover {
+            background: #b00;
+        }
+
+        .return-all-btn {
+            width: 100%;
+            padding: 8px;
+            background: #d00;
+            color: #fff;
+            border: none;
+            font-size: 12px;
+            font-weight: bold;
+            border-radius: 4px;
+            cursor: pointer;
+            margin-top: 4mm;
+        }
+
+        .return-all-btn:hover {
+            background: #b00;
+        }
+
         @media print {
             .no-print {
                 display: none;
@@ -115,7 +159,7 @@
         <div><span>Invoice #:</span> <span>{{ $transaction->id }}</span></div>
         <div><span>Customer:</span> <span>{{ $transaction->customer ? $transaction->customer->name : 'Walk-in' }}</span>
         </div>
-        <div><span>Cashier:</span> <span>{{ $transaction->user->name }}</span></div>
+        <div><span>Cashier:</span> <span>{{ $transaction->user->name ?? 'N/A' }}</span></div>
     </div>
 
     <table>
@@ -146,9 +190,9 @@
             <span>{{ number_format($transaction->total, 2) }}</span></div>
 
         <div style="font-size: 12px; color: #444; margin-top: 2mm;">
-            <span>Paid:</span> <span>{{ number_format($transaction->paid_amount, 2) }}</span>
+            <span>Paid:</span> <span>{{ number_format($transaction->paid_amount ?? $transaction->total, 2) }}</span>
         </div>
-        @if($transaction->due_amount > 0)
+        @if(($transaction->due_amount ?? 0) > 0)
             <div style="font-size: 12px; color: #d00;">
                 <span>Balance:</span> <span>{{ number_format($transaction->due_amount, 2) }}</span>
             </div>
@@ -166,6 +210,51 @@
         <p>Thank you for your business!</p>
         <p>Powered by GenShelf</p>
     </div>
+
+    {{-- Return Section (visible on screen, hidden on print) --}}
+    <div class="return-section no-print">
+        <h3>🔄 Return Items</h3>
+        <table style="width:100%;">
+            @foreach($transaction->items as $item)
+                <tr style="border-bottom: 1px solid #eee;">
+                    <td style="padding: 4px 0; font-size: 11px;">{{ $item->name }} (x{{ $item->qty }})</td>
+                    <td style="text-align:right; padding: 4px 0;">
+                        <form action="{{ route('pos.invoice.return') }}" method="POST" style="display:inline;">
+                            @csrf
+                            <input type="hidden" name="transaction_id" value="{{ $transaction->id }}">
+                            <input type="hidden" name="product_id" value="{{ $item->product_id }}">
+                            <input type="hidden" name="item_name" value="{{ $item->name }}">
+                            <input type="hidden" name="qty" value="{{ $item->qty }}">
+                            <input type="hidden" name="refund_amount" value="{{ $item->line_total }}">
+                            <input type="hidden" name="type" value="single">
+                            <button type="submit" class="return-btn"
+                                onclick="return confirm('Return {{ $item->name }}?')">↩ Return</button>
+                        </form>
+                    </td>
+                </tr>
+            @endforeach
+        </table>
+
+        <form action="{{ route('pos.invoice.return') }}" method="POST">
+            @csrf
+            <input type="hidden" name="transaction_id" value="{{ $transaction->id }}">
+            <input type="hidden" name="refund_amount" value="{{ $transaction->total }}">
+            <input type="hidden" name="type" value="all">
+            <button type="submit" class="return-all-btn"
+                onclick="return confirm('Return ALL items from this invoice?')">↩ Return All Items</button>
+        </form>
+    </div>
+
+    @if(session('success'))
+        <div class="no-print" style="margin-top:10px; padding:8px; background:#e0ffe0; border:1px solid #0a0; border-radius:4px; font-size:11px; text-align:center;">
+            ✅ {{ session('success') }}
+        </div>
+    @endif
+    @if(session('error'))
+        <div class="no-print" style="margin-top:10px; padding:8px; background:#ffe0e0; border:1px solid #d00; border-radius:4px; font-size:11px; text-align:center;">
+            ❌ {{ session('error') }}
+        </div>
+    @endif
 
     <div class="no-print" style="margin-top: 20px; text-align: center;">
         <button onclick="window.print()"

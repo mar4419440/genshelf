@@ -129,7 +129,7 @@ class PosController extends Controller
             }
 
             // Sync items JSON to the transaction for report performance
-            $transaction->update(['items' => json_encode($processedItemsForJson)]);
+            $transaction->update(['items_snapshot' => $processedItemsForJson]);
 
             // 4. Handle Payments (Full, Partial, or Debt)
             $paidInput = $request->input('paid_amount');
@@ -166,11 +166,131 @@ class PosController extends Controller
             }
 
             DB::commit();
-            return redirect()->back()->with('success', __('Sale completed successfully! Invoice #') . $transaction->id);
+            return redirect()->back()
+                ->with('success', __('Sale completed successfully! Invoice #') . $transaction->id)
+                ->with('print_invoice', $transaction->id);
 
         } catch (\Exception $e) {
             DB::rollBack();
             return redirect()->back()->with('error', __('Checkout failed: ') . $e->getMessage());
+        }
+    }
+
+    /**
+     * Show printable barcode label for a product (50mm x 30mm thermal label).
+     */
+    public function showBarcode(Product $product)
+    {
+        return view('pages.pos.barcode', compact('product'));
+    }
+
+    /**
+     * Show public invoice view (accessed via QR code scan).
+     */
+    public function showInvoice(\App\Models\Transaction $transaction)
+    {
+        $transaction->load(['items', 'customer', 'user']);
+        return view('pages.pos.invoice', compact('transaction'));
+    }
+
+    /**
+     * Process a return from the invoice page (single item or all items).
+     */
+    public function processInvoiceReturn(Request $request)
+    {
+        $transaction = \App\Models\Transaction::findOrFail($request->transaction_id);
+        $type = $request->input('type'); // 'single' or 'all'
+        $refundAmount = (float) $request->input('refund_amount', 0);
+
+        try {
+            DB::beginTransaction();
+
+            // Create return record
+            $return = \App\Models\Returns::create([
+                'type' => 'invoice',
+                'transaction_id' => $transaction->id,
+                'reason' => $type === 'all' ? 'Full invoice return' : 'Item return: ' . $request->input('item_name', ''),
+                'refund_amount' => $refundAmount,
+                'refund_method' => 'cash',
+                'restocked' => true,
+                'user_id' => auth()->id(),
+            ]);
+
+            if ($type === 'single') {
+                // Restock single product
+                $productId = $request->input('product_id');
+                $qty = (int) $request->input('qty', 1);
+
+                if ($productId) {
+                    // Add qty back to latest batch
+                    $batch = \App\Models\ProductBatch::where('product_id', $productId)
+                        ->orderBy('created_at', 'desc')
+                        ->first();
+
+                    if ($batch) {
+                        $batch->increment('qty', $qty);
+                    } else {
+                        \App\Models\ProductBatch::create([
+                            'product_id' => $productId,
+                            'qty' => $qty,
+                            'unit_cost' => 0,
+                            'batch_number' => 'RETURN-' . time(),
+                        ]);
+                    }
+
+                    // Create return item record
+                    \App\Models\ReturnItem::create([
+                        'return_id' => $return->id,
+                        'product_id' => $productId,
+                        'name' => $request->input('item_name', ''),
+                        'qty' => $qty,
+                        'unit_price' => $refundAmount / max($qty, 1),
+                    ]);
+                }
+            } else {
+                // Return all items
+                foreach ($transaction->items as $item) {
+                    if ($item->product_id && !$item->is_service) {
+                        $batch = \App\Models\ProductBatch::where('product_id', $item->product_id)
+                            ->orderBy('created_at', 'desc')
+                            ->first();
+
+                        if ($batch) {
+                            $batch->increment('qty', $item->qty);
+                        } else {
+                            \App\Models\ProductBatch::create([
+                                'product_id' => $item->product_id,
+                                'qty' => $item->qty,
+                                'unit_cost' => 0,
+                                'batch_number' => 'RETURN-' . time(),
+                            ]);
+                        }
+                    }
+
+                    \App\Models\ReturnItem::create([
+                        'return_id' => $return->id,
+                        'product_id' => $item->product_id,
+                        'name' => $item->name,
+                        'qty' => $item->qty,
+                        'unit_price' => $item->unit_price,
+                    ]);
+                }
+            }
+
+            // Adjust customer credit if applicable
+            if ($transaction->customer_id && $refundAmount > 0) {
+                \App\Models\Customer::where('id', $transaction->customer_id)
+                    ->decrement('credit_balance', min($refundAmount, $transaction->due_amount ?? 0));
+            }
+
+            DB::commit();
+            return redirect()->route('pos.invoice', $transaction->id)
+                ->with('success', __('Return processed successfully. Refund: ') . number_format($refundAmount, 2));
+
+        } catch (\Exception $e) {
+            DB::rollBack();
+            return redirect()->route('pos.invoice', $transaction->id)
+                ->with('error', __('Return failed: ') . $e->getMessage());
         }
     }
 }

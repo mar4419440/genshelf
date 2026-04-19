@@ -116,17 +116,21 @@
             const actionUrl = `{{ route('finance.expense.store') }}`;
             const html = `
                     <h3>{{ __('Log Expense') }}</h3>
-                    <form action="${actionUrl}" method="POST">
+                    <form action="${actionUrl}" method="POST" onsubmit="return prepareExpenseForm()">
                         @csrf
                         <div style="margin-bottom: 12px;">
                             <label style="display:block;font-size:12px;font-weight:600;color:var(--tx2);margin-bottom:4px;">{{ __('Category') }}</label>
-                            <select name="category" required style="width:100%; padding:8px; border:1px solid var(--border); border-radius:var(--radius);">
+                            <select name="category" id="expense-category" required onchange="toggleCustomCategory()" style="width:100%; padding:8px; border:1px solid var(--border); border-radius:var(--radius);">
                                 <option value="Rent">{{ __('Rent') }}</option>
                                 <option value="Utilities">{{ __('Utilities') }}</option>
                                 <option value="Salaries">{{ __('Salaries') }}</option>
                                 <option value="Marketing">{{ __('Marketing') }}</option>
                                 <option value="Other">{{ __('Other') }}</option>
                             </select>
+                        </div>
+                        <div id="custom-category-field" style="display:none; margin-bottom: 12px;">
+                            <label style="display:block;font-size:12px;font-weight:600;color:var(--tx2);margin-bottom:4px;">{{ __('Expense Name') }}</label>
+                            <input type="text" id="custom-category-input" placeholder="{{ __('Enter expense name...') }}" style="width:100%; padding:8px; border:1px solid var(--border); border-radius:var(--radius);">
                         </div>
                         <div style="margin-bottom: 12px;">
                             <label style="display:block;font-size:12px;font-weight:600;color:var(--tx2);margin-bottom:4px;">{{ __('Amount') }}</label>
@@ -154,6 +158,25 @@
             document.getElementById('modal-box').innerHTML = html;
             document.getElementById('modal-overlay').classList.add('active');
             document.getElementById('modal-overlay').style.display = 'flex';
+        }
+
+        function toggleCustomCategory() {
+            const sel = document.getElementById('expense-category');
+            const field = document.getElementById('custom-category-field');
+            field.style.display = sel.value === 'Other' ? 'block' : 'none';
+        }
+
+        function prepareExpenseForm() {
+            const sel = document.getElementById('expense-category');
+            const custom = document.getElementById('custom-category-input');
+            if (sel.value === 'Other' && custom.value.trim()) {
+                sel.value = 'Other'; // keep it as Other, but we add custom to a new option
+                const opt = document.createElement('option');
+                opt.value = custom.value.trim();
+                opt.selected = true;
+                sel.appendChild(opt);
+            }
+            return true;
         }
 
         function openDrawerAction(type = 'open') {

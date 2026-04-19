@@ -4,8 +4,7 @@ use Illuminate\Database\Migrations\Migration;
 use Illuminate\Database\Schema\Blueprint;
 use Illuminate\Support\Facades\Schema;
 
-return new class extends Migration
-{
+return new class extends Migration {
     public function up(): void
     {
         // ===== ROLES =====
@@ -57,8 +56,11 @@ return new class extends Migration
             $table->id();
             $table->foreignId('product_id')->constrained()->cascadeOnDelete();
             $table->foreignId('supplier_id')->nullable()->constrained()->nullOnDelete();
+            $table->foreignId('storage_id')->nullable()->constrained()->nullOnDelete();
             $table->integer('qty')->default(0);
-            $table->decimal('cost', 12, 2)->default(0);
+            $table->decimal('unit_cost', 12, 2)->default(0);
+            $table->string('batch_number')->nullable();
+            $table->date('expiration_date')->nullable();
             $table->timestamps();
         });
 
@@ -92,10 +94,15 @@ return new class extends Migration
             $table->id();
             $table->foreignId('customer_id')->nullable()->constrained()->nullOnDelete();
             $table->foreignId('user_id')->nullable()->constrained()->nullOnDelete(); // employee
+            $table->foreignId('storage_id')->nullable()->constrained()->nullOnDelete();
             $table->decimal('subtotal', 12, 2)->default(0);
             $table->decimal('tax', 12, 2)->default(0);
             $table->decimal('total', 12, 2)->default(0);
-            $table->enum('payment_method', ['cash', 'credit'])->default('cash');
+            $table->decimal('paid_amount', 12, 2)->default(0);
+            $table->decimal('due_amount', 12, 2)->default(0);
+            $table->date('due_date')->nullable();
+            $table->enum('payment_method', ['cash', 'credit', 'partial', 'debt'])->default('cash');
+            $table->json('items_snapshot')->nullable();
             $table->timestamps();
         });
 
@@ -108,6 +115,7 @@ return new class extends Migration
             $table->integer('qty')->default(1);
             $table->decimal('unit_price', 12, 2)->default(0);
             $table->decimal('line_total', 12, 2)->default(0);
+            $table->date('warranty_expiry')->nullable();
             $table->boolean('is_service')->default(false);
         });
 

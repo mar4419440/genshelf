@@ -314,6 +314,27 @@
             </form>
         </div>
     </div>
+
+    <!-- Service Modal -->
+    <div id="service-modal" class="modal-backdrop" style="display:none; position:fixed; z-index:1000; left:0; top:0; width:100%; height:100%; background:rgba(0,0,0,0.6); backdrop-filter:blur(4px);">
+        <div class="card" style="width:400px; margin: 100px auto; padding:24px; border-radius:16px;">
+            <h3 style="font-weight:800; margin-bottom:20px;">🛠️ {{ __('Add Custom Service') }}</h3>
+            <div style="display:flex; flex-direction:column; gap:16px;">
+                <div>
+                    <label style="display:block; font-size:12px; font-weight:700; margin-bottom:6px; color:var(--tx2);">{{ __('Service Name') }}</label>
+                    <input type="text" id="svc-name" class="search-bar" style="width:100%" placeholder="{{ __('e.g. Maintenance, Delivery, etc.') }}">
+                </div>
+                <div>
+                    <label style="display:block; font-size:12px; font-weight:700; margin-bottom:6px; color:var(--tx2);">{{ __('Price') }}</label>
+                    <input type="number" id="svc-price" class="search-bar" style="width:100%" placeholder="0.00" step="0.01">
+                </div>
+                <div style="display:flex; gap:12px; margin-top:8px;">
+                    <button type="button" class="btn btn-pr" style="flex:2" onclick="addServiceToCart()">{{ __('Add to Cart') }}</button>
+                    <button type="button" class="btn btn-o" style="flex:1" onclick="closeServiceModal()">{{ __('Cancel') }}</button>
+                </div>
+            </div>
+        </div>
+    </div>
 @endsection
 
 @push('scripts')
@@ -462,6 +483,31 @@
         });
 
         // Close dropdown
-        window.onclick = e => { if (!e.target.closest('#customer-search')) document.getElementById('customer-dropdown').style.display = 'none'; }
+        window.onclick = e => { 
+            if (!e.target.closest('#customer-search')) document.getElementById('customer-dropdown').style.display = 'none'; 
+            if (e.target.classList.contains('modal-backdrop')) closeServiceModal();
+        }
+
+        function openServiceModal() { document.getElementById('service-modal').style.display = 'block'; }
+        function closeServiceModal() { document.getElementById('service-modal').style.display = 'none'; }
+        function addServiceToCart() {
+            const name = document.getElementById('svc-name').value.trim();
+            const price = parseFloat(document.getElementById('svc-price').value) || 0;
+            if (!name) { alert("Please enter service name"); return; }
+            
+            cart.push({ 
+                id: 'svc_' + Date.now(), 
+                name: name, 
+                price: price, 
+                qty: 1, 
+                isService: true, 
+                maxStock: 999999 
+            });
+            
+            renderCart();
+            closeServiceModal();
+            document.getElementById('svc-name').value = '';
+            document.getElementById('svc-price').value = '';
+        }
     </script>
 @endpush

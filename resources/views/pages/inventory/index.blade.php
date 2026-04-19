@@ -97,9 +97,10 @@
                                 @if(!$p->is_service)
                                     <button class="btn btn-xs btn-gn" onclick='openRestockModal(@json($p))'>📦
                                         {{ __('Restock') }}</button>
+                                    <a href="{{ route('returns', ['product_id' => $p->id]) }}" class="btn btn-xs btn-rd" title="{{ __('Log Damage/Return') }}">🔄</a>
                                 @endif
                                 <button class="btn btn-sm btn-o" onclick='openProductModal(@json($p))'>{{ __('Edit') }}</button>
-                                <a href="{{ url('/pos/barcode') }}/${{ $p->id }}" target="_blank"
+                                <a href="{{ url('/pos/barcode/' . $p->id) }}" target="_blank"
                                     class="btn btn-sm btn-o">🏷️</a>
                                 <form action="{{ route('inventory.destroy', $p->id) }}" method="POST" style="display:inline;"
                                     onsubmit="return confirm('{{ __('Are you sure?') }}')">
@@ -145,7 +146,7 @@
                 suppliers.map(s => `<option value="${s.id}">${s.name}</option>`).join('');
 
             let categoryOptions = `<option value="">{{ __('Select Category') }}</option>` +
-                categories.map(c => `<option value="${c.id}" ${p && p.category === c.full_path ? 'selected' : ''}>${c.name} ${c.parent_id ? '(' + c.parent.name + ')' : ''}</option>`).join('');
+                categories.map(c => `<option value="${c.id}" ${p && p.category === c.full_path ? 'selected' : ''}>${c.name} ${c.parent ? '(' + c.parent.name + ')' : ''}</option>`).join('');
 
             const html = `
                                             <h3>${isEdit ? '{{ __('Edit Product') }}' : '{{ __('Add Product') }}'}</h3>

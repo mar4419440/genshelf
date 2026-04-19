@@ -67,7 +67,7 @@ class ReportController extends Controller
                         $sub->where('name', 'like', "%$search%")
                             ->orWhere('display_name', 'like', "%$search%");
                     })
-                    ->orWhere('items', 'like', "%$search%");
+                    ->orWhere('items_snapshot', 'like', "%$search%");
             });
         }
 
@@ -220,7 +220,7 @@ class ReportController extends Controller
     {
         $productSales = [];
         foreach ($transactions as $tx) {
-            $items = is_string($tx->items) ? json_decode($tx->items, true) : $tx->items;
+            $items = $tx->items_snapshot;
             if (is_array($items)) {
                 foreach ($items as $item) {
                     $name = $item['name'] ?? 'Unknown';
