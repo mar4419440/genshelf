@@ -158,27 +158,17 @@
         .cir-qty {
             display: flex;
             align-items: center;
-            gap: 8px;
-        }
-
-        .qty-btn {
-            width: 26px;
-            height: 26px;
-            border-radius: 6px;
-            background: var(--bg3);
-            display: flex;
-            align-items: center;
-            justify-content: center;
-            font-size: 16px;
         }
 
         .qty-input {
-            width: 45px;
+            width: 55px;
             text-align: center;
             border: 1px solid var(--border);
-            border-radius: 6px;
+            border-radius: 8px;
             background: var(--bg);
             font-weight: 700;
+            padding: 6px;
+            font-size: 14px;
         }
 
         .pos-totals {
