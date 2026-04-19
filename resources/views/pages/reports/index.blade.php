@@ -4,100 +4,188 @@
 @endpush
 
 @section('content')
-<div class="page-hdr">
-    <h2>{{ __('Reports') }}</h2>
-    <div style="display:flex;gap:8px">
-        <button class="btn btn-sm btn-o" onclick="exportTransactionsCSV()">📥 {{ __('Export CSV') }}</button>
-        <button class="btn btn-sm btn-gn" onclick="generateDailyClose()">📊 {{ __('Daily Close Report') }}</button>
+    <div class="page-hdr">
+        <h2>{{ __('Reports') }}</h2>
+        <div style="display:flex;gap:8px">
+            <button class="btn btn-sm btn-o" onclick="exportTransactionsCSV()">📥 {{ __('Export CSV') }}</button>
+            <button class="btn btn-sm btn-gn" onclick="generateDailyClose()">📊 {{ __('Daily Close Report') }}</button>
+        </div>
     </div>
-</div>
 
-<div class="card-grid card-grid-3">
-    <div class="card metric-card">
-        <div class="metric-val">{{ number_format($totalRev, 2) }}</div>
-        <div class="metric-lbl">{{ __('All-Time Revenue') }}</div>
-    </div>
-    <div class="card metric-card">
-        <div class="metric-val">{{ $totalTxCount }}</div>
-        <div class="metric-lbl">{{ __('Total Transactions') }}</div>
-    </div>
-    <div class="card metric-card">
-        <div class="metric-val">{{ number_format($avgOrder, 2) }}</div>
-        <div class="metric-lbl">{{ __('Avg Order Value') }}</div>
-    </div>
-</div>
+    <div class="card" style="margin-bottom: 20px;">
+        <form method="GET" action="{{ route('reports') }}" id="filter-form">
+            <div style="display: flex; flex-wrap: wrap; gap: 12px; align-items: flex-end;">
+                <!-- Period Select -->
+                <div style="flex: 1; min-width: 150px;">
+                    <label
+                        style="display:block; font-size:11px; color:var(--tx2); margin-bottom:4px;">{{ __('Quick Period') }}</label>
+                    <select name="period" class="search-bar" style="width:100%; height:38px;" onchange="this.form.submit()">
+                        <option value="all" {{ request('period') == 'all' ? 'selected' : '' }}>{{ __('All Time') }}</option>
+                        <option value="today" {{ request('period') == 'today' ? 'selected' : '' }}>{{ __('Today') }}</option>
+                        <option value="yesterday" {{ request('period') == 'yesterday' ? 'selected' : '' }}>
+                            {{ __('Yesterday') }}</option>
+                        <option value="this_week" {{ request('period') == 'this_week' ? 'selected' : '' }}>
+                            {{ __('This Week') }}</option>
+                        <option value="this_month" {{ request('period') == 'this_month' ? 'selected' : '' }}>
+                            {{ __('This Month') }}</option>
+                        <option value="last_month" {{ request('period') == 'last_month' ? 'selected' : '' }}>
+                            {{ __('Last Month') }}</option>
+                        <option value="this_quarter" {{ request('period') == 'this_quarter' ? 'selected' : '' }}>
+                            {{ __('This Quarter') }}</option>
+                        <option value="this_year" {{ request('period') == 'this_year' ? 'selected' : '' }}>
+                            {{ __('This Year') }}</option>
+                    </select>
+                </div>
 
-<div class="card">
-    <h3 style="margin-bottom:12px">{{ __('Top Selling Products') }}</h3>
-    <div class="table-wrap">
-        <table>
-            <tr>
-                <th>#</th>
-                <th>{{ __('Product') }}</th>
-                <th>{{ __('Units Sold') }}</th>
-                <th>{{ __('Revenue') }}</th>
-            </tr>
-            @forelse($topSelling as $index => $p)
+                <!-- Specific Month -->
+                <div style="width: 120px;">
+                    <label
+                        style="display:block; font-size:11px; color:var(--tx2); margin-bottom:4px;">{{ __('Month') }}</label>
+                    <select name="specific_month" class="search-bar" style="width:100%; height:38px;"
+                        onchange="this.form.submit()">
+                        <option value="">--</option>
+                        @for($m = 1; $m <= 12; $m++)
+                            <option value="{{ $m }}" {{ request('specific_month') == $m ? 'selected' : '' }}>
+                                {{ date('F', mktime(0, 0, 0, $m, 1)) }}
+                            </option>
+                        @endfor
+                    </select>
+                </div>
+
+                <!-- Specific Quarter -->
+                <div style="width: 100px;">
+                    <label
+                        style="display:block; font-size:11px; color:var(--tx2); margin-bottom:4px;">{{ __('Quarter') }}</label>
+                    <select name="specific_quarter" class="search-bar" style="width:100%; height:38px;"
+                        onchange="this.form.submit()">
+                        <option value="">--</option>
+                        <option value="1" {{ request('specific_quarter') == '1' ? 'selected' : '' }}>Q1</option>
+                        <option value="2" {{ request('specific_quarter') == '2' ? 'selected' : '' }}>Q2</option>
+                        <option value="3" {{ request('specific_quarter') == '3' ? 'selected' : '' }}>Q3</option>
+                        <option value="4" {{ request('specific_quarter') == '4' ? 'selected' : '' }}>Q4</option>
+                    </select>
+                </div>
+
+                <!-- Specific Year -->
+                <div style="width: 100px;">
+                    <label
+                        style="display:block; font-size:11px; color:var(--tx2); margin-bottom:4px;">{{ __('Year') }}</label>
+                    <select name="specific_year" class="search-bar" style="width:100%; height:38px;"
+                        onchange="this.form.submit()">
+                        <option value="">--</option>
+                        @for($y = date('Y'); $y >= date('Y') - 5; $y--)
+                            <option value="{{ $y }}" {{ request('specific_year') == $y ? 'selected' : '' }}>{{ $y }}</option>
+                        @endfor
+                    </select>
+                </div>
+
+                <!-- Search -->
+                <div style="flex: 2; min-width: 200px;">
+                    <label
+                        style="display:block; font-size:11px; color:var(--tx2); margin-bottom:4px;">{{ __('Search name, item, or value') }}</label>
+                    <div style="display:flex; gap:4px">
+                        <input type="text" name="search" value="{{ request('search') }}" class="search-bar"
+                            style="flex:1; height:38px;" placeholder="{{ __('Search...') }}">
+                        <button type="submit" class="btn btn-pr" style="height:38px;">🔍</button>
+                        <a href="{{ route('reports') }}" class="btn btn-o"
+                            style="height:38px; display:flex; align-items:center;">🔄</a>
+                    </div>
+                </div>
+            </div>
+        </form>
+    </div>
+
+    <div class="card-grid card-grid-3">
+        <div class="card metric-card">
+            <div class="metric-val">{{ number_format($totalRev, 2) }}</div>
+            <div class="metric-lbl">{{ __('All-Time Revenue') }}</div>
+        </div>
+        <div class="card metric-card">
+            <div class="metric-val">{{ $totalTxCount }}</div>
+            <div class="metric-lbl">{{ __('Total Transactions') }}</div>
+        </div>
+        <div class="card metric-card">
+            <div class="metric-val">{{ number_format($avgOrder, 2) }}</div>
+            <div class="metric-lbl">{{ __('Avg Order Value') }}</div>
+        </div>
+    </div>
+
+    <div class="card">
+        <h3 style="margin-bottom:12px">{{ __('Top Selling Products') }}</h3>
+        <div class="table-wrap">
+            <table>
                 <tr>
-                    <td>{{ $index + 1 }}</td>
-                    <td>{{ $p['name'] }}</td>
-                    <td>{{ $p['units'] }}</td>
-                    <td>{{ number_format($p['revenue'], 2) }}</td>
+                    <th>#</th>
+                    <th>{{ __('Product') }}</th>
+                    <th>{{ __('Units Sold') }}</th>
+                    <th>{{ __('Revenue') }}</th>
                 </tr>
-            @empty
-                <tr><td colspan="4" class="empty-state">{{ __('No data yet') }}</td></tr>
-            @endforelse
-        </table>
+                @forelse($topSelling as $index => $p)
+                    <tr>
+                        <td>{{ $index + 1 }}</td>
+                        <td>{{ $p['name'] }}</td>
+                        <td>{{ $p['units'] }}</td>
+                        <td>{{ number_format($p['revenue'], 2) }}</td>
+                    </tr>
+                @empty
+                    <tr>
+                        <td colspan="4" class="empty-state">{{ __('No data yet') }}</td>
+                    </tr>
+                @endforelse
+            </table>
+        </div>
     </div>
-</div>
 
-<div class="card">
-    <h3 style="margin-bottom:12px">{{ __('Transaction Log') }}</h3>
-    <div class="table-wrap" style="max-height: 400px; overflow-y: auto;">
-        <table>
-            <tr>
-                <th>{{ __('Items') }}</th>
-                <th>{{ __('Subtotal') }}</th>
-                <th>{{ __('Tax') }}</th>
-                <th>{{ __('Total') }}</th>
-                <th>{{ __('Customer') }}</th>
-                <th>{{ __('Employee') }}</th>
-                <th>{{ __('Date') }}</th>
-            </tr>
-            @forelse($transactions->take(50) as $tx)
-                @php
-                    $itemsStr = '';
-                    $itemsArr = is_string($tx->items) ? json_decode($tx->items, true) : $tx->items;
-                    if(is_array($itemsArr)) {
-                        $itemsStr = implode(', ', array_map(function($i) { return $i['name'] ?? 'Item'; }, $itemsArr));
-                    }
-                @endphp
+    <div class="card">
+        <h3 style="margin-bottom:12px">{{ __('Transaction Log') }}</h3>
+        <div class="table-wrap" style="max-height: 400px; overflow-y: auto;">
+            <table>
                 <tr>
-                    <td>{{ $itemsStr }}</td>
-                    <td>{{ number_format($tx->subtotal, 2) }}</td>
-                    <td>{{ number_format($tx->tax, 2) }}</td>
-                    <td>{{ number_format($tx->total, 2) }}</td>
-                    <td>{{ $tx->customer->name ?? __('Walk-in Customer') }}</td>
-                    <td>{{ $tx->user->displayName ?? ($tx->user->name ?? '') }}</td>
-                    <td>{{ $tx->created_at->format('Y-m-d H:i') }}</td>
+                    <th>{{ __('Items') }}</th>
+                    <th>{{ __('Subtotal') }}</th>
+                    <th>{{ __('Tax') }}</th>
+                    <th>{{ __('Total') }}</th>
+                    <th>{{ __('Customer') }}</th>
+                    <th>{{ __('Employee') }}</th>
+                    <th>{{ __('Date') }}</th>
                 </tr>
-            @empty
-                <tr><td colspan="7" class="empty-state">{{ __('No data yet') }}</td></tr>
-            @endforelse
-        </table>
+                @forelse($transactions->take(50) as $tx)
+                    @php
+                        $itemsStr = '';
+                        $itemsArr = is_string($tx->items) ? json_decode($tx->items, true) : $tx->items;
+                        if (is_array($itemsArr)) {
+                            $itemsStr = implode(', ', array_map(function ($i) {
+                                return $i['name'] ?? 'Item'; }, $itemsArr));
+                        }
+                    @endphp
+                    <tr>
+                        <td>{{ $itemsStr }}</td>
+                        <td>{{ number_format($tx->subtotal, 2) }}</td>
+                        <td>{{ number_format($tx->tax, 2) }}</td>
+                        <td>{{ number_format($tx->total, 2) }}</td>
+                        <td>{{ $tx->customer->name ?? __('Walk-in Customer') }}</td>
+                        <td>{{ $tx->user->displayName ?? ($tx->user->name ?? '') }}</td>
+                        <td>{{ $tx->created_at->format('Y-m-d H:i') }}</td>
+                    </tr>
+                @empty
+                    <tr>
+                        <td colspan="7" class="empty-state">{{ __('No data yet') }}</td>
+                    </tr>
+                @endforelse
+            </table>
+        </div>
     </div>
-</div>
 
-<!-- Modal Container -->
-<div class="modal-overlay" id="modal-overlay" onclick="if(event.target===this)closeModal()">
-  <div class="modal" id="modal-box"></div>
-</div>
+    <!-- Modal Container -->
+    <div class="modal-overlay" id="modal-overlay" onclick="if(event.target===this)closeModal()">
+        <div class="modal" id="modal-box"></div>
+    </div>
 @endsection
 
 @push('scripts')
-<script>
-    function closeModal() { document.getElementById('modal-overlay').classList.remove('show'); }
-    function exportTransactionsCSV() { alert('Export logic'); }
-    function generateDailyClose() { alert('Daily close logic'); }
-</script>
+    <script>
+        function closeModal() { document.getElementById('modal-overlay').classList.remove('show'); }
+        function exportTransactionsCSV() { alert('Export logic'); }
+        function generateDailyClose() { alert('Daily close logic'); }
+    </script>
 @endpush

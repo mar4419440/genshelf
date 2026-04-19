@@ -150,5 +150,18 @@
     "Service": "خدمة",
     "Check this if the item is a service (no stock tracking needed).": "حدد هذا إذا كان الصنف خدمة (لا يحتاج لتتبع المخزون).",
     "Storage": "المخزن",
-    "Unknown": "غير معروف"
+    "Unknown": "غير معروف",
+    "Quick Period": "فترة سريعة",
+    "All Time": "كل الأوقات",
+    "Today": "اليوم",
+    "Yesterday": "أمس",
+    "This Week": "هذا الأسبوع",
+    "This Month": "هذا الشهر",
+    "Last Month": "الشهر الماضي",
+    "This Quarter": "هذا الربع",
+    "This Year": "هذه السنة",
+    "Month": "الشهر",
+    "Quarter": "الربع",
+    "Year": "السنة",
+    "Search name, item, or value": "ابحث بالاسم أو الصنف أو القيمة"
 }
