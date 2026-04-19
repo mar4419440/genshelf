@@ -1,107 +1,107 @@
 @extends('layouts.app')
 
-@push('styles')
-@endpush
+@section('title', __('Stock Transfers'))
 
 @section('content')
-    <div class="page-hdr">
-        <h2>{{ __('Stock Transfers') }}</h2>
-        <button class="btn btn-pr" onclick="openTransferModal()">➕ {{ __('Add Transfer') }}</button>
+    <div class="page-header">
+        <div class="ph-text">
+            <h1>📦 {{ __('Stock Transfers') }}</h1>
+            <p>{{ __('Move inventory between storages and stores') }}</p>
+        </div>
+        <div class="ph-actions">
+            <button class="btn btn-gn" onclick="openTransferModal()">{{ __('New Transfer') }}</button>
+        </div>
     </div>
 
     <div class="card">
         <div class="table-wrap">
             <table>
-                <tr>
-                    <th>{{ __('Product') }}</th>
-                    <th>{{ __('From') }}</th>
-                    <th>{{ __('To') }}</th>
-                    <th>{{ __('Qty') }}</th>
-                    <th>{{ __('Date') }}</th>
-                    <th>{{ __('Reason') }}</th>
-                </tr>
-                @forelse($transfers as $st)
+                <thead>
                     <tr>
-                        <td>{{ $st->product->name ?? '?' }}</td>
-                        <td>{{ $st->from_location }}</td>
-                        <td>{{ $st->to_location }}</td>
-                        <td>{{ $st->qty }}</td>
-                        <td>{{ $st->created_at->format('Y-m-d H:i') }}</td>
-                        <td>{{ $st->reason }}</td>
+                        <th>{{ __('Date') }}</th>
+                        <th>{{ __('Product') }}</th>
+                        <th>{{ __('From') }}</th>
+                        <th>{{ __('To') }}</th>
+                        <th>{{ __('Qty') }}</th>
+                        <th>{{ __('User') }}</th>
                     </tr>
-                @empty
-                    <tr>
-                        <td colspan="6" class="empty-state">{{ __('No data yet') }}</td>
-                    </tr>
-                @endforelse
+                </thead>
+                <tbody>
+                    @forelse($transfers as $t)
+                        <tr>
+                            <td>{{ $t->created_at->format('Y-m-d H:i') }}</td>
+                            <td><strong>{{ $t->product->name }}</strong></td>
+                            <td><span class="badge badge-o">{{ $t->fromStorage->name }}</span></td>
+                            <td><span class="badge badge-gn">{{ $t->toStorage->name }}</span></td>
+                            <td>{{ number_format($t->qty, 2) }}</td>
+                            <td>{{ $t->user->name }}</td>
+                        </tr>
+                    @empty
+                        <tr>
+                            <td colspan="6" class="empty-state">{{ __('No transfers recorded yet.') }}</td>
+                        </tr>
+                    @endforelse
+                </tbody>
             </table>
         </div>
     </div>
 
-    <!-- Modal Container -->
-    <div class="modal-overlay" id="modal-overlay" onclick="if(event.target===this)closeModal()">
-        <div class="modal" id="modal-box"
-            style="background:var(--bg2); padding: 20px; border-radius: var(--radius); width: 100%; max-width: 500px; display: inline-block;">
-        </div>
-    </div>
-@endsection
-
-@push('scripts')
-    <script>
-        function openTransferModal() {
-            const actionUrl = `{{ route('transfers.store') }}`;
-
-            const html = `
-                <h3>{{ __('New Stock Transfer') }}</h3>
-                <form action="${actionUrl}" method="POST">
-                    @csrf
-                    <div style="margin-bottom: 12px;">
-                        <label style="display:block;font-size:12px;font-weight:600;color:var(--tx2);margin-bottom:4px;">{{ __('Product') }}</label>
-                        <select name="product_id" required style="width:100%; padding:8px; border:1px solid var(--border); border-radius:var(--radius);">
-                            <option value="">-- {{ __('Select Product') }} --</option>
-                            @foreach($products as $product)
-                                <option value="{{ $product->id }}">{{ $product->name }}</option>
+    <div class="modal-overlay" id="transfer-modal">
+        <div class="modal" style="max-width: 500px;">
+            <h3>{{ __('New Stock Transfer') }}</h3>
+            <form action="{{ route('transfers.store') }}" method="POST">
+                @csrf
+                <div class="form-group">
+                    <label>{{ __('Product') }}</label>
+                    <select name="product_id" required style="width:100%" onchange="loadStock(this.value)">
+                        <option value="">{{ __('Select Product') }}</option>
+                        @foreach(\App\Models\Product::all() as $p)
+                            <option value="{{ $p->id }}">{{ $p->name }}</option>
+                        @endforeach
+                    </select>
+                </div>
+                <div style="display:grid; grid-template-columns: 1fr 1fr; gap:12px;">
+                    <div class="form-group">
+                        <label>{{ __('From Storage') }}</label>
+                        <select id="from_storage" name="from_storage_id" required style="width:100%"
+                            onchange="checkStock()">
+                            @foreach(\App\Models\Storage::all() as $s)
+                                <option value="{{ $s->id }}">{{ $s->name }} ({{ $s->type }})</option>
                             @endforeach
                         </select>
                     </div>
-                    <div style="display:flex; gap:10px; margin-bottom: 12px;">
-                        <div style="flex:1;">
-                            <label style="display:block;font-size:12px;font-weight:600;color:var(--tx2);margin-bottom:4px;">{{ __('From Location') }}</label>
-                            <input name="from_location" value="{{ __('Main Store') }}" required>
-                        </div>
-                        <div style="flex:1;">
-                            <label style="display:block;font-size:12px;font-weight:600;color:var(--tx2);margin-bottom:4px;">{{ __('To Location') }}</label>
-                            <input name="to_location" required>
-                        </div>
+                    <div class="form-group">
+                        <label>{{ __('To Location') }}</label>
+                        <select name="to_storage_id" required style="width:100%">
+                            @foreach(\App\Models\Storage::all() as $s)
+                                <option value="{{ $s->id }}">{{ $s->name }} ({{ $s->type }})</option>
+                            @endforeach
+                        </select>
                     </div>
-                    <div style="margin-bottom: 12px;">
-                        <label style="display:block;font-size:12px;font-weight:600;color:var(--tx2);margin-bottom:4px;">{{ __('Quantity') }}</label>
-                        <input name="qty" type="number" value="1" min="1" required>
-                    </div>
-                    <div style="margin-bottom: 12px;">
-                        <label style="display:block;font-size:12px;font-weight:600;color:var(--tx2);margin-bottom:4px;">{{ __('Arabic Reason') }}</label>
-                        <textarea name="reason" rows="2" style="width:100%; border:1px solid var(--border); border-radius:var(--radius); padding:8px;" required></textarea>
-                    </div>
-                    <div style="margin-bottom: 12px;">
-                        <label style="display:block;font-size:12px;font-weight:600;color:var(--tx2);margin-bottom:4px;">{{ __('English Reason') }} ({{ __('Optional') }})</label>
-                        <textarea name="reason_en" rows="2" style="width:100%; border:1px solid var(--border); border-radius:var(--radius); padding:8px;"></textarea>
-                    </div>
-                    <div style="display:flex; gap:8px;">
-                        <button type="button" class="btn btn-o" onclick="closeModal()">{{ __('Cancel') }}</button>
-                        <button type="submit" class="btn btn-pr" style="flex:1;">{{ __('Process Transfer') }}</button>
-                    </div>
-                </form>
-            `;
-            document.getElementById('modal-box').innerHTML = html;
-            document.getElementById('modal-overlay').classList.add('active');
-            document.getElementById('modal-overlay').style.display = 'flex';
-            document.getElementById('modal-overlay').style.alignItems = 'center';
-            document.getElementById('modal-overlay').style.justifyContent = 'center';
-        }
+                </div>
+                <div class="form-group">
+                    <label>{{ __('Quantity to Move') }}</label>
+                    <input type="number" name="qty" step="0.01" required placeholder="{{ __('Available') }}: 0"
+                        id="transfer_qty">
+                </div>
+                <div class="form-group">
+                    <label>{{ __('Notes') }}</label>
+                    <textarea name="notes" rows="2"></textarea>
+                </div>
+                <div style="display:flex; gap:8px; margin-top:16px;">
+                    <button type="button" class="btn btn-o" onclick="closeTransferModal()">{{ __('Cancel') }}</button>
+                    <button type="submit" class="btn btn-gn" style="flex:1;">{{ __('Confirm Transfer') }}</button>
+                </div>
+            </form>
+        </div>
+    </div>
 
-        function closeModal() {
-            document.getElementById('modal-overlay').classList.remove('active');
-            document.getElementById('modal-overlay').style.display = 'none';
+    <script>
+        function openTransferModal() { document.getElementById('transfer-modal').classList.add('show'); }
+        function closeTransferModal() { document.getElementById('transfer-modal').classList.remove('show'); }
+
+        function loadStock(productId) {
+            // Simple logic for Demo; in real app, we fetch available per storage via AJAX
         }
     </script>
-@endpush
+@endsection

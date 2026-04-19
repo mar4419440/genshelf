@@ -28,11 +28,9 @@ Route::middleware(['auth'])->group(function () {
     Route::put('/categories/{category}', [\App\Http\Controllers\CategoryController::class, 'update'])->name('categories.update');
     Route::delete('/categories/{category}', [\App\Http\Controllers\CategoryController::class, 'destroy'])->name('categories.destroy');
 
-    // Storages
-    Route::get('/storages', [\App\Http\Controllers\StorageController::class, 'index'])->name('storages');
-    Route::post('/storages', [\App\Http\Controllers\StorageController::class, 'store'])->name('storages.store');
-    Route::put('/storages/{storage}', [\App\Http\Controllers\StorageController::class, 'update'])->name('storages.update');
-    Route::delete('/storages/{storage}', [\App\Http\Controllers\StorageController::class, 'destroy'])->name('storages.destroy');
+    // Inventory & Storages
+    Route::resource('storages', \App\Http\Controllers\StorageController::class);
+    Route::resource('transfers', \App\Http\Controllers\TransferController::class);
 
     // Inventory
     Route::get('/inventory', [\App\Http\Controllers\InventoryController::class, 'index'])->name('inventory');

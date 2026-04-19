@@ -37,26 +37,26 @@ class TransferController extends Controller
 
         DB::transaction(function () use ($validated) {
             StockTransfer::create($validated);
+        $productId = $request->product_id;
+        $fromId = $request->from_storage_id;
+        $toId = $request->to_storage_id;
+        $qty = $request->qty;
 
-            // Subtract stock from oldest batches (FIFO)
-            $qtyToDeduct = $validated['qty'];
-            $batches = \App\Models\ProductBatch::where('product_id', $validated['product_id'])
-                ->where('qty', '>', 0)
-                ->orderBy('created_at', 'asc')
-                ->get();
+        // Verify enough stock in FromStorage
+        $batches = \App\Models\ProductBatch::where('product_id', $productId)
+            ->where('storage_id', $fromId)
+            ->where('qty', '>', 0)
+            ->orderBy('expiry_date', 'asc')
+            ->get();
 
+        $available = $batches->sum('qty');
+        if ($available < $qty) {
+            return redirect()->back()->with('error', __('Not enough stock in source storage.'));
+        }
+
+        \DB::transaction(function () use ($productId, $fromId, $toId, $qty, $batches, $request) {
+            $remainingToTransfer = $qty;
             foreach ($batches as $batch) {
-                if ($qtyToDeduct <= 0)
-                    break;
-
-                if ($batch->qty >= $qtyToDeduct) {
-                    $batch->decrement('qty', $qtyToDeduct);
-                    $qtyToDeduct = 0;
-                } else {
-                    $qtyToDeduct -= $batch->qty;
-                    $batch->update(['qty' => 0]);
-                }
-            }
 
             if ($qtyToDeduct > 0) {
                 throw new \Exception(__('Not enough stock for transfer.'));
