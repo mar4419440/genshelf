@@ -14,6 +14,7 @@
                 <thead>
                     <tr style="border-bottom:1px solid var(--border);">
                         <th style="padding:12px; font-size:12px; color:var(--tx2); font-weight:600;">{{ __('Name') }}</th>
+                        <th style="padding:12px; font-size:12px; color:var(--tx2); font-weight:600;">{{ __('Type') }}</th>
                         <th style="padding:12px; font-size:12px; color:var(--tx2); font-weight:600;">{{ __('Conditions') }}
                         </th>
                         <th style="padding:12px; font-size:12px; color:var(--tx2); font-weight:600;">{{ __('Status') }}</th>
@@ -28,6 +29,11 @@
                                 {{ $storage->name }}
                                 @if($storage->name_en) <span
                                 style="color:var(--tx2); font-size:12px;">({{ $storage->name_en }})</span> @endif
+                            </td>
+                            <td style="padding:12px;">
+                                <span class="badge {{ $storage->type === 'pos' ? 'badge-gn' : 'badge-o' }}" style="text-transform:uppercase; font-size:10px;">
+                                    {{ $storage->type === 'pos' ? __('Store (POS)') : __('Warehouse') }}
+                                </span>
                             </td>
                             <td style="padding:12px;color:var(--tx2); font-size:13px;">{{ $storage->conditions ?: '-' }}</td>
                             <td style="padding:12px;">

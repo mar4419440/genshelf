@@ -17,18 +17,20 @@ class StorageController extends Controller
     {
         $validated = $request->validate([
             'name' => 'required|string|max:255',
+            'type' => 'required|in:storage,pos',
             'name_en' => 'nullable|string|max:255',
             'conditions' => 'nullable|string',
         ]);
 
         Storage::create($validated);
-        return redirect()->back()->with('success', __('Storage location added successfully.'));
+        return redirect()->back()->with('success', __('Location added successfully.'));
     }
 
     public function update(Request $request, Storage $storage)
     {
         $validated = $request->validate([
             'name' => 'required|string|max:255',
+            'type' => 'required|in:storage,pos',
             'name_en' => 'nullable|string|max:255',
             'conditions' => 'nullable|string',
             'is_active' => 'boolean'

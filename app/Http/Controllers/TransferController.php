@@ -2,48 +2,35 @@
 
 namespace App\Http\Controllers;
 
+use App\Models\StockTransfer;
+use App\Models\ProductBatch;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\DB;
-use App\Models\StockTransfer;
-use App\Models\Product;
 
 class TransferController extends Controller
 {
     public function index()
     {
-        if (DB::table('settings')->where('key', 'toggle_transfers')->value('value') != '1') {
-            return view('pages.transfers.disabled');
-        }
-
-        $transfers = StockTransfer::with('product')->get();
-        // Useful for the actual stock transfer modal form later
-        $products = Product::where('is_service', false)->get();
-
-        return view('pages.transfers.index', compact('transfers', 'products'));
+        $transfers = StockTransfer::with(['product', 'fromStorage', 'toStorage', 'user'])->latest()->get();
+        return view('pages.transfers.index', compact('transfers'));
     }
 
     public function store(Request $request)
     {
-        $validated = $request->validate([
+        $request->validate([
             'product_id' => 'required|exists:products,id',
-            'from_location' => 'required|string',
-            'to_location' => 'required|string',
-            'qty' => 'required|integer|min:1',
-            'reason' => 'required|string',
-            'reason_en' => 'nullable|string'
+            'from_storage_id' => 'required|exists:storages,id',
+            'to_storage_id' => 'required|exists:storages,id|different:from_storage_id',
+            'qty' => 'required|numeric|min:0.01',
+            'notes' => 'nullable|string'
         ]);
 
-        $validated['user_id'] = auth()->id();
-
-        DB::transaction(function () use ($validated) {
-            StockTransfer::create($validated);
         $productId = $request->product_id;
         $fromId = $request->from_storage_id;
         $toId = $request->to_storage_id;
         $qty = $request->qty;
 
-        // Verify enough stock in FromStorage
-        $batches = \App\Models\ProductBatch::where('product_id', $productId)
+        $batches = ProductBatch::where('product_id', $productId)
             ->where('storage_id', $fromId)
             ->where('qty', '>', 0)
             ->orderBy('expiry_date', 'asc')
@@ -54,21 +41,44 @@ class TransferController extends Controller
             return redirect()->back()->with('error', __('Not enough stock in source storage.'));
         }
 
-        \DB::transaction(function () use ($productId, $fromId, $toId, $qty, $batches, $request) {
+        DB::transaction(function () use ($productId, $fromId, $toId, $qty, $batches, $request) {
             $remainingToTransfer = $qty;
             foreach ($batches as $batch) {
+                if ($remainingToTransfer <= 0)
+                    break;
 
-            if ($qtyToDeduct > 0) {
-                throw new \Exception(__('Not enough stock for transfer.'));
+                $transferQty = min($batch->qty, $remainingToTransfer);
+
+                $batch->decrement('qty', $transferQty);
+
+                $targetBatch = ProductBatch::firstOrCreate(
+                    [
+                        'product_id' => $productId,
+                        'storage_id' => $toId,
+                        'expiry_date' => $batch->expiry_date,
+                        'supplier_id' => $batch->supplier_id,
+                        'batch_number' => $batch->batch_number ?: 'TRANS-' . time()
+                    ],
+                    [
+                        'qty' => 0,
+                        'unit_cost' => $batch->unit_cost ?: 0
+                    ]
+                );
+                $targetBatch->increment('qty', $transferQty);
+
+                $remainingToTransfer -= $transferQty;
             }
+
+            StockTransfer::create([
+                'product_id' => $productId,
+                'from_storage_id' => $fromId,
+                'to_storage_id' => $toId,
+                'qty' => $qty,
+                'user_id' => auth()->id(),
+                'notes' => $request->notes
+            ]);
         });
 
-        return redirect()->back()->with('success', __('Stock transfer processed successfully.'));
-    }
-
-    public function destroy(StockTransfer $transfer)
-    {
-        $transfer->delete();
-        return redirect()->back()->with('success', __('Transfer record deleted.'));
+        return redirect()->back()->with('success', __('Stock transferred successfully.'));
     }
 }

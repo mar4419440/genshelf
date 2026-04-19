@@ -668,7 +668,7 @@
                 </div>
             </a>
             <nav>
-                @php $roles = auth()->user()->role ? (is_string(auth()->user()->role->permissions) ? json_decode(auth()->user()->role->permissions, true) : auth()->user()->role->permissions) : [];
+                @php $roles = is_array(auth()->user()->role) ? auth()->user()->role : (json_decode(auth()->user()->role, true) ?: []);
                     if (empty($roles)) {
                         $roles = ['dashboard', 'pos', 'inventory', 'suppliers', 'customers', 'offers', 'returns', 'finance', 'reports', 'warranty', 'transfers', 'settings', 'users'];
                 } @endphp
@@ -680,7 +680,7 @@
                 @if(in_array('inventory', $roles))<a href="{{ route('inventory') }}" class="{{ request()->routeIs('inventory') ? 'active' : '' }}">📦 {{ __('Inventory') }}</a>@endif
                 @if(in_array('inventory', $roles))<a href="{{ route('inventory.create') }}" class="{{ request()->routeIs('inventory.create') ? 'active' : '' }}">➕ {{ __('Add Product') }}</a>@endif
                 @if(in_array('categories', $roles) || in_array('inventory', $roles) || empty(auth()->user()->role))<a href="{{ route('categories') }}" class="{{ request()->routeIs('categories') ? 'active' : '' }}">📁 {{ __('Categories') }}</a>@endif
-                @if(in_array('storages', $roles) || in_array('inventory', $roles) || empty(auth()->user()->role))<a href="{{ route('storages') }}" class="{{ request()->routeIs('storages') ? 'active' : '' }}">🏠 {{ __('Storages') }}</a>@endif
+                @if(in_array('storages', $roles) || in_array('inventory', $roles) || empty(auth()->user()->role))<a href="{{ route('storages.index') }}" class="{{ request()->routeIs('storages*') ? 'active' : '' }}">🏠 {{ __('Storages') }}</a>@endif
                 @if(in_array('suppliers', $roles))<a href="{{ route('suppliers') }}" class="{{ request()->routeIs('suppliers') ? 'active' : '' }}">🤝 {{ __('Suppliers & PO') }}</a>@endif
                 @if(in_array('customers', $roles))<a href="{{ route('customers') }}" class="{{ request()->routeIs('customers') ? 'active' : '' }}">👥 {{ __('Customers') }}</a>@endif
                 @if(in_array('offers', $roles))<a href="{{ route('offers') }}" c
