@@ -23,6 +23,19 @@
         </div>
     @endif
 
+    @if($dashboard->lowAlerts > 0)
+        <div class="card" style="background: rgba(var(--o-rgb), 0.1); border: 1px solid var(--o); padding: 16px; margin-bottom: 24px; display:flex; align-items:center; justify-content:space-between;">
+            <div style="display:flex; align-items:center; gap:12px;">
+                <span style="font-size:24px;">📦</span>
+                <div>
+                    <strong style="color:var(--o); display:block;">{{ __('Low Stock Warning') }}</strong>
+                    <span style="font-size:13px; color:var(--tx2);">{{ $dashboard->lowAlerts }} {{ __('products are below their minimum threshold.') }}</span>
+                </div>
+            </div>
+            <a href="{{ route('inventory') }}" class="btn btn-sm btn-o">{{ __('Manage Inventory') }}</a>
+        </div>
+    @endif
+
     <div style="display:flex; gap:12px; margin-bottom: 24px; border-bottom: 1px solid var(--border); padding-bottom: 8px;">
         <button class="tab-btn active" onclick="showTab('tab-dashboard', this)">📊 {{ __('Dashboard') }}</button>
         <button class="tab-btn" onclick="showTab('tab-analysis', this)">🔬 {{ __('Analysis') }}</button>
