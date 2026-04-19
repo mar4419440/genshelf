@@ -307,7 +307,7 @@
                 container.innerHTML = cart.map((item, i) => `
                     <div class="cart-item">
                         <div class="ci-name">${item.name}</div>
-                        <input class="ci-price-input" type="number" step="0.01" value="${item.price}" onchange="updatePrice(${i}, this.value)">
+                        <input class="ci-price-input" type="number" step="0.01" value="${item.price}" oninput="updatePrice(${i}, this.value)">
                         <div class="ci-qty">
                             <button type="button" onclick="updateQty(${i}, -1)">−</button>
                             <span>${item.qty}</span>
