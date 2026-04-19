@@ -9,7 +9,7 @@ class CategoryController extends Controller
 {
     public function index()
     {
-        $categories = Category::all();
+        $categories = Category::with('parent')->get();
         return view('pages.categories.index', compact('categories'));
     }
 
@@ -18,6 +18,7 @@ class CategoryController extends Controller
         $validated = $request->validate([
             'name' => 'required|string|max:255',
             'name_en' => 'nullable|string|max:255',
+            'parent_id' => 'nullable|exists:categories,id',
         ]);
 
         Category::create($validated);
@@ -29,6 +30,7 @@ class CategoryController extends Controller
         $validated = $request->validate([
             'name' => 'required|string|max:255',
             'name_en' => 'nullable|string|max:255',
+            'parent_id' => 'nullable|exists:categories,id|different:id',
         ]);
 
         $category->update($validated);
