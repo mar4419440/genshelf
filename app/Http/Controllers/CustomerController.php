@@ -53,6 +53,32 @@ class CustomerController extends Controller
         return redirect()->back()->with('success', __('Customer deleted successfully.'));
     }
 
+    public function pay(Request $request, Customer $customer)
+    {
+        $request->validate(['amount' => 'required|numeric|min:0.01']);
+        $amount = $request->amount;
+
+        if ($amount > $customer->credit_balance) {
+            return redirect()->back()->with('error', __('Amount exceeds balance.'));
+        }
+
+        \DB::transaction(function () use ($customer, $amount) {
+            $customer->decrement('credit_balance', $amount);
+
+            \App\Models\Transaction::create([
+                'customer_id' => $customer->id,
+                'user_id' => auth()->id(),
+                'total' => 0,
+                'paid_amount' => $amount,
+                'due_amount' => -$amount,
+                'payment_method' => 'cash',
+                'items' => json_encode([['name' => __('Debt Repayment'), 'qty' => 1, 'price' => $amount]])
+            ]);
+        });
+
+        return redirect()->back()->with('success', __('Payment recorded successfully.'));
+    }
+
     public function history(Customer $customer)
     {
         $history = \App\Models\Transaction::where('customer_id', $customer->id)
