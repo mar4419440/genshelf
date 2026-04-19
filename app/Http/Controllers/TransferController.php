@@ -33,7 +33,7 @@ class TransferController extends Controller
         $batches = ProductBatch::where('product_id', $productId)
             ->where('storage_id', $fromId)
             ->where('qty', '>', 0)
-            ->orderBy('expiry_date', 'asc')
+            ->orderBy('expiration_date', 'asc')
             ->get();
 
         $available = $batches->sum('qty');
@@ -55,7 +55,7 @@ class TransferController extends Controller
                     [
                         'product_id' => $productId,
                         'storage_id' => $toId,
-                        'expiry_date' => $batch->expiry_date,
+                        'expiration_date' => $batch->expiration_date,
                         'supplier_id' => $batch->supplier_id,
                         'batch_number' => $batch->batch_number ?: 'TRANS-' . time()
                     ],
