@@ -25,18 +25,18 @@ class PosController extends Controller
             });
 
         $customers = Customer::all();
-        
+
         $taxRateStr = DB::table('settings')->where('key', 'tax_rate')->value('value');
         $toggleTaxStr = DB::table('settings')->where('key', 'toggle_tax')->value('value');
         $toggleCreditStr = DB::table('settings')->where('key', 'toggle_credit')->value('value');
-        
-        $taxRate = $toggleTaxStr == '1' ? (float)$taxRateStr : 0;
+
+        $taxRate = $toggleTaxStr == '1' ? (float) $taxRateStr : 0;
         $toggleCredit = $toggleCreditStr == '1';
 
         return view('pages.pos.index', compact('products', 'customers', 'taxRate', 'toggleCredit'));
     }
-    
-    public function checkout(Request $request) 
+
+    public function checkout(Request $request)
     {
         $cartData = json_decode($request->input('cart_data', '[]'), true);
         if (empty($cartData)) {
@@ -46,8 +46,8 @@ class PosController extends Controller
         $customerId = $request->input('customer_id');
         $isCredit = $request->has('credit_sale');
         $taxToggle = DB::table('settings')->where('key', 'toggle_tax')->value('value') == '1';
-        $taxRate = $taxToggle ? (float)DB::table('settings')->where('key', 'tax_rate')->value('value') : 0;
-        
+        $taxRate = $taxToggle ? (float) DB::table('settings')->where('key', 'tax_rate')->value('value') : 0;
+
         try {
             DB::beginTransaction();
 
@@ -70,7 +70,16 @@ class PosController extends Controller
             ]);
 
             // 2. Process Items
+            $processedItemsForJson = [];
             foreach ($cartData as $item) {
+                $warrantyExpiry = null;
+                if (!$item['isService']) {
+                    $product = \App\Models\Product::find($item['id']);
+                    if ($product && $product->has_warranty && $product->warranty_duration > 0) {
+                        $warrantyExpiry = now()->addMonths($product->warranty_duration)->format('Y-m-d');
+                    }
+                }
+
                 \App\Models\TransactionItem::create([
                     'transaction_id' => $transaction->id,
                     'product_id' => $item['isService'] ? null : $item['id'],
@@ -78,8 +87,17 @@ class PosController extends Controller
                     'qty' => $item['qty'],
                     'unit_price' => $item['price'],
                     'line_total' => $item['price'] * $item['qty'],
-                    'is_service' => $item['isService'] ? 1 : 0
+                    'is_service' => $item['isService'] ? 1 : 0,
+                    'warranty_expiry' => $warrantyExpiry,
                 ]);
+
+                $processedItemsForJson[] = [
+                    'id' => $item['id'],
+                    'name' => $item['name'],
+                    'qty' => $item['qty'],
+                    'price' => $item['price'],
+                    'warranty_expiry' => $warrantyExpiry,
+                ];
 
                 // 3. Stock Deduction (FIFO)
                 if (!$item['isService']) {
@@ -90,7 +108,8 @@ class PosController extends Controller
                         ->get();
 
                     foreach ($batches as $batch) {
-                        if ($qtyToDeduct <= 0) break;
+                        if ($qtyToDeduct <= 0)
+                            break;
 
                         if ($batch->qty >= $qtyToDeduct) {
                             $batch->decrement('qty', $qtyToDeduct);
@@ -107,13 +126,16 @@ class PosController extends Controller
                 }
             }
 
+            // Sync items JSON to the transaction for report performance
+            $transaction->update(['items' => json_encode($processedItemsForJson)]);
+
             // 4. Update Customer (Credit/Loyalty)
             if ($customerId) {
                 $customer = \App\Models\Customer::find($customerId);
                 if ($isCredit) {
                     $customer->increment('credit_balance', $grandTotal);
                 }
-                
+
                 // Loyalty: 1 point per 10 total currency
                 $loyaltyToggle = DB::table('settings')->where('key', 'toggle_loyalty')->value('value') == '1';
                 if ($loyaltyToggle) {
