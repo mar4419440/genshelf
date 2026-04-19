@@ -284,11 +284,20 @@
                     <div class="total-row"><span>{{ __('Tax') }} ({{ $taxRate }}%)</span> <span id="summary-tax">0.00</span>
                     </div>
 
-                    <div style="margin-top:12px; background:var(--bg3); padding:10px; border-radius:8px;">
-                        <label style="font-size:11px; font-weight:700; color:var(--tx2);">{{ __('Amount Paid') }}</label>
-                        <input type="number" name="paid_amount" id="cart-paid-amount" step="0.01" class="search-bar"
-                            style="width:100%; border:none; background:none; padding:4px 0; font-size:16px; font-weight:700;"
-                            placeholder="Full Payment">
+                    <div
+                        style="margin-top:12px; background:var(--bg3); padding:10px; border-radius:8px; display:flex; flex-direction:column; gap:8px;">
+                        <div>
+                            <label
+                                style="font-size:11px; font-weight:700; color:var(--tx2);">{{ __('Amount Paid') }}</label>
+                            <input type="number" name="paid_amount" id="cart-paid-amount" step="0.01" class="search-bar"
+                                style="width:100%; border:none; background:none; padding:4px 0; font-size:16px; font-weight:700;"
+                                placeholder="Full Payment" oninput="toggleDueDate()">
+                        </div>
+                        <div id="due-date-container" style="display:none; border-top:1px solid var(--border); pt:8px;">
+                            <label style="font-size:11px; font-weight:700; color:var(--rd);">{{ __('Due Date') }}</label>
+                            <input type="date" name="due_date" class="search-bar"
+                                style="width:100%; border:none; background:none; padding:4px 0; font-size:13px;">
+                        </div>
                     </div>
 
                     <div class="grand-total">
@@ -370,20 +379,20 @@
                 container.innerHTML = '<div class="empty-state" style="margin-top:40px;">Cart is empty</div>';
             } else {
                 container.innerHTML = cart.map((item, i) => `
-                            <div class="cart-item-row">
-                                <div class="cir-top">
-                                    <span class="cir-name">${item.name}</span>
-                                    <button type="button" class="cir-del" onclick="removeFromCart(${i})">✕</button>
-                                </div>
-                                <div class="cir-actions">
-                                    <div style="display:flex; gap:8px; align-items:center;">
-                                        <input type="number" class="qty-input" value="${item.qty}" min="1" onchange="setQty(${i}, this.value)">
-                                        <input type="number" step="0.01" class="search-bar" value="${item.price}" onchange="setPrice(${i}, this.value)" style="width: 90px; height: 32px; padding: 4px; font-size: 13px; font-weight: 700; border-radius: 6px;">
+                                <div class="cart-item-row">
+                                    <div class="cir-top">
+                                        <span class="cir-name">${item.name}</span>
+                                        <button type="button" class="cir-del" onclick="removeFromCart(${i})">✕</button>
                                     </div>
-                                    <div style="font-weight:700; width: 80px; text-align: right;">${(item.price * item.qty).toFixed(2)}</div>
+                                    <div class="cir-actions">
+                                        <div style="display:flex; gap:8px; align-items:center;">
+                                            <input type="number" class="qty-input" value="${item.qty}" min="1" onchange="setQty(${i}, this.value)">
+                                            <input type="number" step="0.01" class="search-bar" value="${item.price}" onchange="setPrice(${i}, this.value)" style="width: 90px; height: 32px; padding: 4px; font-size: 13px; font-weight: 700; border-radius: 6px;">
+                                        </div>
+                                        <div style="font-weight:700; width: 80px; text-align: right;">${(item.price * item.qty).toFixed(2)}</div>
+                                    </div>
                                 </div>
-                            </div>
-                        `).join('');
+                            `).join('');
             }
             updateSummary();
         }
@@ -412,6 +421,17 @@
             document.getElementById('selected-customer-id').value = id;
             document.getElementById('customer-search').value = name;
             document.getElementById('customer-dropdown').style.display = 'none';
+        }
+
+        function toggleDueDate() {
+            const paid = parseFloat(document.getElementById('cart-paid-amount').value) || 0;
+            const total = parseFloat(document.getElementById('summary-total').innerText) || 0;
+            const container = document.getElementById('due-date-container');
+            if (paid < total && paid >= 0) {
+                container.style.display = 'block';
+            } else {
+                container.style.display = 'none';
+            }
         }
 
         function submitCheckout() {
