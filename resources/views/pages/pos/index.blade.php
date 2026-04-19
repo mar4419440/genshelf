@@ -325,6 +325,30 @@
             renderCart();
         }
 
+        function setQty(index, val) {
+            const item = cart[index];
+            if (!item) return;
+            let newQty = parseInt(val) || 0;
+            if (newQty < 0) newQty = 0;
+            if (!item.isService && newQty > item.maxStock) {
+                alert("{{ __('Not enough stock') }}");
+                newQty = item.maxStock;
+            }
+            item.qty = newQty;
+            if (newQty === 0) {
+                cart.splice(index, 1);
+                renderCart();
+            } else {
+                updateSummary();
+                // Surgically update row total
+                const itemsContainer = document.getElementById('cart-items-container');
+                const itemRow = itemsContainer.querySelectorAll('.cart-item')[index];
+                if (itemRow) {
+                    itemRow.querySelector('.ci-total').innerText = (item.price * item.qty).toFixed(2);
+                }
+            }
+        }
+
         function updateQty(index, delta) {
             const item = cart[index];
             if (!item) return;
@@ -392,18 +416,18 @@
             } else {
                 emptyMsg.style.display = 'none';
                 container.innerHTML = cart.map((item, i) => `
-                                            <div class="cart-item">
-                                                <div class="ci-name">${item.name}</div>
-                                                <input class="ci-price-input" type="number" step="0.01" value="${item.price}" oninput="updatePrice(${i}, this.value)">
-                                                <div class="ci-qty">
-                                                    <button type="button" onclick="updateQty(${i}, -1)">−</button>
-                                                    <span>${item.qty}</span>
-                                                    <button type="button" onclick="updateQty(${i}, 1)">+</button>
-                                                </div>
-                                                <div class="ci-total">${(item.price * item.qty).toFixed(2)}</div>
-                                                <button type="button" class="ci-del" onclick="removeFromCart(${i})">✕</button>
-                                            </div>
-                                        `).join('');
+                            <div class="cart-item">
+                                <div class="ci-name">${item.name}</div>
+                                <input class="ci-price-input" type="number" step="0.01" value="${item.price}" oninput="updatePrice(${i}, this.value)">
+                                <div class="ci-qty">
+                                    <button type="button" onclick="updateQty(${i}, -1)">−</button>
+                                    <input type="number" value="${item.qty}" oninput="setQty(${i}, this.value)" style="width:40px; text-align:center; border:1px solid var(--border); border-radius:4px; font-size:12px;">
+                                    <button type="button" onclick="updateQty(${i}, 1)">+</button>
+                                </div>
+                                <div class="ci-total">${(item.price * item.qty).toFixed(2)}</div>
+                                <button type="button" class="ci-del" onclick="removeFromCart(${i})">✕</button>
+                            </div>
+                        `).join('');
             }
             updateSummary();
         }
@@ -420,22 +444,22 @@
         function openServiceModal() {
             const modal = document.getElementById('modal-box');
             modal.innerHTML = `
-                                        <div style="padding:10px">
-                                            <h3 style="margin-bottom:16px">➕ {{ __('Add Custom Service / Item') }}</h3>
-                                            <div class="form-group" style="margin-bottom:12px">
-                                                <label>{{ __('Item Name') }}</label>
-                                                <input type="text" id="svc-name" placeholder="Service / Repair..." style="width:100%; padding:10px; border:1px solid var(--border); border-radius:6px;">
-                                            </div>
-                                            <div class="form-group" style="margin-bottom:16px">
-                                                <label>{{ __('Price') }}</label>
-                                                <input type="number" id="svc-price" step="0.1" placeholder="0.00" style="width:100%; padding:10px; border:1px solid var(--border); border-radius:6px;">
-                                            </div>
-                                            <div style="display:flex; gap:10px">
-                                                <button class="btn btn-pr" onclick="addCustomService()">{{ __('Add to Cart') }}</button>
-                                                <button class="btn btn-o" onclick="closeModal()">{{ __('Cancel') }}</button>
-                                            </div>
-                                        </div>
-                                    `;
+                                                <div style="padding:10px">
+                                                    <h3 style="margin-bottom:16px">➕ {{ __('Add Custom Service / Item') }}</h3>
+                                                    <div class="form-group" style="margin-bottom:12px">
+                                                        <label>{{ __('Item Name') }}</label>
+                                                        <input type="text" id="svc-name" placeholder="Service / Repair..." style="width:100%; padding:10px; border:1px solid var(--border); border-radius:6px;">
+                                                    </div>
+                                                    <div class="form-group" style="margin-bottom:16px">
+                                                        <label>{{ __('Price') }}</label>
+                                                        <input type="number" id="svc-price" step="0.1" placeholder="0.00" style="width:100%; padding:10px; border:1px solid var(--border); border-radius:6px;">
+                                                    </div>
+                                                    <div style="display:flex; gap:10px">
+                                                        <button class="btn btn-pr" onclick="addCustomService()">{{ __('Add to Cart') }}</button>
+                                                        <button class="btn btn-o" onclick="closeModal()">{{ __('Cancel') }}</button>
+                                                    </div>
+                                                </div>
+                                            `;
             document.getElementById('modal-overlay').classList.add('show');
         }
 

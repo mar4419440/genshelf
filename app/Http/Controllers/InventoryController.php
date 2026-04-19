@@ -56,8 +56,8 @@ class InventoryController extends Controller
 
         $callback = function () {
             $file = fopen('php://output', 'w');
-            fputcsv($file, ['Name', 'Category', 'Default Price', 'Low Stock Threshold', 'Is Service (0 or 1)']);
-            fputcsv($file, ['Example Product', 'Electronics', '99.99', '10', '0']);
+            fputcsv($file, [__('Name'), __('Category_Path'), __('Default_Price'), __('Low_Stock_Threshold'), __('Is_Service'), __('Storage_Name')]);
+            fputcsv($file, ['Example Product', 'Electronics > Mobile', '99.99', '10', '0', 'Main Store']);
             fclose($file);
         };
 
@@ -78,13 +78,21 @@ class InventoryController extends Controller
             if (count($row) < 3)
                 continue;
 
+            $storageName = trim($row[5] ?? '');
+            $storage = \App\Models\Storage::where('name', $storageName)->first();
+
             Product::create([
                 'name' => $row[0],
                 'category' => $row[1] ?? 'General',
                 'default_price' => $row[2] ?? 0,
                 'low_stock_threshold' => $row[3] ?? 5,
                 'is_service' => ($row[4] ?? 0) == 1 ? 1 : 0,
-            ]);
+            ])->batches()->create([
+                        'qty' => 0,
+                        'unit_cost' => 0,
+                        'storage_id' => $storage ? $storage->id : \App\Models\Storage::first()->id,
+                        'batch_number' => 'IMPORT-' . time()
+                    ]);
             $count++;
         }
 

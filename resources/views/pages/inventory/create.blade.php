@@ -71,10 +71,10 @@
                                 style="list-style:none; padding:0; margin:0; max-height:200px; overflow-y:auto;">
                                 @foreach ($categories as $c)
                                     <li class="category-item" data-id="{{ $c->id }}"
-                                        data-name="{{ strtolower($c->name . ' ' . $c->name_en) }}"
-                                        onclick="selectCategory('{{ $c->id }}', '{{ $c->name }}{{ $c->name_en ? ' - ' . $c->name_en : '' }}')"
+                                        data-name="{{ strtolower($c->full_path . ' ' . $c->name_en) }}"
+                                        onclick="selectCategory('{{ $c->id }}', '{{ $c->full_path }}{{ $c->name_en ? ' - ' . $c->name_en : '' }}')"
                                         style="padding:10px 12px; cursor:pointer; font-size:14px; color:var(--tx); border-bottom:1px solid var(--bg2);">
-                                        {{ $c->name }} {{ $c->name_en ? ' - ' . $c->name_en : '' }}
+                                        {{ $c->full_path }} {{ $c->name_en ? ' - ' . $c->name_en : '' }}
                                     </li>
                                 @endforeach
                             </ul>

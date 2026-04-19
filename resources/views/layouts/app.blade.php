@@ -661,7 +661,7 @@
     <div class="overlay" id="mobile-overlay" onclick="toggleSidebar()"></div>
     <div class="app-container">
         <div class="sidebar" id="app-sidebar">
-            <a href="{{ route('dashboard') }}" class="logo">
+            <a href="{{ route('reports') }}" class="logo">
                 <div class="logo-brand">
                     <div class="logo-icon"><svg width="20" height="20" viewBox="0 0 24 24" fill="none"
                             stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round">
@@ -684,9 +684,7 @@
                     } 
                 @endphp
                 
-                   @if(in_array('dashboard', $roles))<a href="{{ route('dashboard') }}"
-                    class="{{ request()->routeIs('dashboard') ? 'active' : '' }}">📊
-                {{ __('Dashboard') }}</a>@endif
+
                 @if(in_array('pos', $roles))<a href="{{ route('pos') }}" class="{{ request()->routeIs('pos') ? 'active' : '' }}">🛒 {{ __('Point of Sale') }}</a>@endif
                 @if(in_array('inventory', $roles))<a href="{{ route('inventory') }}" class="{{ request()->routeIs('inventory') ? 'active' : '' }}">📦 {{ __('Inventory') }}</a>@endif
                 @if(in_array('inventory', $roles))<a href="{{ route('inventory.create') }}" class="{{ request()->routeIs('inventory.create') ? 'active' : '' }}">➕ {{ __('Add Product') }}</a>@endif
@@ -701,7 +699,7 @@
                 @if(in_array('finance', $roles))<a href="{{ route('finance') }}" cla
                    ss="{{ request()->routeIs('finance') ? 'active' : '' }}">💰 {{ __('Finance') }}</a>@endif
                 @if(in_array('reports', $roles))<a href="{{ route('reports') }}" c
-                   lass="{{ request()->routeIs('reports') ? 'active' : '' }}">📈 {{ __('Reports') }}</a>@endif
+                   lass="{{ request()->routeIs('reports') ? 'active' : '' }}">📊 {{ __('Business Intelligence') }}</a>@endif
                 @if(in_array('warranty', $roles))<a href="{{ route('warranty') }}" class="{{ request()->routeIs('warranty') ? 'active' : '' }}">🛡️ {{ __('Warranty') }}</a>@endif
 @if(in_array('transfers', $roles))<a href="{{ route('transfers') }}" class="{{ request()->routeIs('transfers') ? 'active' : '' }}">🚚 {{ __('Stock Transfers') }}</a>@endif
 @if(in_array('settings', $roles))<a href="{{ route('settings') }}" class="{{ request()->routeIs('settings') ? 'active' : '' }}">⚙️ {{ __('Settings') }}</a>@endif
