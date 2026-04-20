@@ -24,27 +24,40 @@ class SupplierController extends Controller
 
     public function downloadTemplate()
     {
+        $costMode = DB::table('settings')->where('key', 'cost_display_mode')->value('value') ?? 'unit';
+        $costHeader = $costMode === 'total' ? __('Total_Cost') : __('Unit_Cost');
+
+        $reqStyle = '<style bgcolor="#FFE6E6">';
+        $reqEnd = '</style>';
+
         $headers = [
-            'Content-Type' => 'text/csv',
-            'Content-Disposition' => 'attachment; filename="po_template.csv"',
+            $reqStyle . __('Supplier Name') . $reqEnd,
+            $reqStyle . __('Product Name') . $reqEnd,
+            $reqStyle . __('Quantity') . $reqEnd,
+            $reqStyle . $costHeader . $reqEnd
         ];
 
-        $callback = function () {
-            $file = fopen('php://output', 'w');
-            fputcsv($file, ['Supplier Name', 'Product Name', 'Quantity', 'Unit Cost']);
-            fputcsv($file, ['Main Supplier', 'Classic Widget', '50', '15.50']);
-            fclose($file);
-        };
-
-        return response()->stream($callback, 200, $headers);
+        $xlsx = \Shuchkin\SimpleXLSXGen::fromArray([$headers]);
+        $xlsx->downloadAs('po_template.xlsx');
+        exit;
     }
 
     public function importPOs(Request $request)
     {
-        $request->validate(['csv_file' => 'required|file|mimes:csv,txt']);
+        $request->validate(['csv_file' => 'required|file|mimes:csv,txt,xlsx,xls']);
 
         $path = $request->file('csv_file')->getRealPath();
-        $data = array_map('str_getcsv', file($path));
+        $extension = $request->file('csv_file')->getClientOriginalExtension();
+
+        if (in_array(strtolower($extension), ['xlsx', 'xls'])) {
+            if ($xlsx = \Shuchkin\SimpleXLSX::parse($path)) {
+                $data = $xlsx->rows();
+            } else {
+                return redirect()->back()->with('error', \Shuchkin\SimpleXLSX::parseError());
+            }
+        } else {
+            $data = array_map('str_getcsv', file($path));
+        }
 
         $header = array_shift($data);
         $count = 0;
@@ -59,7 +72,17 @@ class SupplierController extends Controller
                 $supplierName = trim($row[0]);
                 $productName = trim($row[1]);
                 $qty = (int) $row[2];
-                $unitCost = (float) $row[3];
+                $cost = (float) $row[3];
+                
+                $costMode = DB::table('settings')->where('key', 'cost_display_mode')->value('value') ?? 'unit';
+                
+                if ($costMode === 'total') {
+                    $totalCost = $cost;
+                    $unitCost = $qty > 0 ? $cost / $qty : 0;
+                } else {
+                    $unitCost = $cost;
+                    $totalCost = $qty * $cost;
+                }
 
                 $supplier = Supplier::where('name', $supplierName)->first();
                 $product = Product::where('name', $productName)->first();
@@ -74,7 +97,7 @@ class SupplierController extends Controller
                     'product_id' => $product->id,
                     'qty' => $qty,
                     'unit_cost' => $unitCost,
-                    'total_cost' => $qty * $unitCost,
+                    'total_cost' => $totalCost,
                     'status' => 'pending'
                 ]);
                 $count++;
@@ -86,6 +109,98 @@ class SupplierController extends Controller
         }
 
         $msg = __(':count POs imported successfully.', ['count' => $count]);
+        if (!empty($errors)) {
+            $msg .= " " . __('Errors in rows: ') . implode(', ', $errors);
+        }
+
+        return redirect()->back()->with('success', $msg);
+    }
+
+    public function downloadSupplierTemplate()
+    {
+        $reqStyle = '<style bgcolor="#FFE6E6">';
+        $reqEnd = '</style>';
+
+        $headers = [
+            $reqStyle . __('Supplier Name (Arabic)') . $reqEnd,
+            __('Supplier Name (English)'),
+            $reqStyle . __('Category') . $reqEnd,
+            __('Contact Person'),
+            $reqStyle . __('Phone') . $reqEnd,
+            __('Email'),
+            __('Address')
+        ];
+
+        $xlsx = \Shuchkin\SimpleXLSXGen::fromArray([$headers]);
+        $xlsx->downloadAs('supplier_template.xlsx');
+        exit;
+    }
+
+    public function importSuppliers(Request $request)
+    {
+        $request->validate(['csv_file' => 'required|file|mimes:csv,txt,xlsx,xls']);
+
+        $path = $request->file('csv_file')->getRealPath();
+        $extension = $request->file('csv_file')->getClientOriginalExtension();
+
+        if (in_array(strtolower($extension), ['xlsx', 'xls'])) {
+            if ($xlsx = \Shuchkin\SimpleXLSX::parse($path)) {
+                $data = $xlsx->rows();
+            } else {
+                return redirect()->back()->with('error', \Shuchkin\SimpleXLSX::parseError());
+            }
+        } else {
+            $data = array_map('str_getcsv', file($path));
+        }
+
+        $header = array_shift($data);
+        $count = 0;
+        $errors = [];
+
+        DB::beginTransaction();
+        try {
+            foreach ($data as $index => $row) {
+                if (count($row) < 5)
+                    continue;
+
+                $nameAr = trim($row[0] ?? '');
+                $nameEn = trim($row[1] ?? '');
+                $catName = trim($row[2] ?? '');
+                $contact = trim($row[3] ?? '');
+                $phone = trim($row[4] ?? '');
+                $email = trim($row[5] ?? '');
+                $address = trim($row[6] ?? '');
+
+                if (empty($nameAr) || empty($catName) || empty($phone)) {
+                    $errors[] = "Row " . ($index + 2) . ": Missing Name, Category, or Phone.";
+                    continue;
+                }
+
+                $category = \App\Models\Category::where('name', $catName)->orWhere('name_en', $catName)->first();
+                if (!$category) {
+                    $errors[] = "Row " . ($index + 2) . ": Category '$catName' not found.";
+                    continue;
+                }
+
+                Supplier::create([
+                    'name' => $nameAr,
+                    'name_en' => $nameEn,
+                    'category' => $category->name,
+                    'category_en' => $category->name_en,
+                    'contact_person' => $contact,
+                    'phone' => $phone,
+                    'email' => $email,
+                    'address' => $address,
+                ]);
+                $count++;
+            }
+            DB::commit();
+        } catch (\Exception $e) {
+            DB::rollBack();
+            return redirect()->back()->with('error', __('Import failed: ') . $e->getMessage());
+        }
+
+        $msg = __(':count Suppliers imported successfully.', ['count' => $count]);
         if (!empty($errors)) {
             $msg .= " " . __('Errors in rows: ') . implode(', ', $errors);
         }

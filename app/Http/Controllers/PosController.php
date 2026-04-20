@@ -166,12 +166,25 @@ class PosController extends Controller
             }
 
             DB::commit();
+            if ($request->wantsJson()) {
+                return response()->json([
+                    'success' => true,
+                    'invoice_id' => $transaction->id,
+                    'print_url' => route('pos.invoice', $transaction->id)
+                ]);
+            }
             return redirect()->back()
                 ->with('success', __('Sale completed successfully! Invoice #') . $transaction->id)
                 ->with('print_invoice', $transaction->id);
 
         } catch (\Exception $e) {
             DB::rollBack();
+            if ($request->wantsJson()) {
+                return response()->json([
+                    'success' => false,
+                    'error' => $e->getMessage()
+                ], 400);
+            }
             return redirect()->back()->with('error', __('Checkout failed: ') . $e->getMessage());
         }
     }

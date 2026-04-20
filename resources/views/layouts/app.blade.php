@@ -668,7 +668,12 @@
                             <path d="M3 9h18v10a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2V9Z" />
                             <path d="M3 9V5a2 2 0 0 1 2-2h14a2 2 0 0 1 2 2v4" />
                         </svg></div>
-                    <div class="logo-text"><span class="gen">Gen</span><span class="shelf">Shelf</span></div>
+                    <div class="logo-text">
+                        <span class="gen">Gen</span><span class="shelf">Shelf</span>
+                    </div>
+                </div>
+                <div style="text-align:center; margin-top:8px;">
+                    <span id="global-sync-badge" style="display:none;" class="badge badge-am"></span>
                 </div>
             </a>
             <nav>
@@ -738,10 +743,107 @@
             </footer>
         </div>
                                                                                                           </div>
-        <script>
-        document.addEventListener('DOMContentLoaded',()=>{const getCellValue=(tr,idx)=>tr.children[idx].innerText||tr.children[idx].textContent;const comparer=(idx,asc)=>(a,b)=>((v1,v2)=>v1!==''&&v2!==''&&!isNaN(v1)&&!isNaN(v2)?v1-v2:v1.toString().localeCompare(v2))(getCellValue(asc?a:b,idx),getCellValue(asc?b:a,idx));document.querySelectorAll('th').forEach(th=>th.addEventListener('click',function(){const table=th.closest('table');if(!table)return;const tbody=table.querySelector('tbody')||table;const text=th.innerText.toLowerCase();if(text.includes('action')||text.includes('permission')||th.classList.contains('no-sort'))return;this.asc=!this.asc;const rows=Array.from(tbody.querySelectorAll('tr:nth-child(n+2)'));if(rows.length===0)return;rows.sort(comparer(Array.from(th.parentNode.children).indexOf(th),this.asc)).forEach(tr=>tbody.appendChild(tr));table.querySelectorAll('th').forEach(th=>th.classList.remove('sort-asc','sort-desc'));th.classList.toggle('sort-asc',this.asc);th.classList.toggle('sort-desc',!this.asc)}))});
-       
- function toggleSidebar(){document.getElementById('app-sidebar').classList.toggle('active');document.getElementById('mobile-overlay').classList.toggle('active')}
+    <script>
+        document.addEventListener('DOMContentLoaded', () => {
+            const getCellValue = (tr, idx) => tr.children[idx].innerText || tr.children[idx].textContent;
+            const comparer = (idx, asc) => (a, b) => ((v1, v2) => v1 !== '' && v2 !== '' && !isNaN(v1) && !isNaN(v2) ? v1 - v2 : v1.toString().localeCompare(v2))(getCellValue(asc ? a : b, idx), getCellValue(asc ? b : a, idx));
+            document.querySelectorAll('th').forEach(th => th.addEventListener('click', function () {
+                const table = th.closest('table');
+                if (!table) return;
+                const tbody = table.querySelector('tbody') || table;
+                const text = th.innerText.toLowerCase();
+                if (text.includes('action') || text.includes('permission') || th.classList.contains('no-sort')) return;
+                this.asc = !this.asc;
+                const rows = Array.from(tbody.querySelectorAll('tr:nth-child(n+2)'));
+                if (rows.length === 0) return;
+                rows.sort(comparer(Array.from(th.parentNode.children).indexOf(th), this.asc)).forEach(tr => tbody.appendChild(tr));
+                table.querySelectorAll('th').forEach(th => th.classList.remove('sort-asc', 'sort-desc'));
+                th.classList.toggle('sort-asc', this.asc);
+                th.classList.toggle('sort-desc', !this.asc)
+            }));
+            
+            // Global Auto-Sync initial check
+            if(navigator.onLine) syncGenericQueue();
+        });
+
+        function toggleSidebar() {
+            document.getElementById('app-sidebar').classList.toggle('active');
+            document.getElementById('mobile-overlay').classList.toggle('active');
+        }
+
+        // Global Offline Sync Manager
+        window.updateGenericConnectionStatus = function() {
+            const q = JSON.parse(localStorage.getItem('generic_offline_queue') || '[]');
+            const badge = document.getElementById('global-sync-badge');
+            if (badge) {
+                if (!navigator.onLine) {
+                    badge.style.display = 'inline-block';
+                    badge.className = 'badge badge-rd';
+                    badge.innerHTML = '🔴 Offline' + (q.length>0 ? ` (${q.length})` : '');
+                } else if (q.length > 0) {
+                    badge.style.display = 'inline-block';
+                    badge.className = 'badge badge-am';
+                    badge.innerHTML = '🔄 Syncing...';
+                } else {
+                    badge.style.display = 'none';
+                }
+            }
+        };
+
+        window.addEventListener('online', () => {
+            updateGenericConnectionStatus();
+            syncGenericQueue();
+        });
+        window.addEventListener('offline', () => {
+            updateGenericConnectionStatus();
+        });
+
+        async function syncGenericQueue() {
+            let queue = JSON.parse(localStorage.getItem('generic_offline_queue') || '[]');
+            if (queue.length === 0) return;
+            
+            updateGenericConnectionStatus();
+            let remaining = [];
+            
+            for (let req of queue) {
+                try {
+                    let formData = new FormData();
+                    for (const key in req.payload) { formData.append(key, req.payload[key]); }
+                    
+                    // Allow server to recognize JSON preference to avoid full HTML redirect
+                    const response = await fetch(req.url, {
+                        method: req.method === 'GET' ? 'GET' : 'POST',
+                        headers: { 'Accept': 'application/json' },
+                        body: formData
+                    });
+                    
+                    if (!response.ok && response.status !== 400 && response.status !== 422 && response.status !== 302 && response.status !== 200) {
+                        remaining.push(req);
+                    } else if (response.status === 422 || response.status === 400) {
+                        // Server validation failed, discard to prevent infinite loop or keep it?
+                        // If it fails validation indefinitely it blocks the queue. Discarding is safer for prototype.
+                        console.error('Queue item dropped due to validation error:', await response.text());
+                    }
+                } catch (err) {
+                    console.error('Offline sync failed, keeping in queue', err);
+                    remaining.push(req);
+                }
+            }
+            
+            localStorage.setItem('generic_offline_queue', JSON.stringify(remaining));
+            updateGenericConnectionStatus();
+            
+            // If we successfully emptied the queue and are online, a reload might be desired to show new data.
+            // But we don't want to wipe user input if they are typing. We will just show a toast.
+            if(queue.length > 0 && remaining.length === 0) {
+                // We just successfully synced everything!
+                const toast = document.createElement('div');
+                toast.style = "position:fixed; bottom:20px; right:20px; background:var(--gn); color:white; padding:12px 20px; border-radius:8px; z-index:9999; box-shadow:0 4px 12px rgba(0,0,0,0.2); font-weight:bold;";
+                toast.innerHTML = "Offline data synced successfully!";
+                document.body.appendChild(toast);
+                setTimeout(() => toast.remove(), 4000);
+            }
+        }
     </script>
     @stack('scripts')
 </body>

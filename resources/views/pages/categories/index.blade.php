@@ -3,9 +3,17 @@
 @section('content')
     <div style="display:flex; justify-content:space-between; align-items:center; margin-bottom: 24px;">
         <h2 style="font-size:24px; font-weight:700; color:var(--tx);">{{ __('Categories') }}</h2>
-        <button class="btn btn-pr" onclick="openCategoryModal()">
-            + {{ __('Add Category') }}
-        </button>
+        <div style="display:flex;gap:6px">
+            <a href="{{ route('categories.template') }}" class="btn btn-o">📥 {{ __('Template') }}</a>
+            <button class="btn btn-o" onclick="document.getElementById('import-category-file').click()">📤 {{ __('Import File') }}</button>
+            <button class="btn btn-pr" onclick="openCategoryModal()">
+                + {{ __('Add Category') }}
+            </button>
+            <form id="import-category-form" action="{{ route('categories.import') }}" method="POST" enctype="multipart/form-data" style="display:none;">
+                @csrf
+                <input type="file" id="import-category-file" name="csv_file" onchange="document.getElementById('import-category-form').submit()">
+            </form>
+        </div>
     </div>
 
     <div class="card" style="padding: 20px;">

@@ -29,6 +29,8 @@ Route::middleware(['auth'])->group(function () {
 
     // Categories
     Route::get('/categories', [\App\Http\Controllers\CategoryController::class, 'index'])->name('categories');
+    Route::get('/categories/template', [\App\Http\Controllers\CategoryController::class, 'downloadTemplate'])->name('categories.template');
+    Route::post('/categories/import', [\App\Http\Controllers\CategoryController::class, 'importCategories'])->name('categories.import');
     Route::post('/categories', [\App\Http\Controllers\CategoryController::class, 'store'])->name('categories.store');
     Route::put('/categories/{category}', [\App\Http\Controllers\CategoryController::class, 'update'])->name('categories.update');
     Route::delete('/categories/{category}', [\App\Http\Controllers\CategoryController::class, 'destroy'])->name('categories.destroy');
@@ -49,6 +51,8 @@ Route::middleware(['auth'])->group(function () {
 
     // Suppliers & PO
     Route::get('/suppliers', [\App\Http\Controllers\SupplierController::class, 'index'])->name('suppliers');
+    Route::get('/suppliers/template', [\App\Http\Controllers\SupplierController::class, 'downloadSupplierTemplate'])->name('suppliers.template');
+    Route::post('/suppliers/import', [\App\Http\Controllers\SupplierController::class, 'importSuppliers'])->name('suppliers.import');
     Route::post('/suppliers', [\App\Http\Controllers\SupplierController::class, 'store'])->name('suppliers.store');
     Route::put('/suppliers/{supplier}', [\App\Http\Controllers\SupplierController::class, 'update'])->name('suppliers.update');
     Route::delete('/suppliers/{supplier}', [\App\Http\Controllers\SupplierController::class, 'destroy'])->name('suppliers.destroy');

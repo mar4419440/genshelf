@@ -97,11 +97,11 @@
                                 @if(!$p->is_service)
                                     <button class="btn btn-xs btn-gn" onclick='openRestockModal(@json($p))'>📦
                                         {{ __('Restock') }}</button>
-                                    <a href="{{ route('returns', ['product_id' => $p->id]) }}" class="btn btn-xs btn-rd" title="{{ __('Log Damage/Return') }}">🔄</a>
+                                    <a href="{{ route('returns', ['product_id' => $p->id]) }}" class="btn btn-xs btn-rd"
+                                        title="{{ __('Log Damage/Return') }}">🔄</a>
                                 @endif
                                 <button class="btn btn-sm btn-o" onclick='openProductModal(@json($p))'>{{ __('Edit') }}</button>
-                                <a href="{{ url('/pos/barcode/' . $p->id) }}" target="_blank"
-                                    class="btn btn-sm btn-o">🏷️</a>
+                                <a href="{{ url('/pos/barcode/' . $p->id) }}" target="_blank" class="btn btn-sm btn-o">🏷️</a>
                                 <form action="{{ route('inventory.destroy', $p->id) }}" method="POST" style="display:inline;"
                                     onsubmit="return confirm('{{ __('Are you sure?') }}')">
                                     @csrf
@@ -149,68 +149,68 @@
                 categories.map(c => `<option value="${c.id}" ${p && p.category === c.full_path ? 'selected' : ''}>${c.name} ${c.parent ? '(' + c.parent.name + ')' : ''}</option>`).join('');
 
             const html = `
-                                            <h3>${isEdit ? '{{ __('Edit Product') }}' : '{{ __('Add Product') }}'}</h3>
-                                            <form action="${actionUrl}" method="POST">
-                                                @csrf
-                                                ${methodField}
-                                                <div style="margin-bottom: 12px;">
-                                                    <label style="display:block;font-size:12px;font-weight:600;color:var(--tx2);margin-bottom:4px;">{{ __('Barcode / SKU') }}</label>
-                                                    <input name="barcode" value="${p.barcode || ''}" placeholder="Scan or enter barcode" style="width:100%; font-family:monospace; font-weight:700; font-size:15px; background:var(--bg3);">
-                                                </div>
-                                                <div style="display:flex; gap:10px; margin-bottom: 12px;">
-                                                    <div style="flex:1;">
-                                                        <label style="display:block;font-size:12px;font-weight:600;color:var(--tx2);margin-bottom:4px;">{{ __('Arabic Name') }}</label>
-                                                        <input name="name" value="${p.name}" required>
+                                                <h3>${isEdit ? '{{ __('Edit Product') }}' : '{{ __('Add Product') }}'}</h3>
+                                                <form action="${actionUrl}" method="POST">
+                                                    @csrf
+                                                    ${methodField}
+                                                    <div style="margin-bottom: 12px;">
+                                                        <label style="display:block;font-size:12px;font-weight:600;color:var(--tx2);margin-bottom:4px;">{{ __('Barcode / SKU') }}</label>
+                                                        <input name="barcode" value="${p.barcode || ''}" placeholder="Scan or enter barcode" style="width:100%; font-family:monospace; font-weight:700; font-size:15px; background:var(--bg3);">
                                                     </div>
-                                                    <div style="flex:1;">
-                                                        <label style="display:block;font-size:12px;font-weight:600;color:var(--tx2);margin-bottom:4px;">{{ __('English Name') }} ({{ __('Optional') }})</label>
-                                                        <input name="name_en" value="${p.name_en || ''}">
-                                                    </div>
-                                                </div>
-                                                <div style="margin-bottom: 12px;">
-                                                    <label style="display:block;font-size:12px;font-weight:600;color:var(--tx2);margin-bottom:4px;">{{ __('Category') }}</label>
-                                                    <select name="category_id" required style="width:100%; padding:10px; border:1px solid var(--border); border-radius:var(--radius);">
-                                                        ${categoryOptions}
-                                                    </select>
-                                                </div>
-                                                <div style="display:flex; gap:10px; margin-bottom: 12px;">
-                                                    <div style="flex:1;">
-                                                        <label style="display:block;font-size:12px;font-weight:600;color:var(--tx2);margin-bottom:4px;">{{ __('Default Price') }}</label>
-                                                        <input name="default_price" type="number" step="0.01" value="${p.default_price}" required>
-                                                    </div>
-                                                    <div style="flex:1;">
-                                                        <label style="display:block;font-size:12px;font-weight:600;color:var(--tx2);margin-bottom:4px;">{{ __('Low Stock Threshold') }}</label>
-                                                        <input name="low_stock_threshold" type="number" value="${p.low_stock_threshold}">
-                                                    </div>
-                                                </div>
-
-                                                ${!isEdit ? `
-                                                <div id="cost-fields" style="display: block;">
                                                     <div style="display:flex; gap:10px; margin-bottom: 12px;">
                                                         <div style="flex:1;">
-                                                            <label style="display:block;font-size:12px;font-weight:600;color:var(--tx2);margin-bottom:4px;">{{ __('Initial Cost') }} (${costMode === 'unit' ? '{{ __("Unit") }}' : '{{ __("Total") }}'})</label>
-                                                            <input name="cost" type="number" step="0.01" required>
+                                                            <label style="display:block;font-size:12px;font-weight:600;color:var(--tx2);margin-bottom:4px;">{{ __('Arabic Name') }}</label>
+                                                            <input name="name" value="${p.name}" required>
                                                         </div>
                                                         <div style="flex:1;">
-                                                            <label style="display:block;font-size:12px;font-weight:600;color:var(--tx2);margin-bottom:4px;">{{ __('Supplier') }}</label>
-                                                            <select name="supplier_id" required>${supplierOptions}</select>
+                                                            <label style="display:block;font-size:12px;font-weight:600;color:var(--tx2);margin-bottom:4px;">{{ __('English Name') }} ({{ __('Optional') }})</label>
+                                                            <input name="name_en" value="${p.name_en || ''}">
                                                         </div>
                                                     </div>
-                                                </div>
-                                                ` : ''}
+                                                    <div style="margin-bottom: 12px;">
+                                                        <label style="display:block;font-size:12px;font-weight:600;color:var(--tx2);margin-bottom:4px;">{{ __('Category') }}</label>
+                                                        <select name="category_id" required style="width:100%; padding:10px; border:1px solid var(--border); border-radius:var(--radius);">
+                                                            ${categoryOptions}
+                                                        </select>
+                                                    </div>
+                                                    <div style="display:flex; gap:10px; margin-bottom: 12px;">
+                                                        <div style="flex:1;">
+                                                            <label style="display:block;font-size:12px;font-weight:600;color:var(--tx2);margin-bottom:4px;">{{ __('Default Price') }}</label>
+                                                            <input name="default_price" type="number" step="0.01" value="${p.default_price}" required>
+                                                        </div>
+                                                        <div style="flex:1;">
+                                                            <label style="display:block;font-size:12px;font-weight:600;color:var(--tx2);margin-bottom:4px;">{{ __('Low Stock Threshold') }}</label>
+                                                            <input name="low_stock_threshold" type="number" value="${p.low_stock_threshold}">
+                                                        </div>
+                                                    </div>
 
-                                                <div style="margin-bottom: 16px;">
-                                                    <label style="display:flex;align-items:center;gap:6px;font-size:13px;cursor:pointer;">
-                                                        <input type="checkbox" name="is_service" ${p.is_service ? 'checked' : ''} onchange="document.getElementById('cost-fields')?.style.setProperty('display', this.checked ? 'none' : 'block')">
-                                                        {{ __('This is a Service (No Stock Tracking)') }}
-                                                    </label>
-                                                </div>
-                                                <div style="display:flex; gap:8px;">
-                                                    <button type="button" class="btn btn-o" onclick="closeModal()">{{ __('Cancel') }}</button>
-                                                    <button type="submit" class="btn btn-pr" style="flex:1;">${isEdit ? '{{ __('Update') }}' : '{{ __('Save') }}'}</button>
-                                                </div>
-                                            </form>
-                                        `;
+                                                    ${!isEdit ? `
+                                                    <div id="cost-fields" style="display: block;">
+                                                        <div style="display:flex; gap:10px; margin-bottom: 12px;">
+                                                            <div style="flex:1;">
+                                                                <label style="display:block;font-size:12px;font-weight:600;color:var(--tx2);margin-bottom:4px;">{{ __('Initial Cost') }} (${costMode === 'unit' ? '{{ __("Unit") }}' : '{{ __("Total") }}'})</label>
+                                                                <input name="cost" type="number" step="0.01" required>
+                                                            </div>
+                                                            <div style="flex:1;">
+                                                                <label style="display:block;font-size:12px;font-weight:600;color:var(--tx2);margin-bottom:4px;">{{ __('Supplier') }}</label>
+                                                                <select name="supplier_id" required>${supplierOptions}</select>
+                                                            </div>
+                                                        </div>
+                                                    </div>
+                                                    ` : ''}
+
+                                                    <div style="margin-bottom: 16px;">
+                                                        <label style="display:flex;align-items:center;gap:6px;font-size:13px;cursor:pointer;">
+                                                            <input type="checkbox" name="is_service" ${p.is_service ? 'checked' : ''} onchange="document.getElementById('cost-fields')?.style.setProperty('display', this.checked ? 'none' : 'block')">
+                                                            {{ __('This is a Service (No Stock Tracking)') }}
+                                                        </label>
+                                                    </div>
+                                                    <div style="display:flex; gap:8px;">
+                                                        <button type="button" class="btn btn-o" onclick="closeModal()">{{ __('Cancel') }}</button>
+                                                        <button type="submit" class="btn btn-pr" style="flex:1;">${isEdit ? '{{ __('Update') }}' : '{{ __('Save') }}'}</button>
+                                                    </div>
+                                                </form>
+                                            `;
             renderModal(html);
         }
 
@@ -219,29 +219,29 @@
                 suppliers.map(s => `<option value="${s.id}">${s.name}</option>`).join('');
 
             const html = `
-                                            <h3>{{ __('Restock') }}: ${product.name}</h3>
-                                            <form action="{{ url('inventory') }}/${product.id}/restock" method="POST">
-                                                @csrf
-                                                <div style="margin-bottom: 12px;">
-                                                    <label style="display:block;font-size:12px;font-weight:600;color:var(--tx2);margin-bottom:4px;">{{ __('Supplier') }}</label>
-                                                    <select name="supplier_id" required>${supplierOptions}</select>
-                                                </div>
-                                                <div style="display:flex; gap:10px; margin-bottom: 16px;">
-                                                    <div style="flex:1;">
-                                                        <label style="display:block;font-size:12px;font-weight:600;color:var(--tx2);margin-bottom:4px;">{{ __('Quantity') }}</label>
-                                                        <input name="qty" type="number" required min="1">
+                                                <h3>{{ __('Restock') }}: ${product.name}</h3>
+                                                <form action="{{ url('inventory') }}/${product.id}/restock" method="POST">
+                                                    @csrf
+                                                    <div style="margin-bottom: 12px;">
+                                                        <label style="display:block;font-size:12px;font-weight:600;color:var(--tx2);margin-bottom:4px;">{{ __('Supplier') }}</label>
+                                                        <select name="supplier_id" required>${supplierOptions}</select>
                                                     </div>
-                                                    <div style="flex:1;">
-                                                        <label style="display:block;font-size:12px;font-weight:600;color:var(--tx2);margin-bottom:4px;">{{ __('New Cost') }} ({{ __('Optional') }})</label>
-                                                        <input name="cost" type="number" step="0.01" placeholder="${costMode === 'unit' ? '{{ __("Unit Cost") }}' : '{{ __("Total Cost") }}'}">
+                                                    <div style="display:flex; gap:10px; margin-bottom: 16px;">
+                                                        <div style="flex:1;">
+                                                            <label style="display:block;font-size:12px;font-weight:600;color:var(--tx2);margin-bottom:4px;">{{ __('Quantity') }}</label>
+                                                            <input name="qty" type="number" required min="1">
+                                                        </div>
+                                                        <div style="flex:1;">
+                                                            <label style="display:block;font-size:12px;font-weight:600;color:var(--tx2);margin-bottom:4px;">{{ __('New Cost') }} ({{ __('Optional') }})</label>
+                                                            <input name="cost" type="number" step="0.01" placeholder="${costMode === 'unit' ? '{{ __("Unit Cost") }}' : '{{ __("Total Cost") }}'}">
+                                                        </div>
                                                     </div>
-                                                </div>
-                                                <div style="display:flex; gap:8px;">
-                                                    <button type="button" class="btn btn-o" onclick="closeModal()">{{ __('Cancel') }}</button>
-                                                    <button type="submit" class="btn btn-gn" style="flex:1;">📦 {{ __('Restock') }}</button>
-                                                </div>
-                                            </form>
-                                        `;
+                                                    <div style="display:flex; gap:8px;">
+                                                        <button type="button" class="btn btn-o" onclick="closeModal()">{{ __('Cancel') }}</button>
+                                                        <button type="submit" class="btn btn-gn" style="flex:1;">📦 {{ __('Restock') }}</button>
+                                                    </div>
+                                                </form>
+                                            `;
             renderModal(html);
         }
 
@@ -251,6 +251,37 @@
             document.getElementById('modal-overlay').style.display = 'flex';
             document.getElementById('modal-overlay').style.alignItems = 'center';
             document.getElementById('modal-overlay').style.justifyContent = 'center';
+
+            // Hijack form submission for offline support
+            const form = document.querySelector('#modal-box form');
+            if (form) {
+                form.addEventListener('submit', function (e) {
+                    if (!navigator.onLine) {
+                        e.preventDefault();
+
+                        const formData = new FormData(form);
+                        const data = {};
+                        formData.forEach((value, key) => { data[key] = value });
+
+                        const action = form.getAttribute('action');
+                        const method = (data._method || form.getAttribute('method')).toUpperCase();
+
+                        const requestQueue = JSON.parse(localStorage.getItem('generic_offline_queue') || '[]');
+                        requestQueue.push({
+                            url: action,
+                            method: method,
+                            payload: data,
+                            timestamp: Date.now()
+                        });
+
+                        localStorage.setItem('generic_offline_queue', JSON.stringify(requestQueue));
+                        alert('You are offline. Your action has been saved locally and will sync when internet returns.');
+
+                        closeModal();
+                        updateGenericConnectionStatus && updateGenericConnectionStatus();
+                    }
+                });
+            }
         }
 
         function closeModal() {

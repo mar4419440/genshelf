@@ -50,50 +50,109 @@ class InventoryController extends Controller
 
     public function downloadTemplate()
     {
+        $costMode = \DB::table('settings')->where('key', 'cost_display_mode')->value('value') ?? 'unit';
+        $costHeader = $costMode === 'total' ? __('Total_Cost') : __('Unit_Cost');
+
+        $reqStyle = '<style bgcolor="#FFE6E6">';
+        $reqEnd = '</style>';
+
         $headers = [
-            'Content-Type' => 'text/csv',
-            'Content-Disposition' => 'attachment; filename="product_template.csv"',
+            __('Barcode'),
+            $reqStyle . __('Arabic_Name') . $reqEnd,
+            __('English_Name'),
+            __('Category_Path'), // Defaults to General if empty, but good to highlight
+            $reqStyle . __('Default_Price') . $reqEnd,
+            __('Low_Stock_Threshold'),
+            __('Is_Service'),
+            $reqStyle . __('Storage_Name') . $reqEnd,
+            $reqStyle . __('Supplier_Name') . $reqEnd,
+            $reqStyle . __('Initial_Qty') . $reqEnd,
+            $reqStyle . $costHeader . $reqEnd,
         ];
 
-        $callback = function () {
-            $file = fopen('php://output', 'w');
-            fputcsv($file, [__('Name'), __('Category_Path'), __('Default_Price'), __('Low_Stock_Threshold'), __('Is_Service'), __('Storage_Name')]);
-            fputcsv($file, ['Example Product', 'Electronics > Mobile', '99.99', '10', '0', 'Main Store']);
-            fclose($file);
-        };
-
-        return response()->stream($callback, 200, $headers);
+        $xlsx = \Shuchkin\SimpleXLSXGen::fromArray([$headers]);
+        $xlsx->downloadAs('product_template.xlsx');
+        exit;
     }
 
     public function importCSV(Request $request)
     {
-        $request->validate(['csv_file' => 'required|file|mimes:csv,txt']);
+        $request->validate(['csv_file' => 'required|file|mimes:csv,txt,xlsx,xls']);
 
         $path = $request->file('csv_file')->getRealPath();
-        $data = array_map('str_getcsv', file($path));
+        $extension = $request->file('csv_file')->getClientOriginalExtension();
+
+        if (in_array(strtolower($extension), ['xlsx', 'xls'])) {
+            if ($xlsx = \Shuchkin\SimpleXLSX::parse($path)) {
+                $data = $xlsx->rows();
+            } else {
+                return redirect()->back()->with('error', \Shuchkin\SimpleXLSX::parseError());
+            }
+        } else {
+            $data = array_map('str_getcsv', file($path));
+        }
 
         $header = array_shift($data);
         $count = 0;
 
         foreach ($data as $row) {
-            if (count($row) < 3)
+            if (count($row) < 5)
                 continue;
 
-            $storageName = trim($row[5] ?? '');
-            $storage = \App\Models\Storage::where('name', $storageName)->first();
+            $barcode = trim($row[0] ?? '');
+            $nameAr = trim($row[1] ?? '');
+            $nameEn = trim($row[2] ?? '');
+            $categoryPath = trim($row[3] ?? 'General');
+            $price = floatval($row[4] ?? 0);
+            $threshold = intval($row[5] ?? 5);
+            $isService = ($row[6] ?? 0) == 1 ? 1 : 0;
+            $storageName = trim($row[7] ?? '');
+            $supplierName = trim($row[8] ?? '');
+            $qty = intval($row[9] ?? 0);
+            $cost = floatval($row[10] ?? 0);
 
-            Product::create([
-                'name' => $row[0],
-                'category' => $row[1] ?? 'General',
-                'default_price' => $row[2] ?? 0,
-                'low_stock_threshold' => $row[3] ?? 5,
-                'is_service' => ($row[4] ?? 0) == 1 ? 1 : 0,
-            ])->batches()->create([
-                        'qty' => 0,
-                        'unit_cost' => 0,
-                        'storage_id' => $storage ? $storage->id : \App\Models\Storage::first()->id,
-                        'batch_number' => 'IMPORT-' . time()
-                    ]);
+            if (empty($nameAr))
+                continue;
+
+            $category = \App\Models\Category::where('full_path', $categoryPath)->orWhere('name', $categoryPath)->first();
+            $categoryEn = $category ? $category->name_en : null;
+
+            if (empty($barcode)) {
+                $barcode = '2026' . str_pad(mt_rand(1, 999999999), 9, '0', STR_PAD_LEFT);
+            }
+
+            $storage = \App\Models\Storage::where('name', $storageName)->first();
+            $storageId = $storage ? $storage->id : (\App\Models\Storage::first()->id ?? null);
+
+            $supplier = \App\Models\Supplier::where('name', $supplierName)->first();
+            $supplierId = $supplier ? $supplier->id : null;
+
+            $product = new Product();
+            $product->barcode = $barcode;
+            $product->name = $nameAr;
+            $product->name_en = $nameEn;
+            $product->category = $categoryPath;
+            $product->category_en = $categoryEn;
+            $product->default_price = $price;
+            $product->low_stock_threshold = $threshold;
+            $product->is_service = $isService;
+            $product->save();
+
+            if (!$isService && $qty > 0) {
+                $costMode = \DB::table('settings')->where('key', 'cost_display_mode')->value('value') ?? 'unit';
+                $unitCost = $cost;
+                if ($costMode === 'total' && $qty > 0) {
+                    $unitCost = $cost / $qty;
+                }
+
+                $product->batches()->create([
+                    'qty' => $qty,
+                    'unit_cost' => $unitCost,
+                    'storage_id' => $storageId,
+                    'supplier_id' => $supplierId,
+                    'batch_number' => 'IMPORT-' . time()
+                ]);
+            }
             $count++;
         }
 

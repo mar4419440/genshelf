@@ -211,6 +211,7 @@
             <div class="pos-header">
                 <div style="display:flex; gap:12px; align-items:center;">
                     <h2 style="font-weight:800;">🛒 {{ __('POS') }}</h2>
+                    <span id="connection-status" class="badge badge-gn">🟢 Online</span>
                     <input type="text" id="pos-search" class="search-bar"
                         placeholder="{{ __('Search or scan barcode...') }}" style="width: 250px;"
                         onkeypress="if(event.key === 'Enter') handleBarcodeScan(this.value)">
@@ -316,21 +317,28 @@
     </div>
 
     <!-- Service Modal -->
-    <div id="service-modal" class="modal-backdrop" style="display:none; position:fixed; z-index:1000; left:0; top:0; width:100%; height:100%; background:rgba(0,0,0,0.6); backdrop-filter:blur(4px);">
+    <div id="service-modal" class="modal-backdrop"
+        style="display:none; position:fixed; z-index:1000; left:0; top:0; width:100%; height:100%; background:rgba(0,0,0,0.6); backdrop-filter:blur(4px);">
         <div class="card" style="width:400px; margin: 100px auto; padding:24px; border-radius:16px;">
             <h3 style="font-weight:800; margin-bottom:20px;">🛠️ {{ __('Add Custom Service') }}</h3>
             <div style="display:flex; flex-direction:column; gap:16px;">
                 <div>
-                    <label style="display:block; font-size:12px; font-weight:700; margin-bottom:6px; color:var(--tx2);">{{ __('Service Name') }}</label>
-                    <input type="text" id="svc-name" class="search-bar" style="width:100%" placeholder="{{ __('e.g. Maintenance, Delivery, etc.') }}">
+                    <label
+                        style="display:block; font-size:12px; font-weight:700; margin-bottom:6px; color:var(--tx2);">{{ __('Service Name') }}</label>
+                    <input type="text" id="svc-name" class="search-bar" style="width:100%"
+                        placeholder="{{ __('e.g. Maintenance, Delivery, etc.') }}">
                 </div>
                 <div>
-                    <label style="display:block; font-size:12px; font-weight:700; margin-bottom:6px; color:var(--tx2);">{{ __('Price') }}</label>
-                    <input type="number" id="svc-price" class="search-bar" style="width:100%" placeholder="0.00" step="0.01">
+                    <label
+                        style="display:block; font-size:12px; font-weight:700; margin-bottom:6px; color:var(--tx2);">{{ __('Price') }}</label>
+                    <input type="number" id="svc-price" class="search-bar" style="width:100%" placeholder="0.00"
+                        step="0.01">
                 </div>
                 <div style="display:flex; gap:12px; margin-top:8px;">
-                    <button type="button" class="btn btn-pr" style="flex:2" onclick="addServiceToCart()">{{ __('Add to Cart') }}</button>
-                    <button type="button" class="btn btn-o" style="flex:1" onclick="closeServiceModal()">{{ __('Cancel') }}</button>
+                    <button type="button" class="btn btn-pr" style="flex:2"
+                        onclick="addServiceToCart()">{{ __('Add to Cart') }}</button>
+                    <button type="button" class="btn btn-o" style="flex:1"
+                        onclick="closeServiceModal()">{{ __('Cancel') }}</button>
                 </div>
             </div>
         </div>
@@ -418,20 +426,20 @@
                 container.innerHTML = '<div class="empty-state" style="margin-top:40px;">Cart is empty</div>';
             } else {
                 container.innerHTML = cart.map((item, i) => `
-                                    <div class="cart-item-row">
-                                        <div class="cir-top">
-                                            <span class="cir-name">${item.name}</span>
-                                            <button type="button" class="cir-del" onclick="removeFromCart(${i})">✕</button>
-                                        </div>
-                                        <div class="cir-actions">
-                                            <div style="display:flex; gap:8px; align-items:center;">
-                                                <input type="number" class="qty-input" value="${item.qty}" min="1" onchange="setQty(${i}, this.value)">
-                                                <input type="number" step="0.01" class="search-bar" value="${item.price}" onchange="setPrice(${i}, this.value)" style="width: 90px; height: 32px; padding: 4px; font-size: 13px; font-weight: 700; border-radius: 6px;">
+                                        <div class="cart-item-row">
+                                            <div class="cir-top">
+                                                <span class="cir-name">${item.name}</span>
+                                                <button type="button" class="cir-del" onclick="removeFromCart(${i})">✕</button>
                                             </div>
-                                            <div style="font-weight:700; width: 80px; text-align: right;">${(item.price * item.qty).toFixed(2)}</div>
+                                            <div class="cir-actions">
+                                                <div style="display:flex; gap:8px; align-items:center;">
+                                                    <input type="number" class="qty-input" value="${item.qty}" min="1" onchange="setQty(${i}, this.value)">
+                                                    <input type="number" step="0.01" class="search-bar" value="${item.price}" onchange="setPrice(${i}, this.value)" style="width: 90px; height: 32px; padding: 4px; font-size: 13px; font-weight: 700; border-radius: 6px;">
+                                                </div>
+                                                <div style="font-weight:700; width: 80px; text-align: right;">${(item.price * item.qty).toFixed(2)}</div>
+                                            </div>
                                         </div>
-                                    </div>
-                                `).join('');
+                                    `).join('');
             }
             updateSummary();
         }
@@ -475,16 +483,112 @@
 
         function submitCheckout() {
             if (cart.length === 0) { alert("Cart is empty"); return; }
-            document.getElementById('checkout-form').submit();
+
+            if (!navigator.onLine) {
+                const order = {
+                    _token: document.querySelector('input[name="_token"]').value,
+                    storage_id: document.getElementById('cart-storage-id').value,
+                    cart_data: document.getElementById('cart-data-input').value,
+                    customer_id: document.getElementById('selected-customer-id').value,
+                    paid_amount: document.getElementById('cart-paid-amount').value,
+                    due_date: document.querySelector('input[name="due_date"]').value,
+                    timestamp: Date.now()
+                };
+
+                let offlineOrders = JSON.parse(localStorage.getItem('pos_offline_orders') || '[]');
+                offlineOrders.push(order);
+                localStorage.setItem('pos_offline_orders', JSON.stringify(offlineOrders));
+
+                clearCart();
+                document.getElementById('cart-paid-amount').value = '';
+                document.getElementById('selected-customer-id').value = '';
+                document.getElementById('customer-search').value = '';
+                document.getElementById('due-date-container').style.display = 'none';
+
+                alert("You are offline. Order saved locally. It will automatically sync when internet is restored.");
+                updateConnectionStatus();
+            } else {
+                document.getElementById('checkout-form').submit();
+            }
         }
+
+        async function syncOfflineOrders() {
+            let offlineOrders = JSON.parse(localStorage.getItem('pos_offline_orders') || '[]');
+            if (offlineOrders.length === 0) return;
+
+            updateConnectionStatus(); // show syncing
+
+            let remainingOrders = [];
+
+            for (let order of offlineOrders) {
+                try {
+                    let formData = new FormData();
+                    for (const key in order) {
+                        formData.append(key, order[key]);
+                    }
+
+                    let response = await fetch("{{ route('pos.checkout') }}", {
+                        method: 'POST',
+                        headers: { 'Accept': 'application/json' },
+                        body: formData
+                    });
+
+                    let result = await response.json();
+                    if (!result.success) {
+                        console.error("Order sync failed:", result.error);
+                        remainingOrders.push(order); // keep it if it failed server-side validation
+                    } else {
+                        console.log("Successfully synced offline order:", result.invoice_id);
+                        if (result.print_url) {
+                            window.open(result.print_url, "_blank", "width=400,height=600");
+                        }
+                    }
+                } catch (error) {
+                    console.error("Network error during sync:", error);
+                    remainingOrders.push(order); // network error, keep to try again
+                }
+            }
+
+            localStorage.setItem('pos_offline_orders', JSON.stringify(remainingOrders));
+            updateConnectionStatus(); // reset back to online/offline
+        }
+
+        function updateConnectionStatus() {
+            const badge = document.getElementById('connection-status');
+            const offlineOrders = JSON.parse(localStorage.getItem('pos_offline_orders') || '[]');
+
+            if (navigator.onLine) {
+                if (offlineOrders.length > 0) {
+                    badge.className = 'badge badge-am';
+                    badge.innerText = '🔄 Syncing...';
+                } else {
+                    badge.className = 'badge badge-gn';
+                    badge.innerText = '🟢 Online';
+                }
+            } else {
+                badge.className = 'badge badge-rd';
+                badge.innerText = '🔴 Offline' + (offlineOrders.length > 0 ? ` (${offlineOrders.length} saved)` : '');
+            }
+        }
+
+        window.addEventListener('online', () => {
+            updateConnectionStatus();
+            syncOfflineOrders();
+        });
+
+        window.addEventListener('offline', updateConnectionStatus);
 
         window.addEventListener('DOMContentLoaded', () => {
             updateActiveStorage(document.getElementById('pos-storage-selector').value);
+            updateConnectionStatus();
+            if (navigator.onLine) {
+                syncOfflineOrders();
+            }
         });
 
         // Close dropdown
-        window.onclick = e => { 
-            if (!e.target.closest('#customer-search')) document.getElementById('customer-dropdown').style.display = 'none'; 
+        window.onclick = e => {
+            if (!e.target.closest('#customer-search')) document.getElementById('customer-dropdown').style.display = 'none';
             if (e.target.classList.contains('modal-backdrop')) closeServiceModal();
         }
 
@@ -494,16 +598,16 @@
             const name = document.getElementById('svc-name').value.trim();
             const price = parseFloat(document.getElementById('svc-price').value) || 0;
             if (!name) { alert("Please enter service name"); return; }
-            
-            cart.push({ 
-                id: 'svc_' + Date.now(), 
-                name: name, 
-                price: price, 
-                qty: 1, 
-                isService: true, 
-                maxStock: 999999 
+
+            cart.push({
+                id: 'svc_' + Date.now(),
+                name: name,
+                price: price,
+                qty: 1,
+                isService: true,
+                maxStock: 999999
             });
-            
+
             renderCart();
             closeServiceModal();
             document.getElementById('svc-name').value = '';
