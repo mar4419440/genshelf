@@ -9,6 +9,35 @@
         </div>
     </div>
 
+    <!-- NEW SLICERS FORM -->
+    <div class="card" style="margin-bottom: 24px; padding: 12px 16px;">
+        <form method="GET" action="{{ route('reports') }}" style="display:flex; flex-wrap:wrap; gap:12px; align-items:flex-end;">
+            <div>
+                <label style="font-size:11px; font-weight:600; color:var(--tx2); text-transform:uppercase;">{{ __('Quick Period') }}</label>
+                <select name="period" style="font-size:13px; padding:6px 10px; width:150px;">
+                    <option value="">{{ __('All Time') }}</option>
+                    <option value="today" {{ request('period')=='today'?'selected':'' }}>{{ __('Today') }}</option>
+                    <option value="yesterday" {{ request('period')=='yesterday'?'selected':'' }}>{{ __('Yesterday') }}</option>
+                    <option value="this_week" {{ request('period')=='this_week'?'selected':'' }}>{{ __('This Week') }}</option>
+                    <option value="this_month" {{ request('period')=='this_month'?'selected':'' }}>{{ __('This Month') }}</option>
+                    <option value="last_month" {{ request('period')=='last_month'?'selected':'' }}>{{ __('Last Month') }}</option>
+                    <option value="this_quarter" {{ request('period')=='this_quarter'?'selected':'' }}>{{ __('This Quarter') }}</option>
+                    <option value="this_year" {{ request('period')=='this_year'?'selected':'' }}>{{ __('This Year') }}</option>
+                </select>
+            </div>
+            <div>
+                <label style="font-size:11px; font-weight:600; color:var(--tx2); text-transform:uppercase;">{{ __('Start Date') }}</label>
+                <input type="date" name="start_date" value="{{ request('start_date') }}" style="font-size:13px; padding:6px 10px;">
+            </div>
+            <div>
+                <label style="font-size:11px; font-weight:600; color:var(--tx2); text-transform:uppercase;">{{ __('End Date') }}</label>
+                <input type="date" name="end_date" value="{{ request('end_date') }}" style="font-size:13px; padding:6px 10px;">
+            </div>
+            <button type="submit" class="btn btn-pr" style="padding:6px 16px;">{{ __('Filter') }}</button>
+            <a href="{{ route('reports') }}" class="btn btn-o" style="padding:6px 16px;">{{ __('Clear') }}</a>
+        </form>
+    </div>
+
     <!-- BI Tabs -->
     @if($dashboard->overdueCount > 0)
         <div class="card" style="background: rgba(var(--rd-rgb), 0.1); border: 1px solid var(--rd); padding: 16px; margin-bottom: 24px; display:flex; align-items:center; justify-content:space-between;">
@@ -44,10 +73,39 @@
 
     <!-- TAB: DASHBOARD -->
     <div id="tab-dashboard" class="bi-tab active">
+        <h3 style="margin-bottom:12px;">📊 {{ __('Sales Performance (Filtered)') }}</h3>
         <div class="card-grid card-grid-4" style="margin-bottom: 24px;">
             <div class="card metric-card">
-                <div class="metric-val">{{ number_format($dashboard->todayRevenue, 2) }}</div>
-                <div class="metric-lbl">{{ __('Today\'s Revenue') }}</div>
+                <div class="metric-val">{{ number_format($summary->revenue, 2) }}</div>
+                <div class="metric-lbl">{{ __('Filtered Revenue') }}</div>
+            </div>
+            <div class="card metric-card">
+               <div class="metric-val" style="color:var(--am)">{{ number_format($summary->cogs, 2) }}</div>
+               <div class="metric-lbl">{{ __('Estimated Cost of Goods') }}</div>
+            </div>
+            <div class="card metric-card">
+               <div class="metric-val" style="color:var(--gn)">{{ number_format($summary->net_profit, 2) }}</div>
+               <div class="metric-lbl">{{ __('Net Profit') }}</div>
+            </div>
+            <div class="card metric-card">
+               <div class="metric-val">{{ $summary->count }}</div>
+               <div class="metric-lbl">{{ __('Transactions Selected') }}</div>
+            </div>
+        </div>
+
+        <h3 style="margin-bottom:12px;">🏢 {{ __('Store Inventory & Global Overview') }}</h3>
+        <div class="card-grid card-grid-3" style="margin-bottom: 24px;">
+            <div class="card metric-card">
+                <div class="metric-val" style="font-size: 24px;">{{ number_format($dashboard->storeTotalCost, 2) }}</div>
+                <div class="metric-lbl">{{ __('Total Cost of Items') }}</div>
+            </div>
+            <div class="card metric-card">
+                <div class="metric-val" style="color:var(--gn); font-size: 24px;">{{ number_format($dashboard->storeTotalSelling, 2) }}</div>
+                <div class="metric-lbl">{{ __('Total Selling Value') }}</div>
+            </div>
+            <div class="card metric-card">
+                <div class="metric-val" style="color:var(--am); font-size: 24px;">{{ number_format($dashboard->storeTotalSelling - $dashboard->storeTotalCost, 2) }}</div>
+                <div class="metric-lbl">{{ __('Expected Net Profit in Store') }}</div>
             </div>
             <div class="card metric-card">
                 <div class="metric-val">{{ $dashboard->totalStock }}</div>
@@ -171,7 +229,9 @@
                                 <th>{{ __('Customer') }}</th>
                                 <th>{{ __('Store') }}</th>
                                 <th>{{ __('Items') }}</th>
+                                <th>{{ __('Cost') }}</th>
                                 <th>{{ __('Total') }}</th>
+                                <th>{{ __('Net Profit') }}</th>
                                 <th>{{ __('Paid') }}</th>
                                 <th style="text-align:right;">{{ __('Action') }}</th>
                             </tr>
@@ -182,12 +242,15 @@
                                     <td><small>{{ $tx->storage->name ?? '—' }}</small></td>
                                     <td>
                                         @php
-                                            $items = is_string($tx->items) ? json_decode($tx->items, true) : $tx->items;
-                                            $count = is_array($items) ? count($items) : 0;
+                                            $totalQty = $tx->items ? $tx->items->sum('qty') : 0;
                                         @endphp
-                                        <span class="badge badge-o" style="font-size:10px;">{{ $count }} {{ __('items') }}</span>
+                                        <span class="badge badge-o" style="font-size:10px;">{{ $totalQty }} {{ __('items') }}</span>
                                     </td>
+                                    <td style="color:var(--rd)">{{ number_format($tx->calculated_cogs ?? 0, 2) }}</td>
                                     <td style="font-weight:700;">{{ number_format($tx->total, 2) }}</td>
+                                    <td style="color:var(--pr); font-weight:700;">
+                                        {{ number_format($tx->total - ($tx->calculated_cogs ?? 0), 2) }}
+                                    </td>
                                     <td style="color:var(--gn)">{{ number_format($tx->paid_amount, 2) }}</td>
                                     <td style="text-align:right;">
                                         <div style="display:flex; gap:4px; justify-content:flex-end;">

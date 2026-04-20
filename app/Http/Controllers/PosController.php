@@ -33,7 +33,9 @@ class PosController extends Controller
         $taxRate = $toggleTaxStr == '1' ? (float) $taxRateStr : 0;
         $toggleCredit = $toggleCreditStr == '1';
 
-        return view('pages.pos.index', compact('products', 'customers', 'taxRate', 'toggleCredit'));
+        $categories = \App\Models\Category::whereNull('parent_id')->with('children')->get();
+
+        return view('pages.pos.index', compact('products', 'customers', 'taxRate', 'toggleCredit', 'categories'));
     }
 
     public function checkout(Request $request)

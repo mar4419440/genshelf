@@ -10,7 +10,7 @@ class ReportController extends Controller
 {
     public function index(Request $request)
     {
-        $query = Transaction::with(['customer', 'user']);
+        $query = Transaction::with(['customer', 'user', 'items']);
 
         // --- FILTERING ---
         if ($request->filled('start_date') && $request->filled('end_date')) {
@@ -188,8 +188,16 @@ class ReportController extends Controller
 
         $overdueDebts = Transaction::where('due_amount', '>', 0)
             ->where('due_date', '<', now())
+            ->whereHas('customer', function ($query) {
+                $query->where('credit_balance', '>', 0);
+            })
             ->with('customer')
             ->get();
+
+        $storeTotalCost = DB::table('product_batches')->sum(DB::raw('qty * unit_cost'));
+        $storeTotalSelling = DB::table('product_batches')
+            ->join('products', 'product_batches.product_id', '=', 'products.id')
+            ->sum(DB::raw('product_batches.qty * products.default_price'));
 
         return (object) [
             'todayRevenue' => $todayRevenue,
@@ -201,7 +209,9 @@ class ReportController extends Controller
             'days' => [__('Sun'), __('Mon'), __('Tue'), __('Wed'), __('Thu'), __('Fri'), __('Sat')],
             'todayDay' => now()->dayOfWeek,
             'overdueCount' => $overdueDebts->count(),
-            'overdueList' => $overdueDebts
+            'overdueList' => $overdueDebts,
+            'storeTotalCost' => $storeTotalCost,
+            'storeTotalSelling' => $storeTotalSelling
         ];
     }
 
@@ -209,10 +219,30 @@ class ReportController extends Controller
     {
         $totalRev = $transactions->sum('total');
         $count = $transactions->count();
+
+        $productCosts = DB::table('product_batches')
+            ->select('product_id', DB::raw('AVG(unit_cost) as avg_cost'))
+            ->groupBy('product_id')
+            ->pluck('avg_cost', 'product_id');
+
+        $totalCOGS = 0;
+        foreach ($transactions as $tx) {
+            $txCogs = 0;
+            foreach ($tx->items as $item) {
+                if ($item->product_id && isset($productCosts[$item->product_id])) {
+                    $txCogs += $productCosts[$item->product_id] * $item->qty;
+                }
+            }
+            $tx->calculated_cogs = $txCogs;
+            $totalCOGS += $txCogs;
+        }
+
         return (object) [
             'revenue' => $totalRev,
             'count' => $count,
-            'avg' => $count > 0 ? $totalRev / $count : 0
+            'avg' => $count > 0 ? $totalRev / $count : 0,
+            'cogs' => $totalCOGS,
+            'net_profit' => $totalRev - $totalCOGS
         ];
     }
 

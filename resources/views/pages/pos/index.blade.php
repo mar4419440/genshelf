@@ -224,13 +224,21 @@
             </div>
 
             <!-- Categories -->
-            <div class="category-scroll">
-                <div class="cat-chip active" onclick="filterCategory('all', this)">{{ __('All Items') }}</div>
-                @php $categories = \App\Models\Category::all(); @endphp
+            <div class="category-scroll" id="main-categories">
+                <div class="cat-chip active" onclick="filterMainCategory('all', this, [])">{{ __('All Items') }}</div>
                 @foreach($categories as $c)
-                    <div class="cat-chip" onclick="filterCategory('{{ strtolower($c->name) }}', this)">{{ $c->name }}</div>
+                    @php 
+                        $childrenData = [];
+                        foreach($c->children as $child) {
+                            $childrenData[] = ['name' => $child->name, 'slug' => strtolower($child->name)];
+                        }
+                    @endphp
+                    <div class="cat-chip" onclick='filterMainCategory("{{ strtolower($c->name) }}", this, @json($childrenData))'>{{ $c->name }}</div>
                 @endforeach
             </div>
+
+            <!-- Subcategories (Dynamic) -->
+            <div class="category-scroll" id="sub-categories" style="display:none; padding-top:4px;"></div>
 
             <!-- Products -->
             <div class="pos-products-grid" id="pos-product-grid">
@@ -369,20 +377,59 @@
 
         function updateActiveStorage(id) { document.getElementById('cart-storage-id').value = id; }
 
-        function filterCategory(cat, chip) {
-            document.querySelectorAll('.cat-chip').forEach(c => c.classList.remove('active'));
-            chip.classList.add('active');
+        let currentAllowedCats = [];
+
+        function filterMainCategory(parentSlug, chip, childrenData) {
+            document.querySelectorAll('#main-categories .cat-chip').forEach(c => c.classList.remove('active'));
+            if(chip) chip.classList.add('active');
+            
+            const subContainer = document.getElementById('sub-categories');
+            if (childrenData && childrenData.length > 0) {
+                subContainer.style.display = 'flex';
+                const childrenNames = childrenData.map(c => c.slug).join(',');
+                subContainer.innerHTML = `<div class="cat-chip active" onclick="filterSubCategory('${parentSlug}', '${childrenNames}', this)">{{ __('All') }}</div>` +
+                         childrenData.map(c => `<div class="cat-chip" onclick="filterSubCategory('${c.slug}', '', this)">${c.name}</div>`).join('');
+                         
+                currentAllowedCats = [parentSlug, ...childrenData.map(c => c.slug)];
+            } else {
+                subContainer.style.display = 'none';
+                subContainer.innerHTML = '';
+                currentAllowedCats = [parentSlug];
+            }
+            
+            applyFilter(parentSlug === 'all');
+        }
+
+        function filterSubCategory(slug, additionalSlugs, chip) {
+            document.querySelectorAll('#sub-categories .cat-chip').forEach(c => c.classList.remove('active'));
+            if(chip) chip.classList.add('active');
+            
+            currentAllowedCats = [slug];
+            if (additionalSlugs) {
+                 currentAllowedCats = currentAllowedCats.concat(additionalSlugs.split(','));
+            }
+            applyFilter(false);
+        }
+
+        function applyFilter(isAll) {
+            const searchQ = document.getElementById('pos-search').value.toLowerCase();
             document.querySelectorAll('.pos-item-card').forEach(card => {
-                if (cat === 'all' || card.getAttribute('data-cat') === cat) card.style.display = 'flex';
-                else card.style.display = 'none';
+                const itemCatAttr = card.getAttribute('data-cat') || '';
+                const itemCats = itemCatAttr.split('>').map(s => s.trim());
+                
+                let isMatch = isAll || currentAllowedCats.some(cat => itemCats.includes(cat));
+                if (isMatch && searchQ) {
+                    if (!card.innerText.toLowerCase().includes(searchQ)) {
+                        isMatch = false;
+                    }
+                }
+                card.style.display = isMatch ? 'flex' : 'none';
             });
         }
 
         document.getElementById('pos-search').addEventListener('input', e => {
-            const q = e.target.value.toLowerCase();
-            document.querySelectorAll('.pos-item-card').forEach(card => {
-                card.style.display = card.innerText.toLowerCase().includes(q) ? 'flex' : 'none';
-            });
+            const isActiveAll = document.querySelector('#main-categories .cat-chip.active');
+            applyFilter(isActiveAll && isActiveAll.innerText.includes('{{ __("All Items") }}'));
         });
 
         function addToCart(id, name, price, stock) {
