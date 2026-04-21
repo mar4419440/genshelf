@@ -92,7 +92,7 @@
                     <div
                         style="display:grid; grid-template-columns: 100px 1fr; gap:16px; align-items:center; background:var(--bg2); padding:12px; border-radius:8px;">
                         <div style="display:flex; align-items:center; gap:8px;">
-                            <input type="checkbox" name="is_service" id="is_service" onchange="toggleServiceFields()">
+                            <input type="checkbox" name="is_service" id="is_service" value="1" onchange="toggleServiceFields()">
                             <label for="is_service" style="font-weight:600; font-size:13px;">{{ __('Service') }}</label>
                         </div>
                         <p style="font-size:12px; color:var(--tx2);">
@@ -179,7 +179,7 @@
                     <h3 style="font-size:16px; font-weight:600; margin-bottom:16px;">🛡️ {{ __('Warranty & Expiry') }}</h3>
 
                     <div style="margin-bottom:12px; display:flex; align-items:center; gap:10px;">
-                        <input type="checkbox" name="has_warranty" id="has_warranty" onchange="toggleWarranty()">
+                        <input type="checkbox" name="has_warranty" id="has_warranty" value="1" onchange="toggleWarranty()">
                         <label for="has_warranty"
                             style="font-size:13px; font-weight:600;">{{ __('Enable Warranty') }}</label>
                     </div>
@@ -191,7 +191,7 @@
                     </div>
 
                     <div style="margin-bottom:12px; display:flex; align-items:center; gap:10px;">
-                        <input type="checkbox" name="has_expiration" id="has_expiration" onchange="toggleExpiration()">
+                        <input type="checkbox" name="has_expiration" id="has_expiration" value="1" onchange="toggleExpiration()">
                         <label for="has_expiration"
                             style="font-size:13px; font-weight:600;">{{ __('Has Expiration Date') }}</label>
                     </div>

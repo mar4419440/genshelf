@@ -17,8 +17,11 @@ class WarrantyController extends Controller
         $warranties = Warranty::with(['product', 'customer'])->get();
         $products = \App\Models\Product::all();
         $customers = \App\Models\Customer::all();
+        
+        // Fetch products that actually offer a warranty
+        $warrantyProducts = \App\Models\Product::where('has_warranty', true)->get();
 
-        return view('pages.warranty.index', compact('warranties', 'products', 'customers'));
+        return view('pages.warranty.index', compact('warranties', 'products', 'customers', 'warrantyProducts'));
     }
 
     public function store(Request $request)

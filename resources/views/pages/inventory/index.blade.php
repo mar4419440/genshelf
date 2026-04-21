@@ -197,7 +197,29 @@
                                                             </div>
                                                         </div>
                                                     </div>
-                                                    ` : ''}
+                                                    ` : `
+                                                    <div style="background:var(--bg3); padding:12px; border-radius:var(--radius); margin-bottom:12px;">
+                                                        <h4 style="font-size:12px; font-weight:700; color:var(--tx); margin-bottom:12px;">🛡️ {{ __('Edit Warranty & Expiry') }}</h4>
+                                                        
+                                                        <div style="margin-bottom:12px; display:flex; align-items:center; gap:10px;">
+                                                            <input type="checkbox" name="has_warranty" id="edit_has_warranty" value="1" ${p.has_warranty ? 'checked' : ''} onchange="document.getElementById('edit_warranty_input').style.display = this.checked ? 'block' : 'none'">
+                                                            <label for="edit_has_warranty" style="font-size:13px; font-weight:600; cursor:pointer">{{ __('Enable Warranty') }}</label>
+                                                        </div>
+                                                        <div id="edit_warranty_input" style="display:${p.has_warranty ? 'block' : 'none'}; margin-bottom:16px;">
+                                                            <label style="display:block; font-size:11px; margin-bottom:4px;">{{ __('Warranty Duration (Months)') }}</label>
+                                                            <input type="number" name="warranty_duration" value="${p.warranty_duration || 0}" style="width:100%; padding:8px; border:1px solid var(--border); border-radius:6px; background:var(--bg2);">
+                                                        </div>
+
+                                                        <div style="display:flex; align-items:center; gap:10px;">
+                                                            <input type="checkbox" name="has_expiration" id="edit_has_expiration" value="1" ${p.has_expiration ? 'checked' : ''} onchange="document.getElementById('edit_expiration_input').style.display = this.checked ? 'block' : 'none'">
+                                                            <label for="edit_has_expiration" style="font-size:13px; font-weight:600; cursor:pointer">{{ __('Has Expiration Date') }}</label>
+                                                        </div>
+                                                        <div id="edit_expiration_input" style="display:${p.has_expiration ? 'block' : 'none'}; margin-top:8px;">
+                                                            <label style="display:block; font-size:11px; margin-bottom:4px;">{{ __('Set/Update Expiry Date for Current Stock') }}</label>
+                                                            <input type="date" name="expiration_date" style="width:100%; padding:8px; border:1px solid var(--border); border-radius:6px; background:var(--bg2);">
+                                                        </div>
+                                                    </div>
+                                                    `}
 
                                                     <div style="margin-bottom: 16px;">
                                                         <label style="display:flex;align-items:center;gap:6px;font-size:13px;cursor:pointer;">
@@ -229,13 +251,19 @@
                                                     <div style="display:flex; gap:10px; margin-bottom: 16px;">
                                                         <div style="flex:1;">
                                                             <label style="display:block;font-size:12px;font-weight:600;color:var(--tx2);margin-bottom:4px;">{{ __('Quantity') }}</label>
-                                                            <input name="qty" type="number" required min="1">
+                                                            <input name="qty" type="number" required min="1" autocomplete="off">
                                                         </div>
                                                         <div style="flex:1;">
                                                             <label style="display:block;font-size:12px;font-weight:600;color:var(--tx2);margin-bottom:4px;">{{ __('New Cost') }} ({{ __('Optional') }})</label>
-                                                            <input name="cost" type="number" step="0.01" placeholder="${costMode === 'unit' ? '{{ __("Unit Cost") }}' : '{{ __("Total Cost") }}'}">
+                                                            <input name="cost" type="number" step="0.01" placeholder="${costMode === 'unit' ? '{{ __("Unit Cost") }}' : '{{ __("Total Cost") }}'}" autocomplete="off">
                                                         </div>
                                                     </div>
+                                                    ${product.has_expiration ? `
+                                                    <div style="margin-bottom: 16px; background:var(--bg3); padding:10px; border-radius:6px; border: 1px solid var(--border);">
+                                                        <label style="display:block;font-size:12px;font-weight:600;color:var(--rd);margin-bottom:4px;">⏳ {{ __('Expiration Date for this Batch') }}</label>
+                                                        <input name="expiration_date" type="date" required style="width:100%; padding:8px; border:1px solid var(--border); border-radius:6px; background:var(--bg2);">
+                                                    </div>
+                                                    ` : ''}
                                                     <div style="display:flex; gap:8px;">
                                                         <button type="button" class="btn btn-o" onclick="closeModal()">{{ __('Cancel') }}</button>
                                                         <button type="submit" class="btn btn-gn" style="flex:1;">📦 {{ __('Restock') }}</button>

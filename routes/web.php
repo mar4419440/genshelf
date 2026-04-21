@@ -41,6 +41,7 @@ Route::middleware(['auth'])->group(function () {
 
     // Inventory
     Route::get('/inventory', [\App\Http\Controllers\InventoryController::class, 'index'])->name('inventory');
+    Route::get('/inventory/expiring', [\App\Http\Controllers\InventoryController::class, 'expiring'])->name('inventory.expiring');
     Route::get('/inventory/create', [\App\Http\Controllers\InventoryController::class, 'create'])->name('inventory.create');
     Route::post('/inventory', [\App\Http\Controllers\InventoryController::class, 'store'])->name('inventory.store');
     Route::put('/inventory/{product}', [\App\Http\Controllers\InventoryController::class, 'update'])->name('inventory.update');

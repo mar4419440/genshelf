@@ -9,7 +9,37 @@
 </div>
 
 <div class="card">
-    <h3 style="margin-bottom:12px">{{ __('Warranty Registrations') }}</h3>
+    <h3 style="margin-bottom:12px">{{ __('Products Configured with Warranty') }}</h3>
+    <p style="color:var(--tx2); font-size:13px; margin-bottom:16px;">
+        {{ __('Below is a list of all items in your inventory currently offering a warranty.') }}
+    </p>
+    <div class="table-wrap">
+        <table>
+            <tr>
+                <th>{{ __('Product Barcode') }}</th>
+                <th>{{ __('Product Name') }}</th>
+                <th>{{ __('Warranty Duration') }}</th>
+            </tr>
+            @forelse($warrantyProducts as $wp)
+                <tr>
+                    <td style="font-family:monospace; color:var(--tx2);">{{ $wp->barcode ?: '—' }}</td>
+                    <td><strong>{{ $wp->name }}</strong></td>
+                    <td style="font-weight:600; color:var(--pr);">
+                        {{ $wp->warranty_duration }} {{ trans_choice(__('Month|Months'), $wp->warranty_duration ?? 0) }}
+                    </td>
+                </tr>
+            @empty
+                <tr><td colspan="3" class="empty-state">{{ __('No products with warranty configured.') }}</td></tr>
+            @endforelse
+        </table>
+    </div>
+</div>
+
+<div class="card">
+    <div style="display:flex; justify-content:space-between; align-items:center; margin-bottom:12px;">
+        <h3>{{ __('Active / Registered Warranties') }}</h3>
+        <button class="btn btn-sm btn-pr" onclick="openWarrantyModal()">+ {{ __('Manual Registration') }}</button>
+    </div>
     <div class="table-wrap">
         <table>
             <tr>

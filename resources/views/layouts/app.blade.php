@@ -691,7 +691,21 @@
                 
 
                 @if(in_array('pos', $roles))<a href="{{ route('pos') }}" class="{{ request()->routeIs('pos') ? 'active' : '' }}">🛒 {{ __('Point of Sale') }}</a>@endif
-                @if(in_array('inventory', $roles))<a href="{{ route('inventory') }}" class="{{ request()->routeIs('inventory') ? 'active' : '' }}">📦 {{ __('Product Management') }}</a>@endif
+                @if(in_array('inventory', $roles))<a href="{{ route('inventory') }}" class="{{ request()->routeIs('inventory') && !request()->routeIs('inventory.expiring') ? 'active' : '' }}">📦 {{ __('Product Management') }}</a>@endif
+                @if(in_array('inventory', $roles))
+                    @php
+                        $expCount = \App\Models\ProductBatch::whereNotNull('expiration_date')
+                            ->where('qty', '>', 0)
+                            ->where('expiration_date', '<=', \Carbon\Carbon::now()->addDays(30))
+                            ->count();
+                    @endphp
+                    <a href="{{ route('inventory.expiring') }}" class="{{ request()->routeIs('inventory.expiring') ? 'active' : '' }}" style="justify-content:space-between;">
+                        <span style="display:flex; align-items:center; gap:10px;">⏳ {{ __('Expirations') }}</span>
+                        @if($expCount > 0)
+                            <span class="badge badge-rd" style="padding:2px 6px; font-size:10px;">{{ $expCount }}</span>
+                        @endif
+                    </a>
+                @endif
                 @if(in_array('inventory', $roles))<a href="{{ route('inventory.create') }}" class="{{ request()->routeIs('inventory.create') ? 'active' : '' }}">➕ {{ __('Add Product') }}</a>@endif
                 @if(in_array('categories', $roles) || in_array('inventory', $roles) || empty(auth()->user()->role))<a href="{{ route('categories') }}" class="{{ request()->routeIs('categories') ? 'active' : '' }}">📁 {{ __('Categories') }}</a>@endif
                 @if(in_array('storages', $roles) || in_array('inventory', $roles) || empty(auth()->user()->role))<a href="{{ route('storages.index') }}" class="{{ request()->routeIs('storages*') ? 'active' : '' }}">🏠 {{ __('Storages') }}</a>@endif

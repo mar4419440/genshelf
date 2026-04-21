@@ -37,6 +37,17 @@ class InventoryController extends Controller
         return view('pages.inventory.index', compact('products', 'lowStockDefault', 'costMode', 'suppliers', 'categories'));
     }
 
+    public function expiring(Request $request)
+    {
+        $batches = \App\Models\ProductBatch::with('product')
+            ->whereNotNull('expiration_date')
+            ->where('qty', '>', 0)
+            ->orderBy('expiration_date', 'asc')
+            ->get();
+            
+        return view('pages.inventory.expiring', compact('batches'));
+    }
+
     public function create()
     {
         $suppliers = Supplier::all();
@@ -167,10 +178,10 @@ class InventoryController extends Controller
             'category_id' => 'required|exists:categories,id',
             'default_price' => 'required|numeric|min:0',
             'low_stock_threshold' => 'integer|min:0',
-            'is_service' => 'boolean',
-            'has_warranty' => 'boolean',
+            'is_service' => 'nullable|boolean',
+            'has_warranty' => 'nullable|boolean',
             'warranty_duration' => 'nullable|integer|min:0',
-            'has_expiration' => 'boolean',
+            'has_expiration' => 'nullable|boolean',
             'expiration_date' => 'nullable|date',
             'barcode' => 'nullable|string|max:255|unique:products,barcode',
         ];
@@ -273,7 +284,10 @@ class InventoryController extends Controller
             'category_id' => 'required|exists:categories,id',
             'default_price' => 'required|numeric|min:0',
             'low_stock_threshold' => 'integer|min:0',
-            'is_service' => 'boolean',
+            'is_service' => 'nullable|boolean',
+            'has_warranty' => 'nullable|boolean',
+            'warranty_duration' => 'nullable|integer|min:0',
+            'has_expiration' => 'nullable|boolean',
             'barcode' => 'nullable|string|max:255|unique:products,barcode,' . $product->id,
         ]);
 
@@ -283,6 +297,9 @@ class InventoryController extends Controller
         unset($validated['category_id']);
 
         $validated['is_service'] = $request->has('is_service') ? 1 : 0;
+        $validated['has_warranty'] = $request->has('has_warranty') ? 1 : 0;
+        $validated['warranty_duration'] = $validated['warranty_duration'] ?? 0;
+        $validated['has_expiration'] = $request->has('has_expiration') ? 1 : 0;
 
         // Handle barcode
         if (!empty($request->barcode)) {
@@ -296,6 +313,14 @@ class InventoryController extends Controller
         }
 
         $product->update($validated);
+
+        // Optional: Update existing stock expiration dates if provided from the Edit modal
+        if ($request->has('has_expiration') && $request->filled('expiration_date')) {
+            $product->batches()->where('qty', '>', 0)->update(['expiration_date' => $request->expiration_date]);
+        } elseif (!$request->has('has_expiration')) {
+            $product->batches()->update(['expiration_date' => null]);
+        }
+
         return redirect()->back()->with('success', __('Product updated successfully.'));
     }
 

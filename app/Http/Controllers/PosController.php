@@ -80,6 +80,15 @@ class PosController extends Controller
                     $product = \App\Models\Product::find($item['id']);
                     if ($product && $product->has_warranty && $product->warranty_duration > 0) {
                         $warrantyExpiry = now()->addMonths($product->warranty_duration)->format('Y-m-d');
+                        
+                        for ($i = 0; $i < $item['qty']; $i++) {
+                            \App\Models\Warranty::create([
+                                'product_id' => $product->id,
+                                'customer_id' => $customerId,
+                                'purchase_date' => now()->format('Y-m-d'),
+                                'end_date' => $warrantyExpiry
+                            ]);
+                        }
                     }
                 }
 
