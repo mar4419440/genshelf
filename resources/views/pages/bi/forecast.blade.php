@@ -4,7 +4,7 @@
 <div class="container-fluid">
     <div class="row mb-4 align-items-center text-center">
         <div class="col-md-12">
-            <h2 class="fw-bold"><i class="fas fa-crystal-ball me-2 text-primary"></i>{{ __('Sales Forecasting') }}</h2>
+            <h2 class="fw-bold"><i class="fas fa-crystal-ball {{ app()->getLocale() === 'ar' ? 'ms-2' : 'me-2' }} text-primary"></i>{{ __('Sales Forecasting') }}</h2>
             <p class="text-muted">{{ __('AI-powered predictive analysis based on historical sales patterns (3-Month Moving Average)') }}</p>
         </div>
     </div>
