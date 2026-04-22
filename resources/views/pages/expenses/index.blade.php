@@ -1,467 +1,379 @@
 @extends('layouts.app')
 
 @push('styles')
+<!-- Tailwind CDN (Latest Stable) -->
+<script src="https://cdn.tailwindcss.com?plugins=forms,container-queries"></script>
+<link href="https://fonts.googleapis.com/css2?family=Public+Sans:wght@300;400;500;600;700;800;900&display=swap" rel="stylesheet"/>
+<link href="https://fonts.googleapis.com/css2?family=Material+Symbols+Outlined:wght,FILL@100..700,0..1&display=swap" rel="stylesheet"/>
+
+<script id="tailwind-config">
+    tailwind.config = {
+        darkMode: "class",
+        corePlugins: {
+            preflight: false, // Prevent destruction of global Bootstrap layout
+        },
+        theme: {
+            extend: {
+            "colors": {
+                    "tertiary-fixed": "#89f5e7", "outline-variant": "#c6c6cd", "on-tertiary-fixed-variant": "#005049",
+                    "on-primary": "#ffffff", "surface-container-lowest": "#ffffff", "surface": "#f7f9fb",
+                    "inverse-surface": "#2d3133", "surface-container-highest": "#e0e3e5", "surface-dim": "#d8dadc",
+                    "primary-fixed-dim": "#bec6e0", "secondary-fixed-dim": "#b9c7e0", "tertiary-fixed-dim": "#6bd8cb",
+                    "on-background": "#191c1e", "outline": "#76777d", "on-secondary-fixed-variant": "#3a485c",
+                    "primary-fixed": "#dae2fd", "on-error": "#ffffff", "tertiary": "#000000",
+                    "surface-bright": "#f7f9fb", "surface-tint": "#565e74", "on-surface-variant": "#45464d",
+                    "on-secondary-fixed": "#0d1c2f", "on-primary-container": "#7c839b", "on-secondary": "#ffffff",
+                    "secondary-container": "#d5e3fd", "inverse-primary": "#bec6e0", "primary-container": "#131b2e",
+                    "on-tertiary-fixed": "#00201d", "error-container": "#ffdad6", "secondary": "#515f74",
+                    "on-primary-fixed-variant": "#3f465c", "surface-variant": "#e0e3e5", "surface-container-high": "#e6e8ea",
+                    "surface-container": "#eceef0", "tertiary-container": "#00201d", "background": "#f7f9fb",
+                    "on-tertiary": "#ffffff", "on-primary-fixed": "#131b2e", "on-secondary-container": "#57657b",
+                    "surface-container-low": "#f2f4f6", "inverse-on-surface": "#eff1f3", "on-error-container": "#93000a",
+                    "primary": "#000000", "on-surface": "#191c1e", "on-tertiary-container": "#0c9488",
+                    "secondary-fixed": "#d5e3fd", "error": "#ba1a1a"
+            },
+            "borderRadius": { "DEFAULT": "0.125rem", "lg": "0.25rem", "xl": "0.5rem", "full": "0.75rem" },
+            "spacing": { "comfortable-padding": "16px", "container-margin": "24px", "section-gap": "32px", "gutter": "16px", "compact-padding": "8px", "unit": "4px" },
+            "fontFamily": {
+                    "body-lg": ["Public Sans"], "data-mono": ["Public Sans"], "h3": ["Public Sans"],
+                    "body-md": ["Public Sans"], "h2": ["Public Sans"], "h1": ["Public Sans"],
+                    "label-md": ["Public Sans"], "body-sm": ["Public Sans"]
+            },
+            "fontSize": {
+                    "body-lg": ["16px", {"lineHeight": "24px", "letterSpacing": "0", "fontWeight": "400"}],
+                    "data-mono": ["14px", {"lineHeight": "20px", "letterSpacing": "-0.01em", "fontWeight": "500"}],
+                    "h3": ["20px", {"lineHeight": "28px", "letterSpacing": "0", "fontWeight": "600"}],
+                    "body-md": ["14px", {"lineHeight": "20px", "letterSpacing": "0", "fontWeight": "400"}],
+                    "h2": ["24px", {"lineHeight": "32px", "letterSpacing": "-0.01em", "fontWeight": "600"}],
+                    "h1": ["30px", {"lineHeight": "38px", "letterSpacing": "-0.02em", "fontWeight": "700"}],
+                    "label-md": ["12px", {"lineHeight": "16px", "letterSpacing": "0.04em", "fontWeight": "600"}],
+                    "body-sm": ["13px", {"lineHeight": "18px", "letterSpacing": "0", "fontWeight": "400"}]
+            }
+            }
+        }
+    }
+</script>
 <style>
-    :root {
-        --premium-gradient: linear-gradient(135deg, #6366f1 0%, #a855f7 100%);
-        --glass-bg: rgba(255, 255, 255, 0.7);
-        --glass-border: rgba(255, 255, 255, 0.3);
+    .tw-wrapper *, .tw-wrapper ::before, .tw-wrapper ::after {
+        box-sizing: border-box; border-width: 0; border-style: solid; border-color: #e5e7eb;
     }
-
-    .premium-card {
-        background: #fff;
-        border: none;
-        border-radius: 20px;
-        box-shadow: 0 10px 30px -5px rgba(0, 0, 0, 0.05);
-        transition: transform 0.3s cubic-bezier(0.34, 1.56, 0.64, 1);
-    }
-
-    .premium-card:hover {
-        transform: translateY(-5px);
-    }
-
-    .gradient-stat {
-        background: var(--premium-gradient);
-        color: #fff !important;
-    }
-
-    .gradient-stat .text-muted {
-        color: rgba(255, 255, 255, 0.8) !important;
-    }
-
-    .glass-filter {
-        background: var(--glass-bg);
-        backdrop-filter: blur(10px);
-        -webkit-backdrop-filter: blur(10px);
-        border: 1px solid var(--glass-border);
-        border-radius: 16px;
-    }
-
-    .premium-table thead th {
-        background: var(--bg2);
-        color: var(--tx3);
-        font-size: 11px;
-        text-transform: uppercase;
-        letter-spacing: 1px;
-        font-weight: 800;
-        padding: 18px 20px;
-        border: none;
-    }
-
-    .premium-table tbody tr {
-        border-bottom: 1px solid var(--bg3);
-        transition: all 0.2s;
-    }
-
-    .premium-table tbody tr:hover {
-        background: #fcfaff;
-        box-shadow: 0 5px 15px rgba(0,0,0,0.02);
-    }
-
-    .status-pill {
-        font-weight: 700;
-        font-size: 11px;
-        padding: 6px 16px;
-        border-radius: 30px;
-        box-shadow: 0 4px 10px rgba(0,0,0,0.05);
-    }
-
-    .btn-soft-primary { background: rgba(99, 102, 241, 0.1); color: #6366f1; border: none; }
-    .btn-soft-success { background: rgba(34, 197, 94, 0.1); color: #22c55e; border: none; }
-    .btn-soft-danger { background: rgba(239, 68, 68, 0.1); color: #ef4444; border: none; }
-    .btn-soft-info { background: rgba(59, 130, 246, 0.1); color: #3b82f6; border: none; }
-    .btn-soft-primary:hover, .btn-soft-success:hover, .btn-soft-danger:hover, .btn-soft-info:hover { 
-        filter: brightness(0.95); 
-        transform: scale(1.05);
-    }
+    .tw-wrapper input:focus, .tw-wrapper button:focus { outline: none; }
+    .tw-wrapper table { text-indent: 0; border-color: inherit; border-collapse: collapse; }
+    .tw-wrapper button { background-color: transparent; background-image: none; cursor: pointer; }
+    .tw-wrapper input { border-style: solid; }
+    .material-symbols-outlined { font-variation-settings: 'FILL' 0, 'wght' 400, 'GRAD' 0, 'opsz' 24; }
     
-    .floating-btn {
-        box-shadow: 0 8px 20px rgba(99, 102, 241, 0.3);
-    }
+    /* Global Overrides for this view */
+    body { background-color: #f7f9fb !important; }
 </style>
 @endpush
 
 @section('content')
-<div class="container-fluid">
-    <div class="row mb-5 align-items-center">
-        <div class="col-md-6">
-            <h2 class="fw-extrabold mb-1" style="font-weight:900; letter-spacing:-0.5px;">
-                <span class="text-primary">{{ __('Financial') }}</span> {{ __('Flow') }}
-            </h2>
-            <p class="text-muted mb-0">{{ __('Enterprise-grade expense tracking & reconciliation') }}</p>
-        </div>
-        <div class="col-md-6 text-end d-flex gap-2 justify-content-end">
-            <button class="btn btn-outline-primary px-4 py-3 rounded-pill fw-bold" type="button" data-bs-toggle="collapse" data-bs-target="#filterCollapse" aria-expanded="false">
-                <i class="fas fa-filter me-2"></i>{{ __('Filters') }}
-            </button>
-            <button class="btn btn-primary px-4 py-3 rounded-pill fw-bold floating-btn" data-bs-toggle="modal" data-bs-target="#addExpenseModal">
-                <i class="fas fa-plus-circle me-2"></i>{{ __('Log Expense') }}
-            </button>
-        </div>
-    </div>
-
-    <!-- Metrics Grid -->
-    <div class="row g-4 mb-5">
-        <div class="col-md-3">
-            <div class="card premium-card gradient-stat p-4 border-0 h-100">
-                <div class="d-flex justify-content-between align-items-center mb-3">
-                    <div class="bg-white p-2 rounded-circle text-primary shadow-sm" style="width:40px;height:40px;display:flex;align-items:center;justify-content:center;">
-                        <i class="fas fa-wallet"></i>
-                    </div>
-                    <span class="badge bg-white text-primary rounded-pill px-3">{{ __('MTD') }}</span>
+<div class="tw-wrapper font-body-md text-on-surface">
+    <!-- Main Content Canvas -->
+    <main class="flex-1 p-6 pb-20">
+        <div class="max-w-7xl mx-auto space-y-section-gap">
+            
+            <!-- Page Header -->
+            <div class="flex flex-col md:flex-row md:items-center justify-between gap-4 mb-8">
+                <div>
+                    <h2 class="font-h1 text-h1 text-primary">{{ __('Expenses Overview') }}</h2>
+                    <p class="text-body-md text-on-surface-variant">{{ __('Track and manage your retail operational costs.') }}</p>
                 </div>
-                <span class="text-muted small fw-bold text-uppercase ls-1">{{ __('Monthly Total') }}</span>
-                <h2 class="fw-900 mb-0 mt-1">{{ number_format($totalInPeriod, 2) }}</h2>
-            </div>
-        </div>
-        
-        <div class="col-md-3">
-            <div class="card premium-card p-4 border-0 h-100">
-                <div class="d-flex justify-content-between align-items-center mb-3">
-                    <div class="bg-soft-primary p-2 rounded-circle text-primary" style="width:40px;height:40px;display:flex;align-items:center;justify-content:center;">
-                        <i class="fas fa-exchange-alt"></i>
-                    </div>
-                </div>
-                <span class="text-muted small fw-bold text-uppercase ls-1">{{ __('Transactions') }}</span>
-                <h2 class="fw-900 mb-0 mt-1">{{ $expenses->total() }}</h2>
-                <div class="mt-2 x-small text-success fw-bold">
-                    <i class="fas fa-check-circle me-1"></i>{{ count($expenses->items()) }} {{ __('recent entries') }}
-                </div>
-            </div>
-        </div>
-
-        <div class="col-md-6">
-            <div class="card premium-card p-4 border-0 h-100 position-relative overflow-hidden">
-                <div class="position-absolute top-0 end-0 p-3 opacity-10">
-                    <i class="fas fa-chart-line fa-6x"></i>
-                </div>
-                <span class="text-muted small fw-bold text-uppercase ls-1 mb-3 d-block">{{ __('Budget Performance') }}</span>
-                
-                @php 
-                    $budgetTotal = $budgets->sum('budgeted_amount');
-                    $spentTotal = $categoryBreakdown->sum('total');
-                    $pct = $budgetTotal > 0 ? ($spentTotal / $budgetTotal) * 100 : 0;
-                    $status = $pct > 90 ? ['danger', __('Critical')] : ($pct > 70 ? ['warning', __('Heavy')] : ['success', __('Healthy')]);
-                @endphp
-
-                <div class="d-flex justify-content-between align-items-end mb-2">
-                    <h3 class="fw-900 mb-0">{{ round($pct, 1) }}%</h3>
-                    <span class="text-{{ $status[0] }} fw-bold x-small">{{ $status[1] }} {{ __('Utilization') }}</span>
-                </div>
-                
-                <div class="progress" style="height: 12px; border-radius: 10px; background: #f0f0f0;">
-                    <div class="progress-bar bg-{{ $status[0] }} shadow-sm" role="progressbar" style="width: {{ min(100, $pct) }}%; border-radius: 10px;"></div>
-                </div>
-                
-                <div class="d-flex justify-content-between mt-3 x-small fw-bold text-muted">
-                    <span><i class="fas fa-long-arrow-alt-up me-1 text-primary"></i>{{ number_format($spentTotal, 2) }}</span>
-                    <span>{{ number_format($budgetTotal, 2) }} {{ __('Limit') }}</span>
-                </div>
-            </div>
-        </div>
-    </div>
-
-    <!-- Smart Filter Bar (Collapsible) -->
-    <div class="collapse {{ request()->hasAny(['search', 'category', 'period', 'status']) ? 'show' : '' }} mb-5" id="filterCollapse">
-        <div class="glass-filter px-4 py-3">
-            <form action="{{ route('expenses.index') }}" method="GET" class="row g-3 align-items-center">
-                <div class="col-md-3">
-                    <div class="input-group">
-                        <span class="input-group-text bg-transparent border-0 pe-0"><i class="fas fa-search text-muted"></i></span>
-                        <input type="text" name="search" class="form-control border-0 bg-transparent px-3" placeholder="{{ __('What are you looking for?') }}" value="{{ request('search') }}">
-                    </div>
-                </div>
-                <div class="col-md-2">
-                    <select name="category" class="form-select border-0 bg-transparent fw-bold text-primary">
-                        <option value="">{{ __('All Categories') }}</option>
-                        @foreach($categories as $cat => $subs)
-                            <option value="{{ $cat }}" {{ request('category') == $cat ? 'selected' : '' }}>{{ ucfirst(__($cat)) }}</option>
-                        @endforeach
-                    </select>
-                </div>
-                <div class="col-md-2">
-                    <select name="period" class="form-select border-0 bg-transparent fw-bold">
-                        <option value="" {{ !request('period') ? 'selected' : '' }}>{{ __('All Time') }}</option>
-                        <option value="today" {{ request('period') == 'today' ? 'selected' : '' }}>{{ __('Today') }}</option>
-                        <option value="this_week" {{ request('period') == 'this_week' ? 'selected' : '' }}>{{ __('This Week') }}</option>
-                        <option value="this_month" {{ request('period') == 'this_month' ? 'selected' : '' }}>{{ __('This Month') }}</option>
-                        <option value="this_year" {{ request('period') == 'this_year' ? 'selected' : '' }}>{{ __('This Year') }}</option>
-                    </select>
-                </div>
-                <div class="col-md-2">
-                    <select name="status" class="form-select border-0 bg-transparent fw-bold">
-                        <option value="" {{ !request('status') ? 'selected' : '' }}>{{ __('All Statuses') }}</option>
-                        <option value="approved" {{ request('status') == 'approved' ? 'selected' : '' }}>{{ __('Approved') }}</option>
-                        <option value="draft" {{ request('status') == 'draft' ? 'selected' : '' }}>{{ __('Draft') }}</option>
-                        <option value="rejected" {{ request('status') == 'rejected' ? 'selected' : '' }}>{{ __('Rejected') }}</option>
-                    </select>
-                </div>
-                <div class="col-md-3 text-end d-flex gap-2">
-                    <button type="submit" class="btn btn-primary px-4 rounded-pill shadow-sm flex-grow-1">{{ __('Filter') }}</button>
-                    @if(request()->hasAny(['search', 'category', 'period', 'status']))
-                        <a href="{{ route('expenses.index') }}" class="btn btn-outline-danger px-3 rounded-pill shadow-sm" title="{{ __('Clear all filters') }}">
-                            <i class="fas fa-times me-1"></i>{{ __('Clear') }}
+                <!-- Controls -->
+                <div class="flex items-center gap-comfortable-padding">
+                    <form action="{{ route('expenses.index') }}" method="GET" class="flex gap-2" id="filterForm">
+                        <input type="hidden" name="period" value="{{ request('period') }}" id="periodFilter">
+                        <select name="status" class="bg-white border border-outline px-3 py-2 rounded-lg text-secondary font-label-md outline-none" onchange="document.getElementById('filterForm').submit()">
+                            <option value="">{{ __('All Statuses') }}</option>
+                            <option value="approved" {{ request('status') == 'approved' ? 'selected' : '' }}>{{ __('Approved') }}</option>
+                            <option value="draft" {{ request('status') == 'draft' ? 'selected' : '' }}>{{ __('Draft') }}</option>
+                        </select>
+                        <a href="{{ route('expenses.index') }}" class="flex items-center gap-2 px-comfortable-padding py-2 border border-outline rounded-lg bg-white text-secondary font-label-md hover:bg-surface-container transition-colors">
+                            <span class="material-symbols-outlined text-[20px]">refresh</span> {{ __('Reset') }}
                         </a>
-                    @endif
+                    </form>
                 </div>
-            </form>
-        </div>
-    </div>
+            </div>
 
-    <!-- Main List Card -->
-    <div class="card premium-card border-0 overflow-hidden">
-        <div class="table-responsive">
-            <table class="table premium-table align-middle mb-0">
-                <thead>
-                    <tr>
-                        <th class="ps-4">{{ __('Reference') }}</th>
-                        <th>{{ __('Allocation') }}</th>
-                        <th>{{ __('Description') }}</th>
-                        <th>{{ __('Value') }}</th>
-                        <th>{{ __('Status') }}</th>
-                        <th class="pe-4 text-end">{{ __('Actions') }}</th>
-                    </tr>
-                </thead>
-                <tbody>
-                    @forelse($expenses as $e)
-                    <tr>
-                        <td class="ps-4">
-                            <span class="fw-bold text-dark">{{ $e->expense_date?->format('d M Y') }}</span><br>
-                            <span class="text-muted x-small text-uppercase ls-1">REF#{{ $e->id }}</span>
-                        </td>
-                        <td>
-                            <span class="badge bg-soft-primary text-primary px-3 py-2 rounded-pill fw-bold x-small">{{ ucfirst(__($e->category)) }}</span>
-                            @if($e->sub_category)
-                                <div class="text-muted small mt-1 ms-1"> <i class="fas fa-level-up-alt fa-rotate-90 me-1"></i> {{ ucfirst(__($e->sub_category)) }}</div>
-                            @endif
-                        </td>
-                        <td>
-                            <div class="fw-bold d-flex align-items-center">
-                                @if($e->attachment_path) <i class="fas fa-paperclip text-muted me-2 x-small"></i> @endif
-                                {{ $e->local_description }}
-                            </div>
-                            <span class="x-small text-muted text-uppercase">{{ str_replace('_', ' ', $e->payment_method) }}</span>
-                        </td>
-                        <td>
-                            <div class="fw-900 text-dark" style="font-size:16px;">{{ number_format($e->amount, 2) }}</div>
-                        </td>
-                        <td>
-                            <span class="status-pill badge bg-{{ $e->status_badge }}">{{ strtoupper($e->status) }}</span>
-                        </td>
-                        <td class="pe-4 text-end">
-                            <div class="action-btns justify-content-end">
-                                @if($e->status === 'draft')
-                                <form action="{{ route('expenses.approve', $e) }}" method="POST">
-                                    @csrf
-                                    <button class="btn btn-sm btn-soft-success rounded-circle" style="width:32px;height:32px;" title="{{ __('Confirm & Approve') }}">
-                                        <i class="fas fa-check-double x-small"></i>
-                                    </button>
-                                </form>
-                                @endif
-                                
-                                @if($e->attachment_path)
-                                <a href="{{ Storage::url($e->attachment_path) }}" target="_blank" class="btn btn-sm btn-soft-primary rounded-circle" style="width:32px;height:32px;" title="{{ __('Audit Receipt') }}">
-                                    <i class="fas fa-file-invoice x-small"></i>
-                                </a>
-                                @endif
+            <!-- Summary Bento Grid -->
+            <div class="grid grid-cols-1 md:grid-cols-12 gap-gutter mb-8">
+                <!-- Total Monthly Summary Card -->
+                <div class="md:col-span-4 bg-white border border-outline-variant p-comfortable-padding rounded-xl shadow-sm">
+                    <div class="flex justify-between items-start mb-4">
+                        <span class="text-label-md text-on-surface-variant uppercase tracking-wider">{{ __('Total Monthly Expense') }}</span>
+                    </div>
+                    <div class="mb-6">
+                        <p class="text-h1 font-h1 text-primary">${{ number_format($totalInPeriod, 2) }}</p>
+                        <p class="text-body-sm text-on-surface-variant">{{ $expenses->total() }} {{ __('Transactions') }}</p>
+                    </div>
+                    
+                    @php 
+                        $budgetTotal = $budgets->sum('budgeted_amount');
+                        $spentTotal = $categoryBreakdown->sum('total');
+                        $pct = $budgetTotal > 0 ? ($spentTotal / $budgetTotal) * 100 : 0;
+                    @endphp
+                    <div class="w-full bg-surface-container rounded-full h-1.5 overflow-hidden">
+                        <div class="bg-primary h-full" style="width: {{ min(100, $pct) }}%"></div>
+                    </div>
+                    <p class="mt-2 text-label-md text-on-surface-variant">{{ round($pct, 1) }}% {{ __('of monthly budget utilized') }}</p>
+                </div>
 
-                                <button class="btn btn-sm btn-soft-info rounded-circle" style="width:32px;height:32px;" title="{{ __('Modify Details') }}" onclick="editExpense({{ $e->id }})">
-                                    <i class="fas fa-pen-nib x-small"></i>
-                                </button>
+                <!-- Category Breakdown Card -->
+                <div class="md:col-span-8 bg-white border border-outline-variant p-comfortable-padding rounded-xl shadow-sm">
+                    <div class="flex justify-between items-center mb-6">
+                        <span class="text-label-md text-on-surface-variant uppercase tracking-wider">{{ __('Category Distribution') }}</span>
+                        <span class="material-symbols-outlined text-outline-variant">pie_chart</span>
+                    </div>
+                    <div class="grid grid-cols-2 md:grid-cols-4 gap-4">
+                        @php
+                            $colors = ['bg-primary', 'bg-secondary', 'bg-on-tertiary-container', 'bg-outline-variant'];
+                        @endphp
+                        @foreach($categoryBreakdown->take(4) as $idx => $cat)
+                        <div class="space-y-2">
+                            <p class="text-label-md text-on-surface-variant">{{ ucfirst(__($cat->category)) }}</p>
+                            <p class="text-h3 font-h3">${{ number_format($cat->total, 0) }}</p>
+                            <div class="h-1 w-12 {{ $colors[$idx % 4] }}"></div>
+                        </div>
+                        @endforeach
+                    </div>
+                    <div class="mt-8 flex gap-2 h-2 overflow-hidden rounded-full">
+                        @foreach($categoryBreakdown->take(4) as $idx => $cat)
+                            <div class="{{ $colors[$idx % 4] }}" style="width: {{ $spentTotal > 0 ? ($cat->total / $spentTotal) * 100 : 0 }}%"></div>
+                        @endforeach
+                    </div>
+                </div>
+            </div>
 
-                                <form action="{{ route('expenses.destroy', $e) }}" method="POST" onsubmit="return confirm('Archive this entry?')">
-                                    @csrf @method('DELETE')
-                                    <button class="btn btn-sm btn-soft-danger rounded-circle" style="width:32px;height:32px;" title="{{ __('Remove Entry') }}">
-                                        <i class="fas fa-trash-alt x-small"></i>
-                                    </button>
-                                </form>
-                            </div>
-                        </td>
-                    </tr>
-                    @empty
-                    <tr>
-                        <td colspan="6" class="text-center py-5">
-                            <div class="opacity-25 mb-3"><i class="fas fa-receipt fa-4x"></i></div>
-                            <h5 class="fw-bold text-muted">{{ __('Clean Slate!') }}</h5>
-                            <p class="text-muted small">{{ __('No expense records found for this criteria.') }}</p>
-                        </td>
-                    </tr>
-                    @endforelse
-                </tbody>
-            </table>
+            <!-- Transaction Control Row -->
+            <div class="flex flex-col md:flex-row md:items-center justify-between gap-4 mb-6">
+                <form action="{{ route('expenses.index') }}" method="GET" class="relative w-full md:w-96">
+                    <input type="hidden" name="category" value="{{ request('category') }}">
+                    <span class="material-symbols-outlined absolute left-3 top-1/2 -translate-y-1/2 text-outline">search</span>
+                    <input name="search" value="{{ request('search') }}" class="w-full pl-10 pr-4 py-2 bg-white border border-outline-variant rounded-lg focus:ring-2 focus:ring-primary focus:border-primary text-body-md outline-none" placeholder="{{ __('Search by description...') }}" type="text"/>
+                </form>
+                
+                <div class="flex items-center gap-2 overflow-x-auto pb-2 md:pb-0">
+                    <span class="text-label-md text-on-surface-variant mr-2">{{ __('Filter') }}:</span>
+                    <a href="{{ route('expenses.index') }}" class="{{ !request('category') ? 'bg-primary text-on-primary' : 'bg-white border border-outline-variant text-on-surface-variant hover:bg-surface-container' }} px-4 py-1.5 rounded-full text-label-md transition-colors whitespace-nowrap">
+                        {{ __('All') }}
+                    </a>
+                    @foreach($categories as $cat => $subs)
+                    <a href="{{ route('expenses.index', ['category' => $cat]) }}" class="{{ request('category') == $cat ? 'bg-primary text-on-primary' : 'bg-white border border-outline-variant text-on-surface-variant hover:bg-surface-container' }} px-4 py-1.5 rounded-full text-label-md transition-colors whitespace-nowrap">
+                        {{ ucfirst(__($cat)) }}
+                    </a>
+                    @endforeach
+                </div>
+            </div>
+
+            <!-- Recent Transactions Table -->
+            <div class="bg-white border border-outline-variant rounded-xl shadow-sm overflow-hidden mb-8">
+                <div class="overflow-x-auto">
+                    <table class="w-full text-left border-collapse">
+                        <thead class="bg-surface-container-low border-b border-outline-variant">
+                            <tr>
+                                <th class="px-6 py-4 font-label-md text-on-surface-variant uppercase tracking-wider">{{ __('Date') }}</th>
+                                <th class="px-6 py-4 font-label-md text-on-surface-variant uppercase tracking-wider">{{ __('Description') }}</th>
+                                <th class="px-6 py-4 font-label-md text-on-surface-variant uppercase tracking-wider text-right">{{ __('Amount') }}</th>
+                                <th class="px-6 py-4 font-label-md text-on-surface-variant uppercase tracking-wider text-center">{{ __('Category') }}</th>
+                                <th class="px-6 py-4 font-label-md text-on-surface-variant uppercase tracking-wider">{{ __('Method') }}</th>
+                                <th class="px-6 py-4 font-label-md text-on-surface-variant uppercase tracking-wider w-10"></th>
+                            </tr>
+                        </thead>
+                        <tbody class="divide-y divide-outline-variant">
+                            @forelse($expenses as $e)
+                            <tr class="hover:bg-surface transition-colors {{ $loop->even ? 'bg-surface-container-low' : '' }}">
+                                <td class="px-6 py-4 font-data-mono text-on-surface">
+                                    {{ $e->expense_date?->format('M d, Y') }}
+                                    <div class="text-[10px] text-outline mt-1">#{{ $e->id }}</div>
+                                </td>
+                                <td class="px-6 py-4">
+                                    <p class="font-semibold text-primary">{{ $e->local_description }}</p>
+                                    @if($e->status === 'draft')
+                                        <p class="text-body-sm text-on-error-container font-bold">{{ __('DRAFT') }}</p>
+                                    @endif
+                                </td>
+                                <td class="px-6 py-4 font-h3 text-right text-primary">${{ number_format($e->amount, 2) }}</td>
+                                <td class="px-6 py-4 text-center">
+                                    @php
+                                        $catColor = match($e->category) {
+                                            'rent' => 'bg-secondary-container text-on-secondary-container',
+                                            'utilities' => 'bg-tertiary-fixed text-on-tertiary-fixed-variant',
+                                            'inventory' => 'bg-primary-fixed text-on-primary-fixed-variant',
+                                            default => 'bg-surface-container-highest text-on-surface-variant'
+                                        };
+                                    @endphp
+                                    <span class="inline-block px-3 py-1 rounded-full text-[12px] font-bold uppercase {{ $catColor }}">
+                                        {{ __($e->category) }}
+                                    </span>
+                                </td>
+                                <td class="px-6 py-4">
+                                    <div class="flex items-center gap-2 text-body-md uppercase text-[11px] font-bold">
+                                        @php
+                                            $methodIcon = match($e->payment_method) {
+                                                'cash' => 'payments',
+                                                'card' => 'credit_card',
+                                                default => 'account_balance'
+                                            };
+                                        @endphp
+                                        <span class="material-symbols-outlined text-[18px]">{{ $methodIcon }}</span>
+                                        {{ str_replace('_', ' ', $e->payment_method) }}
+                                    </div>
+                                </td>
+                                <td class="px-6 py-4">
+                                    <div class="flex gap-2">
+                                        @if($e->status === 'draft')
+                                        <form action="{{ route('expenses.approve', $e) }}" method="POST">
+                                            @csrf
+                                            <button class="material-symbols-outlined text-outline hover:text-on-tertiary-container" title="{{ __('Approve') }}">check_circle</button>
+                                        </form>
+                                        @endif
+                                        <button class="material-symbols-outlined text-outline hover:text-primary" onclick="editExpense({{ $e->id }})" title="{{ __('Edit') }}">edit</button>
+                                        <form action="{{ route('expenses.destroy', $e) }}" method="POST" onsubmit="return confirm('{{ __('Are you sure?') }}')">
+                                            @csrf @method('DELETE')
+                                            <button class="material-symbols-outlined text-outline hover:text-error" title="{{ __('Delete') }}">delete</button>
+                                        </form>
+                                    </div>
+                                </td>
+                            </tr>
+                            @empty
+                            <tr>
+                                <td colspan="6" class="px-6 py-12 text-center text-on-surface-variant">
+                                    <span class="material-symbols-outlined text-[48px] opacity-50 mb-2">inbox</span>
+                                    <p>{{ __('No records found') }}</p>
+                                </td>
+                            </tr>
+                            @endforelse
+                        </tbody>
+                    </table>
+                </div>
+                
+                @if($expenses->hasPages())
+                <div class="px-6 py-4 border-t border-outline-variant flex items-center justify-between">
+                    {{ $expenses->links() }}
+                </div>
+                @endif
+            </div>
+
+            <!-- Floating Action Button -->
+            <button onclick="openAddExpenseModal()" class="fixed bottom-12 right-12 h-14 w-14 rounded-full shadow-lg flex items-center justify-center hover:scale-105 active:scale-95 transition-all z-50 group border-0" style="background:#000;color:#fff;">
+                <span class="material-symbols-outlined text-[32px]" style="color:#fff;">add</span>
+                <span class="absolute right-full mr-4 px-3 py-1.5 rounded-lg text-label-md whitespace-nowrap opacity-0 group-hover:opacity-100 transition-opacity pointer-events-none" style="background:#000;color:#fff;">{{ __('Add Expense') }}</span>
+            </button>
+            
         </div>
-        @if($expenses->hasPages())
-        <div class="card-footer bg-transparent border-0 py-4 d-flex justify-content-center">
-            {{ $expenses->links() }}
-        </div>
-        @endif
-    </div>
+    </main>
 </div>
 
-<!-- Add Expense Modal -->
-<div class="modal fade" id="addExpenseModal" tabindex="-1" aria-hidden="true">
-    <div class="modal-dialog modal-lg modal-dialog-centered">
-        <div class="modal-content border-0 shadow-lg" style="border-radius: 20px; overflow: hidden;">
-            <form action="{{ route('expenses.store') }}" method="POST" enctype="multipart/form-data">
-                @csrf
-                <div class="modal-header border-0 px-4 pt-4 pb-2" style="background: linear-gradient(135deg, rgba(99,102,241,0.08) 0%, rgba(168,85,247,0.08) 100%);">
-                    <div>
-                        <h5 class="modal-title fw-900 mb-1" style="letter-spacing: -0.3px;">
-                            <i class="fas fa-plus-circle text-primary me-2"></i>{{ __('Log New Expense') }}
-                        </h5>
-                        <p class="text-muted x-small mb-0">{{ __('Record a new financial outflow with full audit trail') }}</p>
-                    </div>
-                    <button type="button" class="btn-close" data-bs-dismiss="modal"></button>
-                </div>
-                <div class="modal-body px-4 py-4">
-                    <div class="row g-3">
-                        <div class="col-md-6">
-                            <label class="form-label x-small fw-bold text-uppercase text-muted ls-1">{{ __('Category') }}</label>
-                            <select name="category" class="form-select border-0 shadow-sm" style="background:#f8f9fb;border-radius:10px;padding:12px;" required id="modal_cat">
-                                @foreach($categories as $cat => $subs)
-                                    <option value="{{ $cat }}">{{ ucfirst(__($cat)) }}</option>
-                                @endforeach
-                            </select>
-                        </div>
-                        <div class="col-md-6">
-                            <label class="form-label x-small fw-bold text-uppercase text-muted ls-1">{{ __('Date') }}</label>
-                            <input type="date" name="expense_date" class="form-control border-0 shadow-sm" style="background:#f8f9fb;border-radius:10px;padding:12px;" value="{{ date('Y-m-d') }}" required>
-                        </div>
-                        <div class="col-md-6">
-                            <label class="form-label x-small fw-bold text-uppercase text-muted ls-1">{{ __('Description (AR)') }}</label>
-                            <input type="text" name="description" class="form-control border-0 shadow-sm" style="background:#f8f9fb;border-radius:10px;padding:12px;" required placeholder="{{ __('Enter Arabic description...') }}">
-                        </div>
-                        <div class="col-md-6">
-                            <label class="form-label x-small fw-bold text-uppercase text-muted ls-1">{{ __('Description (EN)') }}</label>
-                            <input type="text" name="description_en" class="form-control border-0 shadow-sm" style="background:#f8f9fb;border-radius:10px;padding:12px;" placeholder="{{ __('Optional English description...') }}">
-                        </div>
-                        <div class="col-md-6">
-                            <label class="form-label x-small fw-bold text-uppercase text-muted ls-1">{{ __('Amount') }}</label>
-                            <div class="input-group shadow-sm" style="border-radius:10px;overflow:hidden;">
-                                <span class="input-group-text border-0 fw-bold text-primary" style="background:#f8f9fb;">$</span>
-                                <input type="number" name="amount" class="form-control border-0 fw-bold" style="background:#f8f9fb;padding:12px;" step="0.01" required placeholder="0.00">
-                            </div>
-                        </div>
-                        <div class="col-md-6">
-                            <label class="form-label x-small fw-bold text-uppercase text-muted ls-1">{{ __('Payment Method') }}</label>
-                            <select name="payment_method" class="form-select border-0 shadow-sm" style="background:#f8f9fb;border-radius:10px;padding:12px;" required>
-                                <option value="cash">💵 {{ __('Cash') }}</option>
-                                <option value="bank_transfer">🏦 {{ __('Bank Transfer') }}</option>
-                                <option value="card">💳 {{ __('Card') }}</option>
-                                <option value="cheque">📝 {{ __('Cheque') }}</option>
-                            </select>
-                        </div>
-                        <div class="col-md-12">
-                            <label class="form-label x-small fw-bold text-uppercase text-muted ls-1">{{ __('Receipt / Attachment') }} <span class="text-muted fw-normal">({{ __('Optional') }})</span></label>
-                            <input type="file" name="attachment" class="form-control border-0 shadow-sm" style="background:#f8f9fb;border-radius:10px;padding:10px;">
-                        </div>
-                    </div>
-                </div>
-                <div class="modal-footer border-0 px-4 pb-4 pt-0">
-                    <button type="button" class="btn btn-light px-4 py-2 rounded-pill fw-bold" data-bs-dismiss="modal">{{ __('Cancel') }}</button>
-                    <button type="submit" class="btn btn-primary px-5 py-2 rounded-pill fw-bold shadow-sm floating-btn">
-                        <i class="fas fa-save me-2"></i>{{ __('Save Expense') }}
-                    </button>
-                </div>
-            </form>
-        </div>
-    </div>
-</div>
-
-<!-- Edit Expense Modal -->
-<div class="modal fade" id="editExpenseModal" tabindex="-1" aria-hidden="true">
-    <div class="modal-dialog modal-lg modal-dialog-centered">
-        <div class="modal-content border-0 shadow-lg" style="border-radius: 20px; overflow: hidden;">
-            <form id="editExpenseForm" method="POST" enctype="multipart/form-data">
-                @csrf
-                @method('PUT')
-                <div class="modal-header border-0 px-4 pt-4 pb-2" style="background: linear-gradient(135deg, rgba(59,130,246,0.08) 0%, rgba(99,102,241,0.08) 100%);">
-                    <div>
-                        <h5 class="modal-title fw-900 mb-1" style="letter-spacing: -0.3px;">
-                            <i class="fas fa-pen-nib text-info me-2"></i>{{ __('Modify Expense') }}
-                        </h5>
-                        <p class="text-muted x-small mb-0">{{ __('Update the details of this expense record') }}</p>
-                    </div>
-                    <button type="button" class="btn-close" data-bs-dismiss="modal"></button>
-                </div>
-                <div class="modal-body px-4 py-4">
-                    <div class="row g-3">
-                        <div class="col-md-6">
-                            <label class="form-label x-small fw-bold text-uppercase text-muted ls-1">{{ __('Category') }}</label>
-                            <select name="category" id="edit_category" class="form-select border-0 shadow-sm" style="background:#f8f9fb;border-radius:10px;padding:12px;" required>
-                                @foreach($categories as $cat => $subs)
-                                    <option value="{{ $cat }}">{{ ucfirst(__($cat)) }}</option>
-                                @endforeach
-                            </select>
-                        </div>
-                        <div class="col-md-6">
-                            <label class="form-label x-small fw-bold text-uppercase text-muted ls-1">{{ __('Date') }}</label>
-                            <input type="date" name="expense_date" id="edit_date" class="form-control border-0 shadow-sm" style="background:#f8f9fb;border-radius:10px;padding:12px;" required>
-                        </div>
-                        <div class="col-md-6">
-                            <label class="form-label x-small fw-bold text-uppercase text-muted ls-1">{{ __('Description (AR)') }}</label>
-                            <input type="text" name="description" id="edit_desc" class="form-control border-0 shadow-sm" style="background:#f8f9fb;border-radius:10px;padding:12px;" required>
-                        </div>
-                        <div class="col-md-6">
-                            <label class="form-label x-small fw-bold text-uppercase text-muted ls-1">{{ __('Description (EN)') }}</label>
-                            <input type="text" name="description_en" id="edit_desc_en" class="form-control border-0 shadow-sm" style="background:#f8f9fb;border-radius:10px;padding:12px;">
-                        </div>
-                        <div class="col-md-6">
-                            <label class="form-label x-small fw-bold text-uppercase text-muted ls-1">{{ __('Amount') }}</label>
-                            <div class="input-group shadow-sm" style="border-radius:10px;overflow:hidden;">
-                                <span class="input-group-text border-0 fw-bold text-primary" style="background:#f8f9fb;">$</span>
-                                <input type="number" name="amount" id="edit_amount" class="form-control border-0 fw-bold" style="background:#f8f9fb;padding:12px;" step="0.01" required>
-                            </div>
-                        </div>
-                        <div class="col-md-6">
-                            <label class="form-label x-small fw-bold text-uppercase text-muted ls-1">{{ __('Payment Method') }}</label>
-                            <select name="payment_method" id="edit_payment" class="form-select border-0 shadow-sm" style="background:#f8f9fb;border-radius:10px;padding:12px;" required>
-                                <option value="cash">💵 {{ __('Cash') }}</option>
-                                <option value="bank_transfer">🏦 {{ __('Bank Transfer') }}</option>
-                                <option value="card">💳 {{ __('Card') }}</option>
-                                <option value="cheque">📝 {{ __('Cheque') }}</option>
-                            </select>
-                        </div>
-                        <div class="col-md-12">
-                            <label class="form-label x-small fw-bold text-uppercase text-muted ls-1">{{ __('Replace Attachment') }} <span class="text-muted fw-normal">({{ __('Optional') }})</span></label>
-                            <input type="file" name="attachment" class="form-control border-0 shadow-sm" style="background:#f8f9fb;border-radius:10px;padding:10px;">
-                        </div>
-                    </div>
-                </div>
-                <div class="modal-footer border-0 px-4 pb-4 pt-0">
-                    <button type="button" class="btn btn-light px-4 py-2 rounded-pill fw-bold" data-bs-dismiss="modal">{{ __('Cancel') }}</button>
-                    <button type="submit" class="btn btn-info text-white px-5 py-2 rounded-pill fw-bold shadow-sm">
-                        <i class="fas fa-save me-2"></i>{{ __('Update Expense') }}
-                    </button>
-                </div>
-            </form>
-        </div>
-    </div>
+<!-- Modal Overlay -->
+<div class="modal-overlay" id="expense-modal-overlay" onclick="if(event.target===this)closeExpenseModal()" style="display:none;position:fixed;inset:0;background:rgba(0,0,0,0.5);z-index:200;align-items:center;justify-content:center;">
+    <div id="expense-modal-box" style="background:var(--bg2,#fff);padding:24px;border-radius:16px;width:100%;max-width:560px;max-height:90vh;overflow-y:auto;box-shadow:0 20px 60px rgba(0,0,0,0.2);"></div>
 </div>
 @endsection
 
 @push('scripts')
 <script>
-    // Store all expenses data for the edit modal
     const expensesData = @json($expenses->items());
+    const categoryOptions = `@foreach($categories as $cat => $subs)<option value="{{ $cat }}">{{ ucfirst(__($cat)) }}</option>@endforeach`;
+
+    function openAddExpenseModal() {
+        const html = `
+            <div style="display:flex;justify-content:space-between;align-items:center;margin-bottom:20px;">
+                <h3 style="font-size:18px;font-weight:700;color:var(--tx,#191c1e);margin:0;">{{ __('Log New Expense') }}</h3>
+                <button type="button" onclick="closeExpenseModal()" style="background:none;border:none;font-size:22px;color:var(--tx2,#555);cursor:pointer;padding:4px;">✕</button>
+            </div>
+            <form action="{{ route('expenses.store') }}" method="POST">
+                @csrf
+                <div style="display:grid;grid-template-columns:1fr 1fr;gap:12px;">
+                    <div>
+                        <label style="display:block;font-size:12px;font-weight:600;color:var(--tx2);margin-bottom:4px;">{{ __('Category') }}</label>
+                        <select name="category" required>${categoryOptions}</select>
+                    </div>
+                    <div>
+                        <label style="display:block;font-size:12px;font-weight:600;color:var(--tx2);margin-bottom:4px;">{{ __('Date') }}</label>
+                        <input type="date" name="expense_date" value="{{ date('Y-m-d') }}" required>
+                    </div>
+                    <div>
+                        <label style="display:block;font-size:12px;font-weight:600;color:var(--tx2);margin-bottom:4px;">{{ __('Description (AR)') }}</label>
+                        <input type="text" name="description" required>
+                    </div>
+                    <div>
+                        <label style="display:block;font-size:12px;font-weight:600;color:var(--tx2);margin-bottom:4px;">{{ __('Amount') }}</label>
+                        <input type="number" name="amount" step="0.01" required>
+                    </div>
+                    <div>
+                        <label style="display:block;font-size:12px;font-weight:600;color:var(--tx2);margin-bottom:4px;">{{ __('Payment Method') }}</label>
+                        <select name="payment_method" required>
+                            <option value="cash">{{ __('Cash') }}</option>
+                            <option value="bank_transfer">{{ __('Bank Transfer') }}</option>
+                            <option value="card">{{ __('Card') }}</option>
+                        </select>
+                    </div>
+                </div>
+                <div style="display:flex;gap:8px;margin-top:20px;">
+                    <button type="button" class="btn btn-o" onclick="closeExpenseModal()">{{ __('Cancel') }}</button>
+                    <button type="submit" class="btn btn-pr" style="flex:1;">{{ __('Save') }}</button>
+                </div>
+            </form>
+        `;
+        renderExpenseModal(html);
+    }
 
     function editExpense(id) {
-        const expense = expensesData.find(e => e.id === id);
-        if (!expense) return;
+        const e = expensesData.find(x => x.id === id);
+        if (!e) return;
 
-        // Set form action
-        document.getElementById('editExpenseForm').action = `/expenses/${id}`;
+        const html = `
+            <div style="display:flex;justify-content:space-between;align-items:center;margin-bottom:20px;">
+                <h3 style="font-size:18px;font-weight:700;color:var(--tx,#191c1e);margin:0;">{{ __('Modify Expense') }}</h3>
+                <button type="button" onclick="closeExpenseModal()" style="background:none;border:none;font-size:22px;color:var(--tx2,#555);cursor:pointer;padding:4px;">✕</button>
+            </div>
+            <form action="/expenses/${e.id}" method="POST">
+                @csrf
+                @method('PUT')
+                <div style="display:grid;grid-template-columns:1fr 1fr;gap:12px;">
+                    <div>
+                        <label style="display:block;font-size:12px;font-weight:600;color:var(--tx2);margin-bottom:4px;">{{ __('Category') }}</label>
+                        <select name="category">${categoryOptions.replace('value="'+e.category+'"', 'value="'+e.category+'" selected')}</select>
+                    </div>
+                    <div>
+                        <label style="display:block;font-size:12px;font-weight:600;color:var(--tx2);margin-bottom:4px;">{{ __('Date') }}</label>
+                        <input type="date" name="expense_date" value="${e.expense_date ? e.expense_date.substring(0,10) : ''}" required>
+                    </div>
+                    <div>
+                        <label style="display:block;font-size:12px;font-weight:600;color:var(--tx2);margin-bottom:4px;">{{ __('Description (AR)') }}</label>
+                        <input type="text" name="description" value="${e.description || ''}" required>
+                    </div>
+                    <div>
+                        <label style="display:block;font-size:12px;font-weight:600;color:var(--tx2);margin-bottom:4px;">{{ __('Amount') }}</label>
+                        <input type="number" name="amount" step="0.01" value="${e.amount || ''}" required>
+                    </div>
+                    <div>
+                        <label style="display:block;font-size:12px;font-weight:600;color:var(--tx2);margin-bottom:4px;">{{ __('Payment Method') }}</label>
+                        <select name="payment_method">
+                            <option value="cash" ${e.payment_method==='cash'?'selected':''}>{{ __('Cash') }}</option>
+                            <option value="bank_transfer" ${e.payment_method==='bank_transfer'?'selected':''}>{{ __('Bank Transfer') }}</option>
+                            <option value="card" ${e.payment_method==='card'?'selected':''}>{{ __('Card') }}</option>
+                        </select>
+                    </div>
+                </div>
+                <div style="display:flex;gap:8px;margin-top:20px;">
+                    <button type="button" class="btn btn-o" onclick="closeExpenseModal()">{{ __('Cancel') }}</button>
+                    <button type="submit" class="btn btn-pr" style="flex:1;">{{ __('Update') }}</button>
+                </div>
+            </form>
+        `;
+        renderExpenseModal(html);
+    }
 
-        // Populate fields
-        document.getElementById('edit_category').value = expense.category || '';
-        document.getElementById('edit_date').value = expense.expense_date ? expense.expense_date.substring(0, 10) : '';
-        document.getElementById('edit_desc').value = expense.description || '';
-        document.getElementById('edit_desc_en').value = expense.description_en || '';
-        document.getElementById('edit_amount').value = expense.amount || '';
-        document.getElementById('edit_payment').value = expense.payment_method || 'cash';
+    function renderExpenseModal(html) {
+        document.getElementById('expense-modal-box').innerHTML = html;
+        const overlay = document.getElementById('expense-modal-overlay');
+        overlay.style.display = 'flex';
+    }
 
-        // Show the modal
-        new bootstrap.Modal(document.getElementById('editExpenseModal')).show();
+    function closeExpenseModal() {
+        document.getElementById('expense-modal-overlay').style.display = 'none';
     }
 </script>
 @endpush
