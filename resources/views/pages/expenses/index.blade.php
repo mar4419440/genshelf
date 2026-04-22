@@ -90,13 +90,13 @@
             </h2>
             <p class="text-muted mb-0">{{ __('Enterprise-grade expense tracking & reconciliation') }}</p>
         </div>
-        <div class="col-md-6 text-end">
+        <div class="col-md-6 text-end d-flex gap-2 justify-content-end">
+            <button class="btn btn-outline-primary px-4 py-3 rounded-pill fw-bold" type="button" data-bs-toggle="collapse" data-bs-target="#filterCollapse" aria-expanded="false">
+                <i class="fas fa-filter me-2"></i>{{ __('Filters') }}
+            </button>
             <button class="btn btn-primary px-4 py-3 rounded-pill fw-bold floating-btn" data-bs-toggle="modal" data-bs-target="#addExpenseModal">
                 <i class="fas fa-plus-circle me-2"></i>{{ __('Log Expense') }}
             </button>
-            <a href="{{ route('expenses.summary') }}" class="btn btn-white border shadow-sm px-4 py-3 rounded-pill ms-2 fw-bold">
-                <i class="fas fa-analytics me-2"></i>{{ __('Intelligence') }}
-            </a>
         </div>
     </div>
 
@@ -161,49 +161,51 @@
         </div>
     </div>
 
-    <!-- Smart Filter Bar -->
-    <div class="glass-filter px-4 py-3 mb-5">
-        <form action="{{ route('expenses.index') }}" method="GET" class="row g-3 align-items-center">
-            <div class="col-md-3">
-                <div class="input-group">
-                    <span class="input-group-text bg-transparent border-0 pe-0"><i class="fas fa-search text-muted"></i></span>
-                    <input type="text" name="search" class="form-control border-0 bg-transparent px-3" placeholder="{{ __('What are you looking for?') }}" value="{{ request('search') }}">
+    <!-- Smart Filter Bar (Collapsible) -->
+    <div class="collapse {{ request()->hasAny(['search', 'category', 'period', 'status']) ? 'show' : '' }} mb-5" id="filterCollapse">
+        <div class="glass-filter px-4 py-3">
+            <form action="{{ route('expenses.index') }}" method="GET" class="row g-3 align-items-center">
+                <div class="col-md-3">
+                    <div class="input-group">
+                        <span class="input-group-text bg-transparent border-0 pe-0"><i class="fas fa-search text-muted"></i></span>
+                        <input type="text" name="search" class="form-control border-0 bg-transparent px-3" placeholder="{{ __('What are you looking for?') }}" value="{{ request('search') }}">
+                    </div>
                 </div>
-            </div>
-            <div class="col-md-2">
-                <select name="category" class="form-select border-0 bg-transparent fw-bold text-primary">
-                    <option value="">{{ __('All Categories') }}</option>
-                    @foreach($categories as $cat => $subs)
-                        <option value="{{ $cat }}" {{ request('category') == $cat ? 'selected' : '' }}>{{ ucfirst(__($cat)) }}</option>
-                    @endforeach
-                </select>
-            </div>
-            <div class="col-md-2">
-                <select name="period" class="form-select border-0 bg-transparent fw-bold">
-                    <option value="" {{ !request('period') ? 'selected' : '' }}>{{ __('All Time') }}</option>
-                    <option value="today" {{ request('period') == 'today' ? 'selected' : '' }}>{{ __('Today') }}</option>
-                    <option value="this_week" {{ request('period') == 'this_week' ? 'selected' : '' }}>{{ __('This Week') }}</option>
-                    <option value="this_month" {{ request('period') == 'this_month' ? 'selected' : '' }}>{{ __('This Month') }}</option>
-                    <option value="this_year" {{ request('period') == 'this_year' ? 'selected' : '' }}>{{ __('This Year') }}</option>
-                </select>
-            </div>
-            <div class="col-md-2">
-                <select name="status" class="form-select border-0 bg-transparent fw-bold">
-                    <option value="" {{ !request('status') ? 'selected' : '' }}>{{ __('All Statuses') }}</option>
-                    <option value="approved" {{ request('status') == 'approved' ? 'selected' : '' }}>{{ __('Approved') }}</option>
-                    <option value="draft" {{ request('status') == 'draft' ? 'selected' : '' }}>{{ __('Draft') }}</option>
-                    <option value="rejected" {{ request('status') == 'rejected' ? 'selected' : '' }}>{{ __('Rejected') }}</option>
-                </select>
-            </div>
-            <div class="col-md-3 text-end d-flex gap-2">
-                <button type="submit" class="btn btn-primary px-4 rounded-pill shadow-sm flex-grow-1">{{ __('Filter') }}</button>
-                @if(request()->hasAny(['search', 'category', 'period', 'status']))
-                    <a href="{{ route('expenses.index') }}" class="btn btn-outline-danger px-3 rounded-pill shadow-sm" title="{{ __('Clear all filters') }}">
-                        <i class="fas fa-times me-1"></i>{{ __('Clear') }}
-                    </a>
-                @endif
-            </div>
-        </form>
+                <div class="col-md-2">
+                    <select name="category" class="form-select border-0 bg-transparent fw-bold text-primary">
+                        <option value="">{{ __('All Categories') }}</option>
+                        @foreach($categories as $cat => $subs)
+                            <option value="{{ $cat }}" {{ request('category') == $cat ? 'selected' : '' }}>{{ ucfirst(__($cat)) }}</option>
+                        @endforeach
+                    </select>
+                </div>
+                <div class="col-md-2">
+                    <select name="period" class="form-select border-0 bg-transparent fw-bold">
+                        <option value="" {{ !request('period') ? 'selected' : '' }}>{{ __('All Time') }}</option>
+                        <option value="today" {{ request('period') == 'today' ? 'selected' : '' }}>{{ __('Today') }}</option>
+                        <option value="this_week" {{ request('period') == 'this_week' ? 'selected' : '' }}>{{ __('This Week') }}</option>
+                        <option value="this_month" {{ request('period') == 'this_month' ? 'selected' : '' }}>{{ __('This Month') }}</option>
+                        <option value="this_year" {{ request('period') == 'this_year' ? 'selected' : '' }}>{{ __('This Year') }}</option>
+                    </select>
+                </div>
+                <div class="col-md-2">
+                    <select name="status" class="form-select border-0 bg-transparent fw-bold">
+                        <option value="" {{ !request('status') ? 'selected' : '' }}>{{ __('All Statuses') }}</option>
+                        <option value="approved" {{ request('status') == 'approved' ? 'selected' : '' }}>{{ __('Approved') }}</option>
+                        <option value="draft" {{ request('status') == 'draft' ? 'selected' : '' }}>{{ __('Draft') }}</option>
+                        <option value="rejected" {{ request('status') == 'rejected' ? 'selected' : '' }}>{{ __('Rejected') }}</option>
+                    </select>
+                </div>
+                <div class="col-md-3 text-end d-flex gap-2">
+                    <button type="submit" class="btn btn-primary px-4 rounded-pill shadow-sm flex-grow-1">{{ __('Filter') }}</button>
+                    @if(request()->hasAny(['search', 'category', 'period', 'status']))
+                        <a href="{{ route('expenses.index') }}" class="btn btn-outline-danger px-3 rounded-pill shadow-sm" title="{{ __('Clear all filters') }}">
+                            <i class="fas fa-times me-1"></i>{{ __('Clear') }}
+                        </a>
+                    @endif
+                </div>
+            </form>
+        </div>
     </div>
 
     <!-- Main List Card -->

@@ -34,7 +34,7 @@
                 <tbody>
                     @foreach($pnlTable as $row)
                     <tr>
-                        <td class="ps-4 fw-bold text-dark">{{ $row['month'] }}</td>
+                        <td class="ps-4 fw-bold text-dark">{{ __($row['month']) }}</td>
                         <td>{{ number_format($row['revenue'], 2) }}</td>
                         <td class="text-muted">{{ number_format($row['cogs'], 2) }}</td>
                         <td class="text-success fw-bold">{{ number_format($row['gross_profit'], 2) }}</td>
@@ -70,5 +70,11 @@
     .bg-soft-success { background: rgba(25, 135, 84, 0.05); }
     .bg-soft-danger { background: rgba(220, 53, 69, 0.05); }
     .x-small { font-size: 11px; letter-spacing: 0.05em; font-weight: 800; }
+    [dir="rtl"] .me-2 { margin-left: 0.5rem !important; margin-right: 0 !important; }
+    [dir="rtl"] .text-end { text-align: left !important; }
+    [dir="rtl"] .pe-4 { padding-left: 1.5rem !important; padding-right: 0 !important; }
+    [dir="rtl"] .ps-4 { padding-right: 1.5rem !important; padding-left: 0 !important; }
+    [dir="rtl"] th, [dir="rtl"] td { text-align: right !important; }
+    [dir="rtl"] .text-end { text-align: left !important; }
 </style>
 @endsection

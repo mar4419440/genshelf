@@ -42,7 +42,7 @@
                             <span class="fw-bold text-dark">{{ $p->name }}</span>
                         </td>
                         <td>
-                            <span class="badge bg-light text-dark border fw-normal">{{ $p->category }}</span>
+                            <span class="badge bg-light text-dark border fw-normal">{{ __($p->category) }}</span>
                         </td>
                         <td class="fw-bold">{{ number_format($p->units_sold) }}</td>
                         <td class="text-primary fw-bold">{{ number_format($p->revenue, 2) }}</td>
@@ -66,5 +66,11 @@
 
 <style>
     .x-small { font-size: 11px; }
+    [dir="rtl"] .me-2 { margin-left: 0.5rem !important; margin-right: 0 !important; }
+    [dir="rtl"] .text-end { text-align: left !important; }
+    [dir="rtl"] .pe-4 { padding-left: 1.5rem !important; padding-right: 0 !important; }
+    [dir="rtl"] .ps-4 { padding-right: 1.5rem !important; padding-left: 0 !important; }
+    [dir="rtl"] th, [dir="rtl"] td { text-align: right !important; }
+    [dir="rtl"] .text-end { text-align: left !important; }
 </style>
 @endsection

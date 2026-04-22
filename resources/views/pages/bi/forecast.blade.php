@@ -21,7 +21,7 @@
                 <div class="col-md-4">
                     <div class="card border-0 shadow-sm p-4 bg-white text-center">
                         <span class="badge bg-soft-primary text-primary rounded-pill mb-2 w-50 mx-auto border border-primary">
-                            {{ Carbon\Carbon::now()->addMonths($i + 1)->format('F Y') }}
+                            {{ __(Carbon\Carbon::now()->addMonths($i + 1)->format('F')) }} {{ Carbon\Carbon::now()->addMonths($i + 1)->format('Y') }}
                         </span>
                         <h3 class="fw-bold text-dark mb-1">{{ number_format($amount, 2) }}</h3>
                         <span class="text-muted small">{{ __('Estimated Revenue') }}</span>
@@ -40,7 +40,7 @@
     
     // Process historical data
     const historical = {!! json_encode($historical->pluck('revenue')) !!};
-    const labels = {!! json_encode($historical->map(fn($h) => Carbon\Carbon::create($h->year, $h->month, 1)->format('M Y'))) !!};
+    const labels = {!! json_encode($historical->map(fn($h) => __(Carbon\Carbon::create($h->year, $h->month, 1)->format('F')) . ' ' . $h->year)) !!};
     
     // Process forecast data
     const forecast = {!! json_encode($forecast) !!};
@@ -64,7 +64,7 @@
             labels: combinedLabels,
             datasets: [
                 {
-                    label: 'Historical Revenue',
+                    label: '{{ __("Historical Revenue") }}',
                     data: histData,
                     borderColor: '#4361ee',
                     backgroundColor: 'rgba(67, 97, 238, 0.1)',
@@ -72,7 +72,7 @@
                     tension: 0.3
                 },
                 {
-                    label: 'Projected Forecast',
+                    label: '{{ __("Projected Forecast") }}',
                     data: forecastData,
                     borderColor: '#f72585',
                     borderDash: [5, 5],
@@ -94,6 +94,10 @@
 
 <style>
     .bg-soft-primary { background: rgba(67, 97, 238, 0.05); }
+    [dir="rtl"] .me-2 { margin-left: 0.5rem !important; margin-right: 0 !important; }
+    [dir="rtl"] .text-center { text-align: center !important; }
+    [dir="rtl"] .mx-auto { margin-left: auto !important; margin-right: auto !important; }
+    [dir="rtl"] .flex-row-reverse { flex-direction: row-reverse !important; }
 </style>
 @endpush
 @endsection

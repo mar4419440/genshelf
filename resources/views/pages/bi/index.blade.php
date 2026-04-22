@@ -78,15 +78,15 @@
                 <div class="mb-4">
                     <span class="text-muted small d-block mb-2">{{ __('Revenue Distribution') }}</span>
                     <div class="d-flex justify-content-between x-small fw-bold mb-1">
-                        <span>Net Profit</span>
+                        <span>{{ __('Net Profit') }}</span>
                         <span>{{ number_format($kpis->revenue - $kpis->expenses, 2) }}</span>
                     </div>
                     <div class="progress" style="height: 20px; border-radius: 6px;">
                         @php 
                             $profitPct = $kpis->revenue > 0 ? (($kpis->revenue - $kpis->expenses) / $kpis->revenue) * 100 : 0;
                         @endphp
-                        <div class="progress-bar bg-success" style="width: {{ max(0, $profitPct) }}%">Profit</div>
-                        <div class="progress-bar bg-danger" style="width: {{ 100 - max(0, $profitPct) }}%">Exp</div>
+                        <div class="progress-bar bg-success" style="width: {{ max(0, $profitPct) }}%">{{ __('Profit') }}</div>
+                        <div class="progress-bar bg-danger" style="width: {{ 100 - max(0, $profitPct) }}%">{{ __('Exp') }}</div>
                     </div>
                 </div>
 
@@ -123,9 +123,9 @@
                     <table class="table table-hover align-middle mb-0">
                         <thead class="bg-light">
                             <tr class="x-small text-muted">
-                                <th class="ps-4 border-0">PRODUCT</th>
-                                <th class="border-0">UNITS</th>
-                                <th class="border-0 text-end pe-4">REVENUE</th>
+                                <th class="ps-4 border-0">{{ __('PRODUCT') }}</th>
+                                <th class="border-0">{{ __('UNITS') }}</th>
+                                <th class="border-0 text-end pe-4">{{ __('REVENUE') }}</th>
                             </tr>
                         </thead>
                         <tbody>
@@ -152,11 +152,11 @@
                 </div>
                 <div class="card-body p-0 mt-2">
                     <table class="table table-hover align-middle mb-0">
-                        <thead class="bg-light">
+                         <thead class="bg-light">
                             <tr class="x-small text-muted">
-                                <th class="ps-4 border-0">CUSTOMER</th>
-                                <th class="border-0">ORDERS</th>
-                                <th class="border-0 text-end pe-4">LTV</th>
+                                <th class="ps-4 border-0">{{ __('CUSTOMER') }}</th>
+                                <th class="border-0">{{ __('ORDERS') }}</th>
+                                <th class="border-0 text-end pe-4">{{ __('LTV') }}</th>
                             </tr>
                         </thead>
                         <tbody>
@@ -211,6 +211,11 @@
     .btn-soft-primary:hover, .btn-soft-success:hover { transform: scale(1.1); filter: brightness(0.9); }
     .x-small { font-size: 11px; }
     .btn-white { background: #fff; }
+    [dir="rtl"] .me-2 { margin-left: 0.5rem !important; margin-right: 0 !important; }
+    [dir="rtl"] .ms-2 { margin-right: 0.5rem !important; margin-left: 0 !important; }
+    [dir="rtl"] .text-end { text-align: left !important; }
+    [dir="rtl"] .pe-4 { padding-left: 1.5rem !important; padding-right: 0 !important; }
+    [dir="rtl"] .ps-4 { padding-right: 1.5rem !important; padding-left: 0 !important; }
 </style>
 @endpush
 @endsection
