@@ -1,174 +1,250 @@
 @extends('layouts.app')
 
+@php
+    $currency = DB::table('settings')->where('key', 'currency')->value('value') ?: 'EGP';
+@endphp
+
+@push('styles')
+<script src="https://cdn.tailwindcss.com?plugins=forms,container-queries"></script>
+<script>
+    tailwind.config = {
+        theme: {
+            extend: {
+                colors: {
+                    'primary': '#3a24d8',
+                    'on-primary': '#ffffff',
+                    'primary-container': '#5446f0',
+                    'on-primary-container': '#e1ddff',
+                    'secondary': '#505f76',
+                    'surface': '#f9f9ff',
+                    'on-surface': '#111c2d',
+                    'on-surface-variant': '#464556',
+                    'outline': '#777587',
+                    'outline-variant': '#c7c4d8',
+                    'surface-container-lowest': '#ffffff',
+                    'surface-container-low': '#f0f3ff',
+                    'surface-container': '#e7eeff',
+                    'surface-container-high': '#dee8ff',
+                    'surface-container-highest': '#d8e3fb',
+                    'error': '#ba1a1a',
+                },
+                fontFamily: {
+                    'manrope': ['Manrope', 'sans-serif'],
+                    'inter': ['Inter', 'sans-serif'],
+                },
+                borderRadius: {
+                    'xl': '0.75rem',
+                    '2xl': '1rem',
+                }
+            }
+        }
+    }
+</script>
+<style>
+    .font-manrope { font-family: 'Manrope', sans-serif; }
+    .font-inter { font-family: 'Inter', sans-serif; }
+    .bg-grid-white { background-image: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='100' height='100' viewBox='0 0 100 100'%3E%3Cg fill-rule='evenodd'%3E%3Cg fill='%23ffffff' fill-opacity='0.1'%3E%3Cpath d='M92 40h8v10h-8V40zm0 0h8V30h-8v10zm0 20h8v10h-8V60zm0 0h8v10h-8V60zM76 50h8v10h-8V50zm0 0h8V40h-8v10zm0 20h8v10h-8V70zm0 0h8v10h-8V70zM60 40h8v10h-8V40zm0 0h8V30h-8v10zm0 20h8v10h-8V60zm0 0h8v10h-8V60zM44 50h8v10h-8V50zm0 0h8V40h-8v10zm0 20h8v10h-8V70zm0 0h8v10h-8V70zM28 40h8v10h-8V40zm0 0h8V30h-8v10zm0 20h8v10h-8V60zm0 0h8v10h-8V60zM12 50h8v10h-8V50zm0 0h8V40h-8v10zm0 20h8v10h-8V70zm0 0h8v10h-8V70z'/%3E%3C/g%3E%3C/g%3E%3C/svg%3E"); }
+</style>
+@endpush
+
 @section('content')
-<div class="container-fluid">
-    <div class="row mb-4 align-items-center">
-        <div class="col-md-6 {{ app()->getLocale() === 'ar' ? 'text-right' : '' }}">
-            <h2 class="fw-bold"><i class="fas fa-brain {{ app()->getLocale() === 'ar' ? 'ms-2' : 'me-2' }} text-primary"></i>{{ __('Business Intelligence') }}</h2>
-            <p class="text-muted">{{ __('Data-driven insights for your retail operation') }}</p>
+<div class="tw-wrapper font-inter text-on-surface bg-surface min-h-screen pb-12">
+    <!-- Header -->
+    <div class="flex flex-col md:flex-row md:items-center justify-between gap-4 mb-8 px-4">
+        <div class="{{ app()->getLocale() === 'ar' ? 'text-right' : 'text-left' }}">
+            <h1 class="font-manrope font-extrabold text-3xl text-primary tracking-tight flex items-center gap-2">
+                <span class="material-symbols-outlined text-4xl">analytics</span>
+                {{ __('Intelligence Overview') }}
+            </h1>
+            <p class="text-on-surface-variant mt-1">{{ __('Data-driven insights for your retail operation') }}</p>
         </div>
-        <div class="col-md-6 {{ app()->getLocale() === 'ar' ? 'text-start' : 'text-end' }}">
-            <form action="{{ route('bi.index') }}" method="GET" class="d-inline-flex gap-2">
-                <select name="period" class="form-select border-0 shadow-sm bg-white" onchange="this.form.submit()">
+        <div class="flex items-center gap-3">
+            <form action="{{ route('bi.index') }}" method="GET" class="flex gap-2">
+                <select name="period" class="bg-white border border-outline-variant px-4 py-2 rounded-xl text-sm font-semibold outline-none focus:border-primary transition-colors" onchange="this.form.submit()">
                     <option value="today" {{ $period == 'today' ? 'selected' : '' }}>{{ __('Today') }}</option>
                     <option value="this_week" {{ $period == 'this_week' ? 'selected' : '' }}>{{ __('This Week') }}</option>
                     <option value="this_month" {{ $period == 'this_month' ? 'selected' : '' }}>{{ __('This Month') }}</option>
                     <option value="this_year" {{ $period == 'this_year' ? 'selected' : '' }}>{{ __('This Year') }}</option>
                 </select>
-                <button type="button" class="btn btn-white border shadow-sm px-3" onclick="window.print()">
-                    <i class="fas fa-download"></i>
+                <button type="button" class="bg-white border border-outline-variant p-2 rounded-xl hover:bg-slate-50 transition-colors shadow-sm" onclick="window.print()">
+                    <span class="material-symbols-outlined text-on-surface-variant">download</span>
                 </button>
             </form>
         </div>
     </div>
 
-    <!-- MAIN KPIs -->
-    <div class="row mb-4">
-        @foreach([
-            ['label' => 'Total Revenue', 'value' => $kpis->revenue, 'prev' => $previousKpis->revenue, 'icon' => 'fa-cash-register', 'color' => 'primary'],
-            ['label' => 'Gross Profit', 'value' => $kpis->revenue - $kpis->expenses, 'prev' => $previousKpis->revenue - $previousKpis->expenses, 'icon' => 'fa-coins', 'color' => 'success'],
-            ['label' => 'Total Expenses', 'value' => $kpis->expenses, 'prev' => $previousKpis->expenses, 'icon' => 'fa-receipt', 'color' => 'danger'],
-            ['label' => 'Avg Order Value', 'value' => $kpis->aov, 'prev' => $previousKpis->aov, 'icon' => 'fa-shopping-basket', 'color' => 'warning'],
-        ] as $kpi)
-        <div class="col-md-3">
-            <div class="card border-0 shadow-sm p-4 bg-white">
-                <div class="d-flex justify-content-between align-items-start mb-2">
-                    <div class="bg-light p-2 rounded-3 text-{{ $kpi['color'] }}">
-                        <i class="fas {{ $kpi['icon'] }} fa-lg"></i>
-                    </div>
-                    @php 
-                        $diff = $kpi['prev'] > 0 ? (($kpi['value'] - $kpi['prev']) / $kpi['prev']) * 100 : ($kpi['value'] > 0 ? 100 : 0);
-                    @endphp
-                    <span class="x-small px-2 py-1 rounded-pill {{ $diff >= 0 ? 'bg-soft-success text-success' : 'bg-soft-danger text-danger' }}">
-                        <i class="fas fa-arrow-{{ $diff >= 0 ? 'up' : 'down' }} me-1"></i>{{ abs(round($diff, 1)) }}%
-                    </span>
+    <!-- KPI Bento Grid -->
+    <div class="grid grid-cols-1 md:grid-cols-4 gap-6 px-4 mb-8">
+        <!-- Revenue Hero (Spans 2) -->
+        <div class="md:col-span-2 bg-primary-container p-8 rounded-2xl shadow-xl shadow-primary/10 text-on-primary-container relative overflow-hidden flex flex-col justify-between min-h-[220px]">
+            <div class="absolute top-0 right-0 w-64 h-64 bg-white/10 rounded-full -mr-32 -mt-32 blur-3xl"></div>
+            <div class="relative z-10">
+                <div class="flex justify-between items-start mb-4">
+                    <span class="font-manrope font-bold text-xs uppercase tracking-widest opacity-80">{{ __('TOTAL REVENUE') }}</span>
+                    <span class="material-symbols-outlined">trending_up</span>
                 </div>
-                <span class="text-muted small fw-bold mb-1">{{ __($kpi['label']) }}</span>
-                <h3 class="fw-bold mb-0 lh-1">{{ number_format($kpi['value'], 2) }}</h3>
+                <div class="font-manrope font-extrabold text-5xl text-white mb-4 tracking-tighter">
+                    {{ number_format($kpis->revenue, 2) }} <span class="text-2xl font-medium opacity-80">{{ $currency }}</span>
+                </div>
+            </div>
+            <div class="relative z-10 flex items-center gap-3">
+                @php 
+                    $revDiff = $previousKpis->revenue > 0 ? (($kpis->revenue - $previousKpis->revenue) / $previousKpis->revenue) * 100 : 0;
+                @endphp
+                <span class="bg-white/20 px-3 py-1 rounded-lg text-xs font-bold flex items-center gap-1">
+                    <span class="material-symbols-outlined text-sm">{{ $revDiff >= 0 ? 'arrow_upward' : 'arrow_downward' }}</span>
+                    {{ abs(round($revDiff, 1)) }}%
+                </span>
+                <span class="text-xs opacity-70">{{ __('vs last month') }}</span>
             </div>
         </div>
-        @endforeach
+
+        <!-- Expenses Tile -->
+        <div class="bg-white p-6 rounded-2xl border border-outline-variant shadow-sm flex flex-col justify-between">
+            <div>
+                <span class="font-manrope font-bold text-[10px] text-secondary uppercase tracking-wider block mb-2">{{ __('EXPENSES') }}</span>
+                <div class="font-manrope font-extrabold text-3xl text-on-surface">
+                    {{ number_format($kpis->expenses, 2) }}
+                </div>
+            </div>
+            <div class="mt-4">
+                @php 
+                    $expDiff = $previousKpis->expenses > 0 ? (($kpis->expenses - $previousKpis->expenses) / $previousKpis->expenses) * 100 : 0;
+                @endphp
+                <div class="flex items-center gap-2 mb-3">
+                    <span class="{{ $expDiff <= 0 ? 'text-emerald-600' : 'text-error' }} text-xs font-bold flex items-center gap-1">
+                        <span class="material-symbols-outlined text-sm">{{ $expDiff <= 0 ? 'arrow_downward' : 'arrow_upward' }}</span>
+                        {{ abs(round($expDiff, 1)) }}%
+                    </span>
+                    <span class="text-[10px] text-secondary">{{ __('from last period') }}</span>
+                </div>
+                <div class="h-1.5 w-full bg-surface-container-highest rounded-full overflow-hidden">
+                    <div class="bg-error h-full" style="width: {{ $kpis->revenue > 0 ? min(100, ($kpis->expenses / $kpis->revenue) * 100) : 0 }}%;"></div>
+                </div>
+            </div>
+        </div>
+
+        <!-- Net Profit Tile -->
+        <div class="bg-white p-6 rounded-2xl border border-outline-variant shadow-sm flex flex-col justify-between">
+            <div>
+                <span class="font-manrope font-bold text-[10px] text-secondary uppercase tracking-wider block mb-2">{{ __('NET PROFIT') }}</span>
+                <div class="font-manrope font-extrabold text-3xl text-primary">
+                    {{ number_format($kpis->revenue - $kpis->expenses, 2) }}
+                </div>
+            </div>
+            <div class="mt-4">
+                 @php 
+                    $profit = $kpis->revenue - $kpis->expenses;
+                    $prevProfit = $previousKpis->revenue - $previousKpis->expenses;
+                    $profitDiff = $prevProfit > 0 ? (($profit - $prevProfit) / $prevProfit) * 100 : 0;
+                @endphp
+                <div class="flex items-center gap-2 mb-3">
+                    <span class="{{ $profitDiff >= 0 ? 'text-emerald-600' : 'text-error' }} text-xs font-bold flex items-center gap-1">
+                        <span class="material-symbols-outlined text-sm">{{ $profitDiff >= 0 ? 'arrow_upward' : 'arrow_downward' }}</span>
+                        {{ abs(round($profitDiff, 1)) }}%
+                    </span>
+                    <span class="text-[10px] text-secondary">{{ __('growth') }}</span>
+                </div>
+                <div class="h-1.5 w-full bg-surface-container-highest rounded-full overflow-hidden">
+                    <div class="bg-primary h-full" style="width: {{ $kpis->revenue > 0 ? max(0, min(100, (($kpis->revenue - $kpis->expenses) / $kpis->revenue) * 100)) : 0 }}%;"></div>
+                </div>
+            </div>
+        </div>
     </div>
 
-    <div class="row mb-4">
-        <!-- Revenue Chart -->
-        <div class="col-md-8">
-            <div class="card border-0 shadow-sm bg-white p-4 h-100">
-                <h5 class="fw-bold mb-4">{{ __('Revenue Timeline') }}</h5>
-                <div style="position: relative; height: 350px; width: 100%;">
+    <!-- Main Analytics Section -->
+    <div class="grid grid-cols-1 lg:grid-cols-3 gap-8 px-4">
+        <!-- Revenue Timeline -->
+        <div class="lg:col-span-2 space-y-6">
+            <div class="bg-white p-8 rounded-2xl border border-outline-variant shadow-sm">
+                <div class="flex items-center justify-between mb-8">
+                    <h3 class="font-manrope font-bold text-xl text-on-surface">{{ __('Revenue Performance') }}</h3>
+                    <div class="flex items-center gap-4">
+                        <div class="flex items-center gap-2">
+                            <span class="w-3 h-3 rounded-full bg-primary"></span>
+                            <span class="text-xs font-semibold text-secondary">{{ __('Revenue') }}</span>
+                        </div>
+                    </div>
+                </div>
+                <div class="h-[350px] w-full">
                     <canvas id="revenueChart"></canvas>
                 </div>
             </div>
-        </div>
-        <!-- Sales Intelligence -->
-        <div class="col-md-4">
-            <div class="card border-0 shadow-sm bg-white p-4 h-100">
-                <h5 class="fw-bold mb-4">{{ __('Quick Insights') }}</h5>
-                
-                <div class="mb-4">
-                    <span class="text-muted small d-block mb-1">{{ __('Peak Sales Day') }}</span>
-                    @if($salesIntelligence->peak_day)
-                        <h4 class="fw-bold mb-0">{{ __(Carbon\Carbon::parse($salesIntelligence->peak_day->date)->format('l')) }}, {{ Carbon\Carbon::parse($salesIntelligence->peak_day->date)->format('d M') }}</h4>
-                        <span class="text-primary fw-bold">{{ number_format($salesIntelligence->peak_day->revenue, 2) }}</span>
-                    @else
-                        <span class="text-muted italic">{{ __('No data yet') }}</span>
-                    @endif
-                </div>
 
-                <div class="mb-4">
-                    <span class="text-muted small d-block mb-2">{{ __('Revenue Distribution') }}</span>
-                    <div class="d-flex justify-content-between x-small fw-bold mb-1">
-                        <span>{{ __('Net Profit') }}</span>
-                        <span>{{ number_format($kpis->revenue - $kpis->expenses, 2) }}</span>
-                    </div>
-                    <div class="progress" style="height: 20px; border-radius: 6px;">
-                        @php 
-                            $profitPct = $kpis->revenue > 0 ? (($kpis->revenue - $kpis->expenses) / $kpis->revenue) * 100 : 0;
-                        @endphp
-                        <div class="progress-bar bg-success" style="width: {{ max(0, $profitPct) }}%">{{ __('Profit') }}</div>
-                        <div class="progress-bar bg-danger" style="width: {{ 100 - max(0, $profitPct) }}%">{{ __('Exp') }}</div>
-                    </div>
+            <!-- Asymmetric Insight Banner -->
+            <div class="relative bg-on-surface rounded-2xl p-8 overflow-hidden flex items-center justify-between border border-primary/20 shadow-xl">
+                <div class="absolute top-0 left-0 w-full h-full bg-grid-white opacity-5"></div>
+                <div class="relative z-10 w-full lg:w-2/3">
+                    <p class="font-manrope font-bold text-white text-2xl mb-2">{{ __('Predictive Growth Insights') }}</p>
+                    <p class="text-secondary-container text-sm mb-6 leading-relaxed">
+                        {{ __('Based on your historical performance, our AI models can forecast upcoming sales trends and inventory needs.') }}
+                    </p>
+                    <a href="{{ route('bi.forecast') }}" class="inline-flex items-center gap-2 bg-primary text-white font-manrope font-bold text-xs px-6 py-3 rounded-full uppercase tracking-widest shadow-lg hover:bg-primary-container transition-all">
+                        <span class="material-symbols-outlined text-sm">auto_graph</span>
+                        {{ __('Run Analysis') }}
+                    </a>
                 </div>
-
-                <div class="row g-3">
-                    <div class="col-6">
-                        <div class="p-3 bg-light rounded-3">
-                            <span class="x-small text-muted d-block">{{ __('Transactions') }}</span>
-                            <span class="fw-bold h5 mb-0">{{ $kpis->tx_count }}</span>
-                        </div>
-                    </div>
-                     <div class="col-6">
-                        <div class="p-3 bg-light rounded-3">
-                            <span class="x-small text-muted d-block">{{ __('Net Margin') }}</span>
-                            <span class="fw-bold h5 mb-0">{{ $kpis->revenue > 0 ? round((($kpis->revenue - $kpis->expenses)/$kpis->revenue)*100, 1) : 0 }}%</span>
-                        </div>
-                    </div>
+                <div class="absolute right-[-20px] bottom-[-20px] w-48 h-48 opacity-10 hidden lg:block">
+                    <span class="material-symbols-outlined text-white text-[180px]">monitoring</span>
                 </div>
             </div>
         </div>
-    </div>
 
-    <!-- Bottom Tables -->
-    <div class="row">
-        <!-- Top Products -->
-        <div class="col-md-6">
-            <div class="card border-0 shadow-sm bg-white overflow-hidden h-100">
-                <div class="card-header bg-transparent border-0 pt-4 px-4 d-flex justify-content-between align-items-center">
-                    <h5 class="fw-bold mb-0 text-primary"><i class="fas fa-boxes me-2"></i>{{ __('Top Performing Items') }}</h5>
-                    <a href="{{ route('bi.products') }}" class="btn btn-sm btn-soft-primary rounded-circle" style="width:32px;height:32px;" title="{{ __('View All Analytics') }}">
-                        <i class="fas fa-chart-line"></i>
-                    </a>
+        <!-- Sidebar Lists -->
+        <div class="space-y-8">
+            <!-- Top Items -->
+            <div>
+                <div class="flex items-center justify-between mb-4 px-1">
+                    <h3 class="font-manrope font-bold text-lg text-on-surface">{{ __('Top Performing Items') }}</h3>
+                    <a href="{{ route('bi.products') }}" class="text-primary font-manrope font-bold text-xs tracking-widest hover:opacity-70 transition-opacity">{{ __('VIEW ALL') }}</a>
                 </div>
-                <div class="card-body p-0 mt-2">
-                    <table class="table table-hover align-middle mb-0">
-                        <thead class="bg-light">
-                            <tr class="x-small text-muted">
-                                <th class="{{ app()->getLocale() === 'ar' ? 'pe-4' : 'ps-4' }} border-0">{{ __('PRODUCT') }}</th>
-                                <th class="border-0">{{ __('UNITS') }}</th>
-                                <th class="border-0 {{ app()->getLocale() === 'ar' ? 'text-start ps-4' : 'text-end pe-4' }}">{{ __('REVENUE') }}</th>
-                            </tr>
-                        </thead>
-                        <tbody>
-                            @foreach($topProducts as $p)
-                            <tr>
-                                <td class="{{ app()->getLocale() === 'ar' ? 'pe-4' : 'ps-4' }} fw-bold">{{ $p->name }}<br><span class="x-small text-muted">{{ __($p->category) }}</span></td>
-                                <td>{{ number_format($p->units) }}</td>
-                                <td class="{{ app()->getLocale() === 'ar' ? 'text-start ps-4' : 'text-end pe-4' }} fw-bold text-success">{{ number_format($p->revenue, 2) }}</td>
-                            </tr>
-                            @endforeach
-                        </tbody>
-                    </table>
+                <div class="space-y-3">
+                    @foreach($topProducts as $p)
+                    <div class="flex items-center justify-between p-4 bg-white border border-outline-variant rounded-2xl hover:border-primary/30 hover:bg-surface transition-all group">
+                        <div class="flex items-center gap-4">
+                            <div class="w-12 h-12 rounded-xl bg-surface-container flex items-center justify-center group-hover:bg-primary/10 transition-colors">
+                                <span class="material-symbols-outlined text-primary" style="font-variation-settings: 'FILL' 1;">package_2</span>
+                            </div>
+                            <div>
+                                <p class="font-manrope font-bold text-on-surface text-sm truncate w-32">{{ $p->name }}</p>
+                                <p class="font-inter text-secondary text-[11px] uppercase tracking-wider font-semibold">{{ __($p->category) }}</p>
+                            </div>
+                        </div>
+                        <div class="text-right">
+                            <p class="font-manrope font-extrabold text-on-surface text-sm">{{ number_format($p->revenue, 0) }}</p>
+                            <span class="inline-block px-2 py-0.5 rounded-full bg-emerald-50 text-emerald-700 text-[9px] font-bold uppercase tracking-wider">
+                                {{ number_format($p->units) }} {{ __('Units') }}
+                            </span>
+                        </div>
+                    </div>
+                    @endforeach
                 </div>
             </div>
-        </div>
-        <!-- Top Customers -->
-        <div class="col-md-6">
-            <div class="card border-0 shadow-sm bg-white overflow-hidden h-100">
-                 <div class="card-header bg-transparent border-0 pt-4 px-4 d-flex justify-content-between align-items-center">
-                    <h5 class="fw-bold mb-0 text-success"><i class="fas fa-users me-2"></i>{{ __('Valuable Customers') }}</h5>
-                    <a href="{{ route('customers') }}" class="btn btn-sm btn-soft-success rounded-circle" style="width:32px;height:32px;" title="{{ __('Customer CRM') }}">
-                        <i class="fas fa-user-friends"></i>
-                    </a>
+
+            <!-- Top Customers -->
+            <div>
+                <div class="flex items-center justify-between mb-4 px-1 mt-4">
+                    <h3 class="font-manrope font-bold text-lg text-on-surface">{{ __('Valuable Customers') }}</h3>
+                    <a href="{{ route('customers') }}" class="text-primary font-manrope font-bold text-xs tracking-widest hover:opacity-70 transition-opacity">{{ __('MANAGE CRM') }}</a>
                 </div>
-                <div class="card-body p-0 mt-2">
-                    <table class="table table-hover align-middle mb-0">
-                         <thead class="bg-light">
-                            <tr class="x-small text-muted">
-                                <th class="{{ app()->getLocale() === 'ar' ? 'pe-4' : 'ps-4' }} border-0">{{ __('CUSTOMER') }}</th>
-                                <th class="border-0">{{ __('ORDERS') }}</th>
-                                <th class="border-0 {{ app()->getLocale() === 'ar' ? 'text-start ps-4' : 'text-end pe-4' }}">{{ __('LTV') }}</th>
-                            </tr>
-                        </thead>
-                        <tbody>
-                            @foreach($topCustomers as $c)
-                            <tr>
-                                <td class="{{ app()->getLocale() === 'ar' ? 'pe-4' : 'ps-4' }} fw-bold">{{ $c->name }}</td>
-                                <td>{{ number_format($c->orders) }}</td>
-                                <td class="{{ app()->getLocale() === 'ar' ? 'text-start ps-4' : 'text-end pe-4' }} fw-bold text-primary">{{ number_format($c->total, 2) }}</td>
-                            </tr>
-                            @endforeach
-                        </tbody>
-                    </table>
+                <div class="space-y-3">
+                    @foreach($topCustomers as $c)
+                    <div class="flex items-center justify-between p-4 bg-white border border-outline-variant rounded-2xl hover:border-primary/30 hover:bg-surface transition-all group">
+                        <div class="flex items-center gap-4">
+                            <div class="w-12 h-12 rounded-full bg-surface-container-high flex items-center justify-center group-hover:bg-primary-container group-hover:text-white transition-all overflow-hidden border border-outline-variant/30">
+                                <span class="font-manrope font-bold text-sm">{{ substr($c->name, 0, 1) }}</span>
+                            </div>
+                            <div>
+                                <p class="font-manrope font-bold text-on-surface text-sm">{{ $c->name }}</p>
+                                <p class="font-inter text-secondary text-[11px] font-semibold">{{ $c->orders }} {{ __('Orders') }}</p>
+                            </div>
+                        </div>
+                        <div class="text-right">
+                            <p class="font-manrope font-extrabold text-primary text-sm">{{ number_format($c->total, 0) }}</p>
+                            <span class="text-secondary text-[9px] font-bold uppercase">{{ __('LTV') }}</span>
+                        </div>
+                    </div>
+                    @endforeach
                 </div>
             </div>
         </div>
@@ -179,43 +255,66 @@
 <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
 <script>
     const revCtx = document.getElementById('revenueChart').getContext('2d');
+    
+    // Gradient for the chart
+    const gradient = revCtx.createLinearGradient(0, 0, 0, 400);
+    gradient.addColorStop(0, '#3a24d8');
+    gradient.addColorStop(1, '#5446f0');
+
     new Chart(revCtx, {
-        type: 'bar',
+        type: 'line',
         data: {
             labels: {!! json_encode($revenueChart['labels']) !!},
             datasets: [{
-                label: 'Revenue',
+                label: '{{ __("Revenue") }}',
                 data: {!! json_encode($revenueChart['data']) !!},
-                backgroundColor: '#4361ee',
-                borderRadius: 4,
-                maxBarThickness: 40
+                borderColor: '#3a24d8',
+                borderWidth: 4,
+                pointBackgroundColor: '#ffffff',
+                pointBorderColor: '#3a24d8',
+                pointBorderWidth: 2,
+                pointRadius: 0,
+                pointHoverRadius: 6,
+                fill: true,
+                backgroundColor: (context) => {
+                    const chart = context.chart;
+                    const {ctx, chartArea} = chart;
+                    if (!chartArea) return null;
+                    const grad = ctx.createLinearGradient(0, chartArea.top, 0, chartArea.bottom);
+                    grad.addColorStop(0, 'rgba(58, 36, 216, 0.1)');
+                    grad.addColorStop(1, 'rgba(58, 36, 216, 0)');
+                    return grad;
+                },
+                tension: 0.4
             }]
         },
         options: {
             responsive: true,
             maintainAspectRatio: false,
-            plugins: { legend: { display: false } },
+            plugins: { 
+                legend: { display: false },
+                tooltip: {
+                    backgroundColor: '#111c2d',
+                    padding: 12,
+                    titleFont: { family: 'Manrope', size: 14, weight: 'bold' },
+                    bodyFont: { family: 'Inter', size: 13 },
+                    cornerRadius: 8,
+                    displayColors: false
+                }
+            },
             scales: {
-                y: { beginAtZero: true, grid: { borderDash: [5, 5] } },
-                x: { grid: { display: false } }
+                y: { 
+                    beginAtZero: true, 
+                    grid: { color: 'rgba(0,0,0,0.03)', borderDash: [5, 5] },
+                    ticks: { font: { family: 'Inter', size: 11 }, color: '#505f76' }
+                },
+                x: { 
+                    grid: { display: false },
+                    ticks: { font: { family: 'Inter', size: 11 }, color: '#505f76' }
+                }
             }
         }
     });
 </script>
-
-<style>
-    .bg-soft-success { background: rgba(25, 135, 84, 0.1); }
-    .bg-soft-danger { background: rgba(220, 53, 69, 0.1); }
-    .btn-soft-primary { background: rgba(67, 97, 238, 0.1); color: #4361ee; border: none; }
-    .btn-soft-success { background: rgba(25, 135, 84, 0.1); color: #198754; border: none; }
-    .btn-soft-primary:hover, .btn-soft-success:hover { transform: scale(1.1); filter: brightness(0.9); }
-    .x-small { font-size: 11px; }
-    .btn-white { background: #fff; }
-    [dir="rtl"] .me-2 { margin-left: 0.5rem !important; margin-right: 0 !important; }
-    [dir="rtl"] .ms-2 { margin-right: 0.5rem !important; margin-left: 0 !important; }
-    [dir="rtl"] .text-end { text-align: left !important; }
-    [dir="rtl"] .pe-4 { padding-left: 1.5rem !important; padding-right: 0 !important; }
-    [dir="rtl"] .ps-4 { padding-right: 1.5rem !important; padding-left: 0 !important; }
-</style>
 @endpush
 @endsection

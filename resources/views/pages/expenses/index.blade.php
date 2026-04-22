@@ -105,7 +105,7 @@
                     </div>
                     <div class="mb-6">
                         <p class="text-h1 font-h1 text-primary">
-                            {{ number_format($totalInPeriod, 2) }} {{ __(config('app.currency', 'USD')) }}
+                            {{ number_format($totalInPeriod, 2) }} {{ __(DB::table('settings')->where('key', 'currency')->value('value') ?: 'EGP') }}
                         </p>
                         <p class="text-body-sm text-on-surface-variant">{{ $expenses->total() }} {{ __('Transactions') }}</p>
                     </div>
