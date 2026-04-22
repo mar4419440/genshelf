@@ -76,7 +76,7 @@
             
             <!-- Page Header -->
             <div class="flex flex-col md:flex-row md:items-center justify-between gap-4 mb-8">
-                <div>
+                <div class="{{ app()->getLocale() === 'ar' ? 'text-right' : 'text-left' }}">
                     <h2 class="font-h1 text-h1 text-primary">{{ __('Expenses Overview') }}</h2>
                     <p class="text-body-md text-on-surface-variant">{{ __('Track and manage your retail operational costs.') }}</p>
                 </div>
@@ -99,12 +99,14 @@
             <!-- Summary Bento Grid -->
             <div class="grid grid-cols-1 md:grid-cols-12 gap-gutter mb-8">
                 <!-- Total Monthly Summary Card -->
-                <div class="md:col-span-4 bg-white border border-outline-variant p-comfortable-padding rounded-xl shadow-sm">
+                <div class="md:col-span-4 bg-white border border-outline-variant p-comfortable-padding rounded-xl shadow-sm {{ app()->getLocale() === 'ar' ? 'text-right' : '' }}">
                     <div class="flex justify-between items-start mb-4">
                         <span class="text-label-md text-on-surface-variant uppercase tracking-wider">{{ __('Total Monthly Expense') }}</span>
                     </div>
                     <div class="mb-6">
-                        <p class="text-h1 font-h1 text-primary">${{ number_format($totalInPeriod, 2) }}</p>
+                        <p class="text-h1 font-h1 text-primary">
+                            {{ number_format($totalInPeriod, 2) }} {{ __(config('app.currency', 'USD')) }}
+                        </p>
                         <p class="text-body-sm text-on-surface-variant">{{ $expenses->total() }} {{ __('Transactions') }}</p>
                     </div>
                     
@@ -120,7 +122,7 @@
                 </div>
 
                 <!-- Category Breakdown Card -->
-                <div class="md:col-span-8 bg-white border border-outline-variant p-comfortable-padding rounded-xl shadow-sm">
+                <div class="md:col-span-8 bg-white border border-outline-variant p-comfortable-padding rounded-xl shadow-sm {{ app()->getLocale() === 'ar' ? 'text-right' : '' }}">
                     <div class="flex justify-between items-center mb-6">
                         <span class="text-label-md text-on-surface-variant uppercase tracking-wider">{{ __('Category Distribution') }}</span>
                         <span class="material-symbols-outlined text-outline-variant">pie_chart</span>
@@ -131,8 +133,8 @@
                         @endphp
                         @foreach($categoryBreakdown->take(4) as $idx => $cat)
                         <div class="space-y-2">
-                            <p class="text-label-md text-on-surface-variant">{{ ucfirst(__($cat->category)) }}</p>
-                            <p class="text-h3 font-h3">${{ number_format($cat->total, 0) }}</p>
+                            <p class="text-label-md text-on-surface-variant">{{ __($cat->category) }}</p>
+                            <p class="text-h3 font-h3">{{ number_format($cat->total, 0) }}</p>
                             <div class="h-1 w-12 {{ $colors[$idx % 4] }}"></div>
                         </div>
                         @endforeach
@@ -149,18 +151,18 @@
             <div class="flex flex-col md:flex-row md:items-center justify-between gap-4 mb-6">
                 <form action="{{ route('expenses.index') }}" method="GET" class="relative w-full md:w-96">
                     <input type="hidden" name="category" value="{{ request('category') }}">
-                    <span class="material-symbols-outlined absolute left-3 top-1/2 -translate-y-1/2 text-outline">search</span>
-                    <input name="search" value="{{ request('search') }}" class="w-full pl-10 pr-4 py-2 bg-white border border-outline-variant rounded-lg focus:ring-2 focus:ring-primary focus:border-primary text-body-md outline-none" placeholder="{{ __('Search by description...') }}" type="text"/>
+                    <span class="material-symbols-outlined absolute {{ app()->getLocale() === 'ar' ? 'right-3' : 'left-3' }} top-1/2 -translate-y-1/2 text-outline">search</span>
+                    <input name="search" value="{{ request('search') }}" class="w-full {{ app()->getLocale() === 'ar' ? 'pr-10 pl-4 text-right' : 'pl-10 pr-4' }} py-2 bg-white border border-outline-variant rounded-lg focus:ring-2 focus:ring-primary focus:border-primary text-body-md outline-none" placeholder="{{ __('Search by description...') }}" type="text"/>
                 </form>
                 
                 <div class="flex items-center gap-2 overflow-x-auto pb-2 md:pb-0">
-                    <span class="text-label-md text-on-surface-variant mr-2">{{ __('Filter') }}:</span>
+                    <span class="text-label-md text-on-surface-variant {{ app()->getLocale() === 'ar' ? 'ml-2' : 'mr-2' }}">{{ __('Filter') }}:</span>
                     <a href="{{ route('expenses.index') }}" class="{{ !request('category') ? 'bg-primary text-on-primary' : 'bg-white border border-outline-variant text-on-surface-variant hover:bg-surface-container' }} px-4 py-1.5 rounded-full text-label-md transition-colors whitespace-nowrap">
                         {{ __('All') }}
                     </a>
                     @foreach($categories as $cat => $subs)
                     <a href="{{ route('expenses.index', ['category' => $cat]) }}" class="{{ request('category') == $cat ? 'bg-primary text-on-primary' : 'bg-white border border-outline-variant text-on-surface-variant hover:bg-surface-container' }} px-4 py-1.5 rounded-full text-label-md transition-colors whitespace-nowrap">
-                        {{ ucfirst(__($cat)) }}
+                        {{ __($cat) }}
                     </a>
                     @endforeach
                 </div>
@@ -169,14 +171,14 @@
             <!-- Recent Transactions Table -->
             <div class="bg-white border border-outline-variant rounded-xl shadow-sm overflow-hidden mb-8">
                 <div class="overflow-x-auto">
-                    <table class="w-full text-left border-collapse">
+                    <table class="w-full {{ app()->getLocale() === 'ar' ? 'text-right' : 'text-left' }} border-collapse">
                         <thead class="bg-surface-container-low border-b border-outline-variant">
                             <tr>
-                                <th class="px-6 py-4 font-label-md text-on-surface-variant uppercase tracking-wider">{{ __('Date') }}</th>
-                                <th class="px-6 py-4 font-label-md text-on-surface-variant uppercase tracking-wider">{{ __('Description') }}</th>
-                                <th class="px-6 py-4 font-label-md text-on-surface-variant uppercase tracking-wider text-right">{{ __('Amount') }}</th>
+                                <th class="px-6 py-4 font-label-md text-on-surface-variant uppercase tracking-wider {{ app()->getLocale() === 'ar' ? 'text-right' : '' }}">{{ __('Date') }}</th>
+                                <th class="px-6 py-4 font-label-md text-on-surface-variant uppercase tracking-wider {{ app()->getLocale() === 'ar' ? 'text-right' : '' }}">{{ __('Description') }}</th>
+                                <th class="px-6 py-4 font-label-md text-on-surface-variant uppercase tracking-wider {{ app()->getLocale() === 'ar' ? 'text-left' : 'text-right' }}">{{ __('Amount') }}</th>
                                 <th class="px-6 py-4 font-label-md text-on-surface-variant uppercase tracking-wider text-center">{{ __('Category') }}</th>
-                                <th class="px-6 py-4 font-label-md text-on-surface-variant uppercase tracking-wider">{{ __('Method') }}</th>
+                                <th class="px-6 py-4 font-label-md text-on-surface-variant uppercase tracking-wider {{ app()->getLocale() === 'ar' ? 'text-right' : '' }}">{{ __('Method') }}</th>
                                 <th class="px-6 py-4 font-label-md text-on-surface-variant uppercase tracking-wider w-10"></th>
                             </tr>
                         </thead>
@@ -184,7 +186,7 @@
                             @forelse($expenses as $e)
                             <tr class="hover:bg-surface transition-colors {{ $loop->even ? 'bg-surface-container-low' : '' }}">
                                 <td class="px-6 py-4 font-data-mono text-on-surface">
-                                    {{ $e->expense_date?->format('M d, Y') }}
+                                    {{ $e->expense_date?->format('Y-m-d') }}
                                     <div class="text-[10px] text-outline mt-1">#{{ $e->id }}</div>
                                 </td>
                                 <td class="px-6 py-4">
@@ -193,7 +195,9 @@
                                         <p class="text-body-sm text-on-error-container font-bold">{{ __('DRAFT') }}</p>
                                     @endif
                                 </td>
-                                <td class="px-6 py-4 font-h3 text-right text-primary">${{ number_format($e->amount, 2) }}</td>
+                                <td class="px-6 py-4 font-h3 {{ app()->getLocale() === 'ar' ? 'text-left' : 'text-right' }} text-primary">
+                                    {{ number_format($e->amount, 2) }}
+                                </td>
                                 <td class="px-6 py-4 text-center">
                                     @php
                                         $catColor = match($e->category) {
@@ -217,7 +221,7 @@
                                             };
                                         @endphp
                                         <span class="material-symbols-outlined text-[18px]">{{ $methodIcon }}</span>
-                                        {{ str_replace('_', ' ', $e->payment_method) }}
+                                        {{ __($e->payment_method) }}
                                     </div>
                                 </td>
                                 <td class="px-6 py-4">
@@ -256,9 +260,9 @@
             </div>
 
             <!-- Floating Action Button -->
-            <button onclick="openAddExpenseModal()" class="fixed bottom-12 right-12 h-14 w-14 rounded-full shadow-lg flex items-center justify-center hover:scale-105 active:scale-95 transition-all z-50 group border-0" style="background:#000;color:#fff;">
+            <button onclick="openAddExpenseModal()" class="fixed bottom-12 {{ app()->getLocale() === 'ar' ? 'left-12' : 'right-12' }} h-14 w-14 rounded-full shadow-lg flex items-center justify-center hover:scale-105 active:scale-95 transition-all z-50 group border-0" style="background:#000;color:#fff;">
                 <span class="material-symbols-outlined text-[32px]" style="color:#fff;">add</span>
-                <span class="absolute right-full mr-4 px-3 py-1.5 rounded-lg text-label-md whitespace-nowrap opacity-0 group-hover:opacity-100 transition-opacity pointer-events-none" style="background:#000;color:#fff;">{{ __('Add Expense') }}</span>
+                <span class="absolute {{ app()->getLocale() === 'ar' ? 'left-full ml-4' : 'right-full mr-4' }} px-3 py-1.5 rounded-lg text-label-md whitespace-nowrap opacity-0 group-hover:opacity-100 transition-opacity pointer-events-none" style="background:#000;color:#fff;">{{ __('Add Expense') }}</span>
             </button>
             
         </div>
@@ -267,14 +271,14 @@
 
 <!-- Modal Overlay -->
 <div class="modal-overlay" id="expense-modal-overlay" onclick="if(event.target===this)closeExpenseModal()" style="display:none;position:fixed;inset:0;background:rgba(0,0,0,0.5);z-index:200;align-items:center;justify-content:center;">
-    <div id="expense-modal-box" style="background:var(--bg2,#fff);padding:24px;border-radius:16px;width:100%;max-width:560px;max-height:90vh;overflow-y:auto;box-shadow:0 20px 60px rgba(0,0,0,0.2);"></div>
+    <div id="expense-modal-box" class="{{ app()->getLocale() === 'ar' ? 'text-right' : 'text-left' }}" style="background:var(--bg2,#fff);padding:24px;border-radius:16px;width:100%;max-width:560px;max-height:90vh;overflow-y:auto;box-shadow:0 20px 60px rgba(0,0,0,0.2);"></div>
 </div>
 @endsection
 
 @push('scripts')
 <script>
     const expensesData = @json($expenses->items());
-    const categoryOptions = `@foreach($categories as $cat => $subs)<option value="{{ $cat }}">{{ ucfirst(__($cat)) }}</option>@endforeach`;
+    const categoryOptions = `@foreach($categories as $cat => $subs)<option value="{{ $cat }}">{{ __($cat) }}</option>@endforeach`;
 
     function openAddExpenseModal() {
         const html = `
@@ -287,23 +291,23 @@
                 <div style="display:grid;grid-template-columns:1fr 1fr;gap:12px;">
                     <div>
                         <label style="display:block;font-size:12px;font-weight:600;color:var(--tx2);margin-bottom:4px;">{{ __('Category') }}</label>
-                        <select name="category" required>${categoryOptions}</select>
+                        <select name="category" required style="text-align: inherit;">${categoryOptions}</select>
                     </div>
                     <div>
                         <label style="display:block;font-size:12px;font-weight:600;color:var(--tx2);margin-bottom:4px;">{{ __('Date') }}</label>
-                        <input type="date" name="expense_date" value="{{ date('Y-m-d') }}" required>
+                        <input type="date" name="expense_date" value="{{ date('Y-m-d') }}" required style="text-align: inherit;">
                     </div>
-                    <div>
-                        <label style="display:block;font-size:12px;font-weight:600;color:var(--tx2);margin-bottom:4px;">{{ __('Description (AR)') }}</label>
-                        <input type="text" name="description" required>
+                    <div style="grid-column: span 2;">
+                        <label style="display:block;font-size:12px;font-weight:600;color:var(--tx2);margin-bottom:4px;">{{ __('Description') }}</label>
+                        <input type="text" name="description" required style="text-align: inherit;">
                     </div>
                     <div>
                         <label style="display:block;font-size:12px;font-weight:600;color:var(--tx2);margin-bottom:4px;">{{ __('Amount') }}</label>
-                        <input type="number" name="amount" step="0.01" required>
+                        <input type="number" name="amount" step="0.01" required style="text-align: inherit;">
                     </div>
                     <div>
                         <label style="display:block;font-size:12px;font-weight:600;color:var(--tx2);margin-bottom:4px;">{{ __('Payment Method') }}</label>
-                        <select name="payment_method" required>
+                        <select name="payment_method" required style="text-align: inherit;">
                             <option value="cash">{{ __('Cash') }}</option>
                             <option value="bank_transfer">{{ __('Bank Transfer') }}</option>
                             <option value="card">{{ __('Card') }}</option>
@@ -334,23 +338,23 @@
                 <div style="display:grid;grid-template-columns:1fr 1fr;gap:12px;">
                     <div>
                         <label style="display:block;font-size:12px;font-weight:600;color:var(--tx2);margin-bottom:4px;">{{ __('Category') }}</label>
-                        <select name="category">${categoryOptions.replace('value="'+e.category+'"', 'value="'+e.category+'" selected')}</select>
+                        <select name="category" style="text-align: inherit;">${categoryOptions.replace('value="'+e.category+'"', 'value="'+e.category+'" selected')}</select>
                     </div>
                     <div>
                         <label style="display:block;font-size:12px;font-weight:600;color:var(--tx2);margin-bottom:4px;">{{ __('Date') }}</label>
-                        <input type="date" name="expense_date" value="${e.expense_date ? e.expense_date.substring(0,10) : ''}" required>
+                        <input type="date" name="expense_date" value="${e.expense_date ? e.expense_date.substring(0,10) : ''}" required style="text-align: inherit;">
                     </div>
-                    <div>
-                        <label style="display:block;font-size:12px;font-weight:600;color:var(--tx2);margin-bottom:4px;">{{ __('Description (AR)') }}</label>
-                        <input type="text" name="description" value="${e.description || ''}" required>
+                    <div style="grid-column: span 2;">
+                        <label style="display:block;font-size:12px;font-weight:600;color:var(--tx2);margin-bottom:4px;">{{ __('Description') }}</label>
+                        <input type="text" name="description" value="${e.description || ''}" required style="text-align: inherit;">
                     </div>
                     <div>
                         <label style="display:block;font-size:12px;font-weight:600;color:var(--tx2);margin-bottom:4px;">{{ __('Amount') }}</label>
-                        <input type="number" name="amount" step="0.01" value="${e.amount || ''}" required>
+                        <input type="number" name="amount" step="0.01" value="${e.amount || ''}" required style="text-align: inherit;">
                     </div>
                     <div>
                         <label style="display:block;font-size:12px;font-weight:600;color:var(--tx2);margin-bottom:4px;">{{ __('Payment Method') }}</label>
-                        <select name="payment_method">
+                        <select name="payment_method" style="text-align: inherit;">
                             <option value="cash" ${e.payment_method==='cash'?'selected':''}>{{ __('Cash') }}</option>
                             <option value="bank_transfer" ${e.payment_method==='bank_transfer'?'selected':''}>{{ __('Bank Transfer') }}</option>
                             <option value="card" ${e.payment_method==='card'?'selected':''}>{{ __('Card') }}</option>
