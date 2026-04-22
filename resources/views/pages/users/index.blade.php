@@ -29,13 +29,15 @@
                             <td>{{ $u->displayName ?? $u->name }}</td>
                             <td><span class="badge badge-pr">{{ $u->role->name ?? '—' }}</span></td>
                             <td class="no-sort">
-                                <button class="btn btn-xs btn-o" onclick='openUserModal(@json($u))'>{{ __('Edit') }}</button>
-                                @if($u->id !== 1 && $u->id !== auth()->id())
-                                    <form action="{{ route('users.destroy', $u->id) }}" method="POST" style="display:inline;" onsubmit="return confirm('{{ __('Are you sure?') }}')">
-                                        @csrf @method('DELETE')
-                                        <button type="submit" class="btn btn-xs btn-rd">{{ __('Delete') }}</button>
-                                    </form>
-                                @endif
+                                <div class="action-btns">
+                                    <button class="btn btn-sm btn-soft-primary rounded-circle" style="width:30px;height:30px;" onclick='openUserModal(@json($u))' title="{{ __('Edit User') }}">✏️</button>
+                                    @if($u->id !== 1 && $u->id !== auth()->id())
+                                        <form action="{{ route('users.destroy', $u->id) }}" method="POST" style="display:inline;" onsubmit="return confirm('{{ __('Are you sure?') }}')">
+                                            @csrf @method('DELETE')
+                                            <button type="submit" class="btn btn-sm btn-soft-danger rounded-circle" style="width:30px;height:30px;" title="{{ __('Delete User') }}">🗑️</button>
+                                        </form>
+                                    @endif
+                                </div>
                             </td>
                         </tr>
                     @empty
@@ -67,13 +69,15 @@
                                 @endphp
                             </td>
                             <td class="no-sort">
-                                <button class="btn btn-xs btn-o" onclick='openRoleModal(@json($r))'>{{ __('Edit') }}</button>
-                                @if($r->id !== 1)
-                                    <form action="{{ route('roles.destroy', $r->id) }}" method="POST" style="display:inline;" onsubmit="return confirm('{{ __('Are you sure?') }}')">
-                                        @csrf @method('DELETE')
-                                        <button type="submit" class="btn btn-xs btn-rd">{{ __('Delete') }}</button>
-                                    </form>
-                                @endif
+                                <div class="d-flex gap-1">
+                                    <button class="btn btn-sm btn-soft-primary rounded-circle" style="width:30px;height:30px;" onclick='openRoleModal(@json($r))' title="{{ __('Edit Role') }}">✏️</button>
+                                    @if($r->id !== 1)
+                                        <form action="{{ route('roles.destroy', $r->id) }}" method="POST" style="display:inline;" onsubmit="return confirm('{{ __('Are you sure?') }}')">
+                                            @csrf @method('DELETE')
+                                            <button type="submit" class="btn btn-sm btn-soft-danger rounded-circle" style="width:30px;height:30px;" title="{{ __('Delete Role') }}">🗑️</button>
+                                        </form>
+                                    @endif
+                                </div>
                             </td>
                         </tr>
                     @empty

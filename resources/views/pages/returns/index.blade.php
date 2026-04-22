@@ -66,7 +66,10 @@
             <tr style="background:var(--bg3); font-size:11px;">
                 <th>#</th>
                 <th>{{ __('Customer') }}</th>
+                <th>{{ __('Cost') }}</th>
                 <th>{{ __('Total') }}</th>
+                <th>{{ __('Net Profit') }}</th>
+                <th>{{ __('Paid') }}</th>
                 <th>{{ __('Date') }}</th>
                 <th>{{ __('Actions') }}</th>
             </tr>
@@ -74,12 +77,15 @@
                 <tr>
                     <td><strong>{{ $t->id }}</strong></td>
                     <td>{{ $t->customer->name ?? __('Walk-in') }}</td>
-                    <td>{{ number_format($t->total, 2) }}</td>
+                    <td style="color:var(--rd)">{{ number_format($t->calculated_cogs ?? 0, 2) }}</td>
+                    <td style="font-weight:700">{{ number_format($t->total, 2) }}</td>
+                    <td style="color:var(--pr); font-weight:700">{{ number_format($t->total - ($t->calculated_cogs ?? 0), 2) }}</td>
+                    <td style="color:var(--gn)">{{ number_format($t->paid_amount, 2) }}</td>
                     <td>{{ $t->created_at->format('Y-m-d') }}</td>
                     <td>
-                        <div style="display:flex; gap:4px;">
-                            <a href="{{ route('pos.invoice', $t->id) }}" target="_blank" class="btn btn-xs btn-o" title="{{ __('View Invoice') }}">📄</a>
-                            <button class="btn btn-xs btn-rd" onclick="openReturnModal('invoice', {id: '{{ $t->id }}', total: '{{ $t->total }}'})">↩ {{ __('Process Return') }}</button>
+                        <div class="action-btns justify-content-center">
+                            <a href="{{ route('pos.invoice', $t->id) }}" target="_blank" class="btn btn-sm btn-soft-info rounded-circle" style="width:30px;height:30px;" title="{{ __('View Invoice Receipt') }}">📄</a>
+                            <button class="btn btn-sm btn-soft-danger rounded-circle" style="width:30px;height:30px;" onclick="openReturnModal('invoice', {id: '{{ $t->id }}', total: '{{ $t->total }}'})" title="{{ __('Process Return for this Invoice') }}">↩</button>
                         </div>
                     </td>
                 </tr>

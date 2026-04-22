@@ -44,20 +44,25 @@
                             <td>{{ $c->loyalty_points }} pts</td>
                         @endif
                         <td class="no-sort">
-                            <button class="btn btn-xs btn-o" onclick='openCustomerModal(@json($c))'>{{ __('Edit') }}</button>
-                            @if($toggleCredit)
-                                <button class="btn btn-xs btn-gn"
-                                    onclick="recordPayment('{{ $c->id }}')">{{ __('Record Payment') }}</button>
-                                <button class="btn btn-xs btn-rd" onclick="addDebt('{{ $c->id }}')">{{ __('Add Debt') }}</button>
-                            @endif
-                            <button class="btn btn-xs btn-bl"
-                                onclick="viewCustomerHistory('{{ $c->id }}')">{{ __('History') }}</button>
+                            <div class="action-btns justify-content-center">
+                                <button class="btn btn-sm btn-soft-primary rounded-circle" style="width:30px;height:30px;" onclick='openCustomerModal(@json($c))' title="{{ __('Edit customer details') }}">✏️</button>
+                                
+                                @if($toggleCredit)
+                                    <button class="btn btn-sm btn-soft-success rounded-circle" style="width:30px;height:30px;"
+                                        onclick="recordPayment('{{ $c->id }}')" title="{{ __('Record a payment/clear debt') }}">💰</button>
+                                    <button class="btn btn-sm btn-soft-danger rounded-circle" style="width:30px;height:30px;" 
+                                        onclick="addDebt('{{ $c->id }}')" title="{{ __('Add a manual debt record') }}">💳</button>
+                                @endif
 
-                            <form action="{{ route('customers.destroy', $c->id) }}" method="POST" style="display:inline;"
-                                onsubmit="return confirm('{{ __('Are you sure?') }}')">
-                                @csrf @method('DELETE')
-                                <button type="submit" class="btn btn-xs btn-rd">{{ __('Delete') }}</button>
-                            </form>
+                                <button class="btn btn-sm btn-soft-info rounded-circle" style="width:30px;height:30px;"
+                                    onclick="viewCustomerHistory('{{ $c->id }}')" title="{{ __('View transaction history') }}">📜</button>
+
+                                <form action="{{ route('customers.destroy', $c->id) }}" method="POST" style="display:inline;"
+                                    onsubmit="return confirm('{{ __('Are you sure?') }}')">
+                                    @csrf @method('DELETE')
+                                    <button type="submit" class="btn btn-sm btn-soft-danger rounded-circle" style="width:30px;height:30px;" title="{{ __('Delete customer') }}">🗑️</button>
+                                </form>
+                            </div>
                         </td>
                     </tr>
                 @empty

@@ -45,8 +45,10 @@ class StorageController extends Controller
     public function destroy(Storage $storage)
     {
         // Check if there are active batches in this storage
-        // Assuming ProductBatch has a relation 'batches'
-        // For now, let's just delete or prevent if items exist
+        if ($storage->batches()->where('qty', '>', 0)->exists()) {
+            return redirect()->back()->with('error', __('Cannot delete storage with active products.'));
+        }
+
         $storage->delete();
         return redirect()->back()->with('success', __('Storage location deleted successfully.'));
     }

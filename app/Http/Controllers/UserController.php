@@ -30,7 +30,7 @@ class UserController extends Controller
         ]);
 
         $validated['password'] = bcrypt($validated['password']);
-        $validated['displayName'] = $validated['name'];
+        $validated['display_name'] = $validated['name'];
 
         User::create($validated);
         return redirect()->back()->with('success', __('User created successfully.'));
@@ -52,7 +52,7 @@ class UserController extends Controller
             unset($validated['password']);
         }
         
-        $validated['displayName'] = $validated['name'];
+        $validated['display_name'] = $validated['name'];
 
         $user->update($validated);
         return redirect()->back()->with('success', __('User updated successfully.'));

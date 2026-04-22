@@ -42,17 +42,19 @@
                                     {{ $storage->is_active ? __('Active') : __('Inactive') }}
                                 </span>
                             </td>
-                            <td style="padding:12px; text-align:right;">
-                                <button class="btn btn-o" style="padding:6px 12px; font-size:12px;"
-                                    onclick='openStorageModal(@json($storage))'>{{ __('Edit') }}</button>
-                                <form action="{{ route('storages.destroy', $storage->id) }}" method="POST"
-                                    style="display:inline;"
-                                    onsubmit="return confirm('{{ __('Are you sure you want to delete this storage location?') }}');">
-                                    @csrf
-                                    @method('DELETE')
-                                    <button type="submit" class="btn"
-                                        style="padding:6px 12px; font-size:12px; background:var(--rd-l); color:var(--rd);">{{ __('Del') }}</button>
-                                </form>
+                             <td style="padding:12px; text-align:right;">
+                                <div class="action-btns justify-content-end">
+                                    <button class="btn btn-sm btn-soft-primary rounded-circle" style="width:30px;height:30px;padding:0;display:flex;align-items:center;justify-content:center;"
+                                        onclick='openStorageModal(@json($storage))' title="{{ __('Edit Storage Unit') }}">✏️</button>
+                                    <form action="{{ route('storages.destroy', $storage->id) }}" method="POST"
+                                        style="display:inline;"
+                                        onsubmit="return confirm('{{ __('Are you sure you want to delete this storage location?') }}');">
+                                        @csrf
+                                        @method('DELETE')
+                                        <button type="submit" class="btn btn-sm btn-soft-danger rounded-circle"
+                                            style="width:30px;height:30px;padding:0;display:flex;align-items:center;justify-content:center;" title="{{ __('Delete Storage Unit') }}">🗑️</button>
+                                    </form>
+                                </div>
                             </td>
                         </tr>
                     @empty

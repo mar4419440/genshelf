@@ -199,7 +199,14 @@
             font-size: 18px;
             font-weight: 800;
             text-transform: uppercase;
-            margin-top: 16px;
+            margin-top: 8px;
+        }
+
+        #checkout-form {
+            display: flex;
+            flex-direction: column;
+            height: 100%;
+            overflow: hidden;
         }
     </style>
 @endpush
@@ -356,6 +363,7 @@
 @push('scripts')
     <script>
         let products = @json($products);
+        let activeOffers = @json($offers);
         let cart = [];
         const taxRate = {{ $taxRate }};
 
@@ -363,17 +371,16 @@
             window.open("{{ route('pos.invoice', session('print_invoice')) }}", "_blank", "width=400,height=600");
         @endif
 
-            function handleBarcodeScan(code) {
-                code = code.trim();
-                if (!code) return;
+        function handleBarcodeScan(code) {
+            code = code.trim();
+            if (!code) return;
 
-                // Look for exact match in barcodes
-                const product = products.find(p => p.barcode === code);
-                if (product) {
-                    addToCart(product.id, product.name, product.default_price, product.current_stock);
-                    document.getElementById('pos-search').value = '';
-                }
+            const product = products.find(p => p.barcode === code);
+            if (product) {
+                addToCart(product.id, product.name, product.default_price, product.current_stock);
+                document.getElementById('pos-search').value = '';
             }
+        }
 
         function updateActiveStorage(id) { document.getElementById('cart-storage-id').value = id; }
 
@@ -446,7 +453,7 @@
         function setQty(index, val) {
             const item = cart[index];
             if (!item) return;
-            let n = parseInt(val) || 1; // Minimum 1 logic
+            let n = parseInt(val) || 1;
             if (n < 1) n = 1;
             if (!item.isService && n > item.maxStock) { alert("Max stock reached"); n = item.maxStock; }
             item.qty = n;
@@ -460,44 +467,87 @@
             renderCart();
         }
 
-        function updateQty(index, delta) {
-            const item = cart[index];
-            let n = item.qty + delta;
-            if (n < 1) return; // Prevent 0
-            setQty(index, n);
-        }
-
         function renderCart() {
             const container = document.getElementById('cart-items-container');
             if (cart.length === 0) {
-                container.innerHTML = '<div class="empty-state" style="margin-top:40px;">Cart is empty</div>';
+                container.innerHTML = '<div class="empty-state" style="margin-top:40px;">{{ __("Cart is empty") }}</div>';
             } else {
-                container.innerHTML = cart.map((item, i) => `
-                                        <div class="cart-item-row">
-                                            <div class="cir-top">
-                                                <span class="cir-name">${item.name}</span>
-                                                <button type="button" class="cir-del" onclick="removeFromCart(${i})">✕</button>
-                                            </div>
-                                            <div class="cir-actions">
-                                                <div style="display:flex; gap:8px; align-items:center;">
-                                                    <input type="number" class="qty-input" value="${item.qty}" min="1" onchange="setQty(${i}, this.value)">
-                                                    <input type="number" step="0.01" class="search-bar" value="${item.price}" onchange="setPrice(${i}, this.value)" style="width: 90px; height: 32px; padding: 4px; font-size: 13px; font-weight: 700; border-radius: 6px;">
-                                                </div>
-                                                <div style="font-weight:700; width: 80px; text-align: right;">${(item.price * item.qty).toFixed(2)}</div>
-                                            </div>
-                                        </div>
-                                    `).join('');
+                container.innerHTML = cart.map((item, i) => {
+                    const offerInfo = getBestOfferForItem(item);
+                    return `
+                        <div class="cart-item-row">
+                            <div class="cir-top">
+                                <span class="cir-name">
+                                    ${item.name}
+                                    ${offerInfo ? `<br><small class="text-success fw-bold" style="font-size:10px;">✨ ${offerInfo.name}</small>` : ''}
+                                </span>
+                                <button type="button" class="cir-del" onclick="removeFromCart(${i})">✕</button>
+                            </div>
+                            <div class="cir-actions">
+                                <div style="display:flex; gap:8px; align-items:center;">
+                                    <input type="number" class="qty-input" value="${item.qty}" min="1" onchange="setQty(${i}, this.value)">
+                                    <input type="number" step="0.01" class="search-bar" value="${item.price}" onchange="setPrice(${i}, this.value)" style="width: 90px; height: 32px; padding: 4px; font-size: 13px; font-weight: 700; border-radius: 6px;">
+                                </div>
+                                <div style="font-weight:700; width: 80px; text-align: right;">${(item.price * item.qty).toFixed(2)}</div>
+                            </div>
+                        </div>
+                    `;
+                }).join('');
             }
             updateSummary();
         }
 
+        function getBestOfferForItem(item) {
+            if (item.isService) return null;
+            return activeOffers.find(o => {
+                if (!o.applicable_products || o.applicable_products.length === 0) return true;
+                return o.applicable_products.includes(parseInt(item.id)) || o.applicable_products.includes(String(item.id));
+            });
+        }
+
         function updateSummary() {
-            let sub = cart.reduce((s, i) => s + (i.price * i.qty), 0);
-            let tax = sub * (taxRate / 100);
-            let tot = sub + tax;
-            document.getElementById('summary-subtotal').innerText = sub.toFixed(2);
-            document.getElementById('summary-tax').innerText = tax.toFixed(2);
-            document.getElementById('summary-total').innerText = tot.toFixed(2);
+            let subtotal = cart.reduce((s, i) => s + (i.price * i.qty), 0);
+            let totalDiscount = 0;
+
+            activeOffers.forEach(offer => {
+                let qualifyingItems = cart.filter(item => {
+                    if (item.isService) return false;
+                    if (!offer.applicable_products || offer.applicable_products.length === 0) return true;
+                    return offer.applicable_products.includes(parseInt(item.id)) || offer.applicable_products.includes(String(item.id));
+                });
+
+                if (qualifyingItems.length === 0) return;
+
+                if (offer.type === 'pct') {
+                    qualifyingItems.forEach(item => {
+                        totalDiscount += (item.price * item.qty) * (offer.value / 100);
+                    });
+                } else if (offer.type === 'fixed') {
+                    qualifyingItems.forEach(item => {
+                        totalDiscount += (offer.value * item.qty);
+                    });
+                } else if (offer.type === 'bogo') {
+                    let units = [];
+                    qualifyingItems.forEach(item => {
+                        for (let k = 0; k < item.qty; k++) units.push(item.price);
+                    });
+                    units.sort((a, b) => b - a);
+                    for (let j = 1; j < units.length; j += 2) {
+                        totalDiscount += units[j];
+                    }
+                } else if (offer.type === 'cash_back') {
+                    totalDiscount += parseFloat(offer.value);
+                }
+            });
+
+            let finalSubtotal = Math.max(0, subtotal - totalDiscount);
+            let tax = finalSubtotal * (taxRate / 100);
+            let grandTotal = finalSubtotal + tax;
+
+            document.getElementById('summary-subtotal').innerText = subtotal.toFixed(2);
+            document.getElementById('summary-tax').innerHTML = `${tax.toFixed(2)} ${totalDiscount > 0 ? `<br><small class="text-success fw-bold">({{ __("Discount") }}: -${totalDiscount.toFixed(2)})</small>` : ''}`;
+            document.getElementById('summary-total').innerText = grandTotal.toFixed(2);
+            
             document.getElementById('cart-data-input').value = JSON.stringify(cart);
         }
 

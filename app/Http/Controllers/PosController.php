@@ -12,15 +12,10 @@ class PosController extends Controller
     public function index()
     {
         // Calculate dynamic stock utilizing DB logic and product data
-        $products = DB::table('products')
-            ->where('is_service', false)
-            ->select('products.*')
+        $products = Product::where('is_service', false)
+            ->withSum('batches as current_stock', 'qty')
             ->get()
-            ->map(function ($product) {
-                // Determine stock based on batches
-                $product->current_stock = DB::table('product_batches')->where('product_id', $product->id)->sum('qty');
-                return $product;
-            })->filter(function ($product) {
+            ->filter(function ($product) {
                 return $product->current_stock > 0;
             });
 
@@ -34,8 +29,13 @@ class PosController extends Controller
         $toggleCredit = $toggleCreditStr == '1';
 
         $categories = \App\Models\Category::whereNull('parent_id')->with('children')->get();
+        
+        $offers = \App\Models\SpecialOffer::where('active', true)
+            ->where('start_date', '<=', now())
+            ->where('end_date', '>=', now())
+            ->get();
 
-        return view('pages.pos.index', compact('products', 'customers', 'taxRate', 'toggleCredit', 'categories'));
+        return view('pages.pos.index', compact('products', 'customers', 'taxRate', 'toggleCredit', 'categories', 'offers'));
     }
 
     public function checkout(Request $request)
@@ -117,7 +117,7 @@ class PosController extends Controller
                     while ($qtyToDeduct > 0) {
                         $batch = \App\Models\ProductBatch::where('product_id', $item['id'])
                             ->where('qty', '>', 0)
-                            ->orderBy('expiration_date', 'asc')
+                            ->orderByRaw('expiration_date IS NULL, expiration_date ASC')
                             ->first();
 
                         if (!$batch) {

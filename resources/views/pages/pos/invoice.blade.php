@@ -135,13 +135,28 @@
         }
 
         @media print {
+            @page {
+                margin: 0;
+            }
+
             .no-print {
-                display: none;
+                display: none !important;
             }
 
             body {
-                width: 100%;
-                padding: 0;
+                width: 72mm; /* Standard printable area for 80mm thermal paper */
+                margin: 0;
+                padding: 2mm;
+                -webkit-print-color-adjust: exact;
+                print-color-adjust: exact;
+            }
+
+            .header h1 {
+                font-size: 20px;
+            }
+
+            .total-section div {
+                font-size: 15px;
             }
         }
     </style>

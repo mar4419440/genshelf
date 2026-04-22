@@ -81,4 +81,9 @@ class TransferController extends Controller
 
         return redirect()->back()->with('success', __('Stock transferred successfully.'));
     }
+    public function destroy(StockTransfer $transfer)
+    {
+        $transfer->delete();
+        return redirect()->back()->with('success', __('Transfer record deleted successfully.'));
+    }
 }

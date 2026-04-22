@@ -10,6 +10,7 @@ return new class extends Migration {
      */
     public function up(): void
     {
+        Schema::dropIfExists('stock_transfers');
         Schema::create('stock_transfers', function (Blueprint $table) {
             $table->id();
             $table->foreignId('product_id')->constrained()->cascadeOnDelete();

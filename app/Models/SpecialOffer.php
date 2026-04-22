@@ -11,6 +11,14 @@ class SpecialOffer extends Model
     protected $casts = [
         'start_date' => 'date',
         'end_date' => 'date',
-        'is_active' => 'boolean'
+        'active' => 'boolean',
+        'applicable_products' => 'array',
+        'applicable_categories' => 'array'
     ];
+
+    public function getProductsAttribute()
+    {
+        if (empty($this->applicable_products)) return collect();
+        return \App\Models\Product::whereIn('id', $this->applicable_products)->get();
+    }
 }

@@ -25,6 +25,11 @@ class InventoryController extends Controller
             $p->storage_names = $p->batches->map(function ($b) {
                 return $b->storage ? $b->storage->name : null;
             })->filter()->unique()->implode(', ');
+            
+            // Get last batch cost for "Old Cost" display
+            $lastBatch = $p->batches->sortByDesc('created_at')->first();
+            $p->last_batch_cost = $lastBatch ? $lastBatch->unit_cost : 0;
+
             return $p;
         });
 

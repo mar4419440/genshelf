@@ -47,7 +47,7 @@ class ReturnController extends Controller
             $preFilledProduct = \App\Models\Product::find(request('product_id'));
         }
 
-        $transactionsQuery = \App\Models\Transaction::with('customer')->latest();
+        $transactionsQuery = \App\Models\Transaction::with(['customer', 'items'])->latest();
         if (request()->filled('search_invoice')) {
             $search = request('search_invoice');
             $transactionsQuery->where(function($q) use ($search) {
@@ -61,6 +61,23 @@ class ReturnController extends Controller
             });
         }
         $transactions = $transactionsQuery->take(50)->get();
+
+        $productCosts = DB::table('product_batches')
+            ->select('product_id', DB::raw('AVG(unit_cost) as avg_cost'))
+            ->groupBy('product_id')
+            ->pluck('avg_cost', 'product_id');
+
+        foreach ($transactions as $tx) {
+            $txCogs = 0;
+            if ($tx->items) {
+                foreach ($tx->items as $item) {
+                    if ($item->product_id && isset($productCosts[$item->product_id])) {
+                        $txCogs += $productCosts[$item->product_id] * $item->qty;
+                    }
+                }
+            }
+            $tx->calculated_cogs = $txCogs;
+        }
         
         return view('pages.returns.index', compact('returns', 'defectiveProducts', 'products', 'suppliers', 'transactions', 'preFilledProduct'));
     }

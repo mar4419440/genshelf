@@ -213,6 +213,28 @@
             font-size: 11px
         }
 
+        /* Soft Buttons & Action Rows */
+        .btn-soft-primary { background: rgba(67, 97, 238, 0.1) !important; color: #4361ee !important; }
+        .btn-soft-success { background: rgba(34, 197, 94, 0.1) !important; color: #22c55e !important; }
+        .btn-soft-danger { background: rgba(239, 68, 68, 0.1) !important; color: #ef4444 !important; }
+        .btn-soft-info { background: rgba(59, 130, 246, 0.1) !important; color: #3b82f6 !important; }
+        .btn-soft-primary:hover, .btn-soft-success:hover, .btn-soft-danger:hover, .btn-soft-info:hover {
+            transform: scale(1.1);
+            filter: brightness(0.9);
+        }
+        
+        .action-btns {
+            display: flex !important;
+            flex-direction: row !important;
+            flex-wrap: nowrap !important;
+            align-items: center !important;
+            gap: 6px !important;
+        }
+        .action-btns form {
+            display: inline-block !important;
+            margin: 0 !important;
+        }
+
         .badge {
             display: inline-block;
             padding: 3px 10px;
@@ -715,10 +737,9 @@
                    lass="{{ request()->routeIs('offers') ? 'active' : '' }}">⭐ {{ __('Special Offers') }}</a>@endif
                 @if(in_array('returns', $roles))<a href="{{ route('returns') }}" c
                    lass="{{ request()->routeIs('returns') ? 'active' : '' }}">🔄 {{ __('Invoices & Returns') }}</a>@endif
-                @if(in_array('finance', $roles))<a href="{{ route('finance') }}" cla
-                   ss="{{ request()->routeIs('finance') ? 'active' : '' }}">💰 {{ __('Finance') }}</a>@endif
-                @if(in_array('reports', $roles))<a href="{{ route('reports') }}" c
-                   lass="{{ request()->routeIs('reports') ? 'active' : '' }}">📊 {{ __('Business Intelligence') }}</a>@endif
+                @if(in_array('finance', $roles))<a href="{{ route('finance') }}" class="{{ request()->routeIs('finance*') ? 'active' : '' }}">💰 {{ __('Finance') }}</a>@endif
+                @if(in_array('finance', $roles))<a href="{{ route('expenses.index') }}" class="{{ request()->routeIs('expenses*') ? 'active' : '' }}">💸 {{ __('Expenses') }}</a>@endif
+                @if(in_array('reports', $roles))<a href="{{ route('bi.index') }}" class="{{ request()->routeIs('bi*') ? 'active' : '' }}">📊 {{ __('Intelligence') }}</a>@endif
                 @if(in_array('warranty', $roles))<a href="{{ route('warranty') }}" class="{{ request()->routeIs('warranty') ? 'active' : '' }}">🛡️ {{ __('Warranty') }}</a>@endif
 @if(in_array('transfers', $roles))<a href="{{ route('transfers') }}" class="{{ request()->routeIs('transfers') ? 'active' : '' }}">🚚 {{ __('Stock Transfers') }}</a>@endif
 @if(in_array('settings', $roles))<a href="{{ route('settings') }}" class="{{ request()->routeIs('settings') ? 'active' : '' }}">⚙️ {{ __('Settings') }}</a>@endif

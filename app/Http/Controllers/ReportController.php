@@ -164,13 +164,7 @@ class ReportController extends Controller
         $lowStockDefault = DB::table('settings')->where('key', 'low_stock_default')->value('value') ?? 5;
         $lowAlerts = DB::table('products')
             ->where('is_service', false)
-            ->whereExists(function ($query) use ($lowStockDefault) {
-                $query->select(DB::raw(1))
-                    ->from('product_batches')
-                    ->whereColumn('product_batches.product_id', 'products.id')
-                    ->havingRaw('SUM(product_batches.qty) <= products.low_stock_threshold')
-                    ->orHavingRaw("SUM(product_batches.qty) <= {$lowStockDefault}");
-            })
+            ->whereRaw("(SELECT COALESCE(SUM(qty), 0) FROM product_batches WHERE product_id = products.id) <= (CASE WHEN products.low_stock_threshold > 0 THEN products.low_stock_threshold ELSE ? END)", [$lowStockDefault])
             ->count();
 
         $pendingPO = DB::table('purchase_orders')->where('status', 'pending')->count();

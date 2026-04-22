@@ -93,20 +93,18 @@
                         <td>{{ $p->is_service ? '—' : $stock }}</td>
                         <td><span class="badge {{ $badge }}">{{ $stLabel }}</span></td>
                         <td>
-                            <div style="display:flex;gap:4px">
+                            <div class="action-btns justify-content-center">
                                 @if(!$p->is_service)
-                                    <button class="btn btn-xs btn-gn" onclick='openRestockModal(@json($p))'>📦
-                                        {{ __('Restock') }}</button>
-                                    <a href="{{ route('returns', ['product_id' => $p->id]) }}" class="btn btn-xs btn-rd"
-                                        title="{{ __('Log Damage/Return') }}">🔄</a>
+                                    <button class="btn btn-sm btn-soft-success rounded-circle" style="width:30px;height:30px;" onclick='openRestockModal(@json($p))' title="{{ __('Restock') }}">📦</button>
+                                    <a href="{{ route('returns', ['product_id' => $p->id]) }}" class="btn btn-sm btn-soft-danger rounded-circle" style="width:30px;height:30px;" title="{{ __('Log Damage/Return') }}">🔄</a>
                                 @endif
-                                <button class="btn btn-sm btn-o" onclick='openProductModal(@json($p))'>{{ __('Edit') }}</button>
-                                <a href="{{ url('/pos/barcode/' . $p->id) }}" target="_blank" class="btn btn-sm btn-o">🏷️</a>
+                                <button class="btn btn-sm btn-soft-primary rounded-circle" style="width:30px;height:30px;" onclick='openProductModal(@json($p))' title="{{ __('Edit') }}">✏️</button>
+                                <a href="{{ url('/pos/barcode/' . $p->id) }}" target="_blank" class="btn btn-sm btn-soft-info rounded-circle" style="width:30px;height:30px;" title="{{ __('Print Barcode') }}">🏷️</a>
                                 <form action="{{ route('inventory.destroy', $p->id) }}" method="POST" style="display:inline;"
                                     onsubmit="return confirm('{{ __('Are you sure?') }}')">
                                     @csrf
                                     @method('DELETE')
-                                    <button type="submit" class="btn btn-sm btn-rd">{{ __('Delete') }}</button>
+                                    <button type="submit" class="btn btn-sm btn-soft-danger rounded-circle" style="width:30px;height:30px;" title="{{ __('Delete') }}">🗑️</button>
                                 </form>
                             </div>
                         </td>
@@ -254,7 +252,12 @@
                                                             <input name="qty" type="number" required min="1" autocomplete="off">
                                                         </div>
                                                         <div style="flex:1;">
-                                                            <label style="display:block;font-size:12px;font-weight:600;color:var(--tx2);margin-bottom:4px;">{{ __('New Cost') }} ({{ __('Optional') }})</label>
+                                                            <label style="display:block;font-size:12px;font-weight:600;color:var(--tx2);margin-bottom:4px;">
+                                                                {{ __('New Cost') }} 
+                                                                <span style="float:right; color:var(--pr); font-weight:700;">
+                                                                    {{ __('Old') }}: ${Number(product.last_batch_cost).toFixed(2)}
+                                                                </span>
+                                                            </label>
                                                             <input name="cost" type="number" step="0.01" placeholder="${costMode === 'unit' ? '{{ __("Unit Cost") }}' : '{{ __("Total Cost") }}'}" autocomplete="off">
                                                         </div>
                                                     </div>

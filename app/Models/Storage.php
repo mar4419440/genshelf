@@ -16,4 +16,9 @@ class Storage extends Model
         'conditions',
         'is_active'
     ];
+
+    public function batches()
+    {
+        return $this->hasMany(ProductBatch::class);
+    }
 }

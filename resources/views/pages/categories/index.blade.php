@@ -46,17 +46,19 @@
                                     <span style="color:var(--tx3); font-style:italic; font-size:11px;">{{ __('Main Category') }}</span>
                                 @endif
                             </td>
-                            <td style="padding:12px; text-align:right;">
-                                <button class="btn btn-o" style="padding:6px 12px; font-size:12px;"
-                                    onclick='openCategoryModal(@json($category))'>{{ __('Edit') }}</button>
-                                <form action="{{ route('categories.destroy', $category->id) }}" method="POST"
-                                    style="display:inline;"
-                                    onsubmit="return confirm('{{ __('Are you sure you want to delete this category?') }}');">
-                                    @csrf
-                                    @method('DELETE')
-                                    <button type="submit" class="btn"
-                                        style="padding:6px 12px; font-size:12px; background:var(--rd-l); color:var(--rd);">{{ __('Del') }}</button>
-                                </form>
+                             <td style="padding:12px; text-align:right;">
+                                <div class="action-btns justify-content-end">
+                                    <button class="btn btn-sm btn-soft-primary rounded-circle" style="width:30px;height:30px;padding:0;display:flex;align-items:center;justify-content:center;"
+                                        onclick='openCategoryModal(@json($category))' title="{{ __('Edit Category') }}">✏️</button>
+                                    <form action="{{ route('categories.destroy', $category->id) }}" method="POST"
+                                        style="display:inline;"
+                                        onsubmit="return confirm('{{ __('Are you sure you want to delete this category?') }}');">
+                                        @csrf
+                                        @method('DELETE')
+                                        <button type="submit" class="btn btn-sm btn-soft-danger rounded-circle"
+                                            style="width:30px;height:30px;padding:0;display:flex;align-items:center;justify-content:center;" title="{{ __('Delete Category') }}">🗑️</button>
+                                    </form>
+                                </div>
                             </td>
                         </tr>
                     @empty

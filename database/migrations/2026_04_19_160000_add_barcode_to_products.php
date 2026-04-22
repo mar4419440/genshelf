@@ -7,9 +7,11 @@ use Illuminate\Support\Facades\Schema;
 return new class extends Migration {
     public function up(): void
     {
-        Schema::table('products', function (Blueprint $table) {
-            $table->string('barcode')->nullable()->unique()->after('name');
-        });
+        if (!Schema::hasColumn('products', 'barcode')) {
+            Schema::table('products', function (Blueprint $table) {
+                $table->string('barcode')->nullable()->unique()->after('name');
+            });
+        }
     }
 
     public function down(): void

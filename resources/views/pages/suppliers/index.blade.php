@@ -40,13 +40,15 @@
                             <td>{{ $s->email }}</td>
                             <td>{{ $s->phone }}</td>
                             <td class="no-sort">
-                                <button class="btn btn-xs btn-o"
-                                    onclick='openSupplierModal(@json($s))'>{{ __('Edit') }}</button>
-                                <form action="{{ route('suppliers.destroy', $s->id) }}" method="POST" style="display:inline;"
-                                    onsubmit="return confirm('{{ __('Are you sure?') }}')">
-                                    @csrf @method('DELETE')
-                                    <button type="submit" class="btn btn-xs btn-rd">{{ __('Delete') }}</button>
-                                </form>
+                                <div class="action-btns justify-content-center">
+                                    <button class="btn btn-sm btn-soft-primary rounded-circle" style="width:30px;height:30px;"
+                                        onclick='openSupplierModal(@json($s))' title="{{ __('Edit Supplier') }}">✏️</button>
+                                    <form action="{{ route('suppliers.destroy', $s->id) }}" method="POST" style="display:inline;"
+                                        onsubmit="return confirm('{{ __('Are you sure?') }}')">
+                                        @csrf @method('DELETE')
+                                        <button type="submit" class="btn btn-sm btn-soft-danger rounded-circle" style="width:30px;height:30px;" title="{{ __('Delete Supplier') }}">🗑️</button>
+                                    </form>
+                                </div>
                             </td>
                         </tr>
                     @empty
@@ -108,13 +110,15 @@
                                 </span>
                             </td>
                             <td class="no-sort">
-                                @if($po->status === 'pending')
-                                    <form action="{{ route('purchase-orders.receive', $po->id) }}" method="POST"
-                                        style="display:inline;">
-                                        @csrf
-                                        <button type="submit" class="btn btn-xs btn-gn">{{ __('Receive') }}</button>
-                                    </form>
-                                @endif
+                                <div class="action-btns justify-content-center">
+                                    @if($po->status === 'pending')
+                                        <form action="{{ route('purchase-orders.receive', $po->id) }}" method="POST"
+                                            style="display:inline;">
+                                            @csrf
+                                            <button type="submit" class="btn btn-sm btn-soft-success rounded-circle" style="width:30px;height:30px;" title="{{ __('Receive Order') }}">📥</button>
+                                        </form>
+                                    @endif
+                                </div>
                             </td>
                         </tr>
                     @empty

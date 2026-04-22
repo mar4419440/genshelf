@@ -23,9 +23,19 @@ class Category extends Model
 
     public function getFullPathAttribute()
     {
-        if ($this->parent) {
-            return $this->parent->full_path . ' > ' . $this->name;
+        $path = [$this->name];
+        $current = $this;
+
+        // Traverse up the tree
+        while ($current->parent_id) {
+            if (!$current->relationLoaded('parent')) {
+                $current->load('parent');
+            }
+            $current = $current->parent;
+            if (!$current) break;
+            array_unshift($path, $current->name);
         }
-        return $this->name;
+
+        return implode(' > ', $path);
     }
 }
