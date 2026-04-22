@@ -1,95 +1,92 @@
 ---
-name: Precision Retail
+name: GenShelf Retail Excellence
 colors:
-  surface: '#f9f9ff'
-  surface-dim: '#cfdaf2'
-  surface-bright: '#f9f9ff'
+  surface: '#fbf8ff'
+  surface-dim: '#d7d8f6'
+  surface-bright: '#fbf8ff'
   surface-container-lowest: '#ffffff'
-  surface-container-low: '#f0f3ff'
-  surface-container: '#e7eeff'
-  surface-container-high: '#dee8ff'
-  surface-container-highest: '#d8e3fb'
-  on-surface: '#111c2d'
-  on-surface-variant: '#464556'
-  inverse-surface: '#263143'
-  inverse-on-surface: '#ecf1ff'
-  outline: '#777587'
-  outline-variant: '#c7c4d8'
-  surface-tint: '#4f40eb'
-  primary: '#3a24d8'
+  surface-container-low: '#f4f2ff'
+  surface-container: '#edecff'
+  surface-container-high: '#e6e6ff'
+  surface-container-highest: '#dfe0fe'
+  on-surface: '#171a30'
+  on-surface-variant: '#464554'
+  inverse-surface: '#2c2f46'
+  inverse-on-surface: '#f1efff'
+  outline: '#777586'
+  outline-variant: '#c7c4d7'
+  surface-tint: '#4d4ad5'
+  primary: '#4441cc'
   on-primary: '#ffffff'
-  primary-container: '#5446f0'
-  on-primary-container: '#e1ddff'
-  inverse-primary: '#c4c0ff'
-  secondary: '#505f76'
+  primary-container: '#5e5ce6'
+  on-primary-container: '#f4f1ff'
+  inverse-primary: '#c2c1ff'
+  secondary: '#5d5c74'
   on-secondary: '#ffffff'
-  secondary-container: '#d0e1fb'
-  on-secondary-container: '#54647a'
-  tertiary: '#494c4e'
+  secondary-container: '#e2e0fc'
+  on-secondary-container: '#63627a'
+  tertiary: '#443adb'
   on-tertiary: '#ffffff'
-  tertiary-container: '#616466'
-  on-tertiary-container: '#dfe1e3'
+  tertiary-container: '#5e57f4'
+  on-tertiary-container: '#f4f1ff'
   error: '#ba1a1a'
   on-error: '#ffffff'
   error-container: '#ffdad6'
   on-error-container: '#93000a'
-  primary-fixed: '#e3dfff'
-  primary-fixed-dim: '#c4c0ff'
-  on-primary-fixed: '#110068'
-  on-primary-fixed-variant: '#351ad4'
-  secondary-fixed: '#d3e4fe'
-  secondary-fixed-dim: '#b7c8e1'
-  on-secondary-fixed: '#0b1c30'
-  on-secondary-fixed-variant: '#38485d'
-  tertiary-fixed: '#e0e3e5'
-  tertiary-fixed-dim: '#c4c7c9'
-  on-tertiary-fixed: '#191c1e'
-  on-tertiary-fixed-variant: '#444749'
-  background: '#f9f9ff'
-  on-background: '#111c2d'
-  surface-variant: '#d8e3fb'
+  primary-fixed: '#e2dfff'
+  primary-fixed-dim: '#c2c1ff'
+  on-primary-fixed: '#0c006b'
+  on-primary-fixed-variant: '#332dbc'
+  secondary-fixed: '#e2e0fc'
+  secondary-fixed-dim: '#c6c4df'
+  on-secondary-fixed: '#1a1a2e'
+  on-secondary-fixed-variant: '#45455b'
+  tertiary-fixed: '#e2dfff'
+  tertiary-fixed-dim: '#c3c0ff'
+  on-tertiary-fixed: '#0f0069'
+  on-tertiary-fixed-variant: '#3323cc'
+  background: '#fbf8ff'
+  on-background: '#171a30'
+  surface-variant: '#dfe0fe'
 typography:
-  headline-xl:
-    fontFamily: Manrope
-    fontSize: 40px
-    fontWeight: '700'
-    lineHeight: '1.2'
-  headline-lg:
-    fontFamily: Manrope
+  h1:
+    fontFamily: Inter
     fontSize: 32px
-    fontWeight: '600'
-    lineHeight: '1.2'
-  headline-md:
-    fontFamily: Manrope
+    fontWeight: '700'
+    lineHeight: 40px
+    letterSpacing: -0.02em
+  h2:
+    fontFamily: Inter
     fontSize: 24px
     fontWeight: '600'
-    lineHeight: '1.3'
-  body-lg:
+    lineHeight: 32px
+    letterSpacing: -0.01em
+  h3:
     fontFamily: Inter
-    fontSize: 18px
-    fontWeight: '400'
-    lineHeight: '1.6'
-  body-md:
+    fontSize: 20px
+    fontWeight: '600'
+    lineHeight: 28px
+  body-lg:
     fontFamily: Inter
     fontSize: 16px
     fontWeight: '400'
-    lineHeight: '1.5'
-  body-sm:
+    lineHeight: 24px
+  body-md:
     fontFamily: Inter
     fontSize: 14px
     fontWeight: '400'
-    lineHeight: '1.5'
-  label-caps:
+    lineHeight: 20px
+  label-sm:
     fontFamily: Inter
     fontSize: 12px
     fontWeight: '600'
-    lineHeight: '1'
+    lineHeight: 16px
     letterSpacing: 0.05em
-  data-mono:
+  data-tabular:
     fontFamily: Inter
     fontSize: 14px
     fontWeight: '500'
-    lineHeight: '1'
+    lineHeight: 20px
 rounded:
   sm: 0.125rem
   DEFAULT: 0.25rem
@@ -98,68 +95,73 @@ rounded:
   xl: 0.75rem
   full: 9999px
 spacing:
-  base: 4px
+  base: 8px
   xs: 4px
   sm: 8px
   md: 16px
   lg: 24px
   xl: 32px
   container-margin: 24px
-  gutter: 16px
+  grid-gutter: 16px
 ---
 
 ## Brand & Style
 
-This design system is engineered for the high-velocity world of retail management, where data clarity is the highest priority. The aesthetic is **Corporate / Modern**, emphasizing reliability and structural integrity. By combining the systematic rigour of a fintech dashboard with the accessibility of a modern SaaS platform, it evokes a sense of "organized intelligence." 
+The brand personality is rooted in reliability and operational intelligence. It serves a dual audience of floor managers and corporate analysts who require high-density information without cognitive overload. The emotional response is one of "ordered control"—a calm, systematic environment that reduces the stress of inventory and financial management.
 
-The UI prioritizes high legibility and an uncluttered interface to reduce cognitive load for managers handling inventory, logistics, and financial reporting. It utilizes a predominantly white and soft-gray workspace to allow the vibrant blue primary accents to guide the user's attention toward critical actions and real-time alerts.
+This design system employs a **Corporate / Modern** style. It prioritizes clarity through a structured hierarchy, ample white space, and a refined color palette. By utilizing subtle borders and tonal layering rather than aggressive gradients or heavy shadows, the UI remains functional and timeless, ensuring the focus stays on the data.
 
 ## Colors
 
-The color strategy uses "Vibrant Blue" as the primary driver for brand identity and interactive states. This blue is high-chroma, ensuring it remains distinct against complex data tables and white backgrounds.
+The palette is anchored by a vibrant primary blue (#5E5CE6) that signals action and technical precision. It is supported by a deep navy secondary color (#1A1A2E) used for high-contrast navigation and primary headings to establish authority.
 
-- **Primary**: Used for CTA buttons, active navigation states, and primary brand iconography.
-- **Secondary (Soft Gray)**: Reserved for supporting text, borders, and inactive interface elements to maintain a clean, low-noise environment.
-- **Surface & Backgrounds**: A mixture of pure white and extremely light grays (Tertiary) are used to create subtle tonal layering and separate distinct data modules without relying on heavy lines.
-- **Functional Colors**: Use standard semantic colors for status: Green for stock "In-Limit," Red for "Out of Stock," and Amber for "Low Inventory."
+The background uses a cool light gray (#F4F5F7) to reduce eye strain during long shifts, while pure white (#FFFFFF) is reserved for interactive cards and containers. Tertiary indigo (#4F46E5) provides subtle variance for secondary actions or data categories, while the neutral slate (#555770) handles body text and UI iconography to maintain a balanced visual weight.
 
 ## Typography
 
-The typography system uses a dual-font approach to balance personality with utility. **Manrope** is used for headlines to provide a modern, friendly, yet professional character. For all functional data and body text, **Inter** is utilized due to its exceptional performance in dense interfaces and its "tabular num" features, which are essential for aligning financial figures in retail reports.
+This design system utilizes **Inter** across all levels to ensure maximum readability and a systematic, utilitarian aesthetic. The type scale is optimized for data-heavy retail environments, featuring "Data Tabular" settings (tabular figures) for price lists and stock counts to ensure vertical alignment of numbers.
 
-Labels for data inputs should always be high-contrast and slightly smaller than the input text to maintain a clear hierarchy. For dashboards, utilize the `data-mono` setting to ensure numbers and currency align perfectly in columns.
+Headlines use tighter letter spacing and heavier weights to create a strong visual anchor, while body text maintains standard tracking for flow. Labels are rendered in a slightly smaller, semi-bold uppercase style to distinguish metadata from actionable content.
 
 ## Layout & Spacing
 
-This design system follows a **Fluid Grid** model with a standard 12-column layout for desktop views. It uses a strict 4px baseline grid to ensure all components—from small buttons to large cards—maintain a rhythmic vertical and horizontal flow.
+The layout follows a **Fluid Grid** model, utilizing a 12-column system that adapts to the wide-screen monitors typically found in retail back-offices. A strict 8px spacing rhythm ensures consistency across all components.
 
-- **Margins**: Use 24px margins for the primary application container to provide breathing room.
-- **Gutters**: A standard 16px gutter is used between layout columns.
-- **Density**: Because retail data can be dense, the system supports a "Compact" mode where vertical padding is reduced by 25% (using the `sm` unit) for inventory lists and POS terminals.
+Layouts should prioritize "Safe Zones" for high-frequency interactions. Gutters are kept at 16px to maximize information density while preventing visual clutter. Dashboards use a modular approach where cards can span 3, 4, 6, or 12 columns depending on the complexity of the data visualization (e.g., small KPIs span 3 columns, while complex inventory tables span 12).
 
 ## Elevation & Depth
 
-To maintain a clean and professional look, depth is communicated through **Tonal Layers** and **Low-Contrast Outlines**. 
+To maintain a clean and professional look, this design system avoids heavy shadows. Depth is primarily communicated through **Tonal Layers** and **Low-Contrast Outlines**.
 
-1. **Base Layer**: Soft gray background (#F8FAFC).
-2. **Container Layer**: Pure white cards with a subtle 1px border (#E2E8F0).
-3. **Elevated State**: For modals and dropdowns, use a very soft, diffused ambient shadow with a slight blue tint (e.g., `0px 10px 30px rgba(84, 70, 240, 0.08)`) to suggest they are floating above the workspace. 
+1.  **Level 0 (Background):** The base gray (#F4F5F7).
+2.  **Level 1 (Surface):** White cards (#FFFFFF) with a 1px solid border (#E2E8F0).
+3.  **Level 2 (Interaction):** Elements like active dropdowns or hovered buttons receive a very soft, ambient shadow (0px 4px 12px rgba(26, 26, 46, 0.05)) to suggest lift without breaking the flat aesthetic.
 
-Avoid heavy drop shadows on standard dashboard widgets; use borders to define boundaries instead, keeping the interface feeling lightweight and "fast."
+This "ghost border" technique ensures that the UI feels crisp and structural, reinforcing the sense of efficiency.
 
 ## Shapes
 
-The shape language is **Soft (0.25rem)**, providing a clean, geometric feel that avoids the "playfulness" of highly rounded corners while remaining more modern than sharp edges.
+The shape language is **Soft** (Level 1). A 0.25rem (4px) corner radius is applied to standard components like input fields, buttons, and small tags to maintain a professional, slightly technical edge. 
 
-- **Standard Elements**: Inputs and buttons use a 4px radius.
-- **Large Components**: Cards and containers use an 8px radius (`rounded-lg`).
-- **Icons**: Icons should be housed in square containers or have very slight rounding to match the UI elements.
+Large containers and cards utilize the `rounded-lg` (0.5rem / 8px) setting to provide enough visual distinction from the background without appearing overly playful. This balance of sharp and slightly rounded edges conveys a precision-engineered feel suitable for retail management.
 
 ## Components
 
-- **Buttons**: Primary buttons are solid vibrant blue with white text. Secondary buttons are outlined with soft gray. States (Hover/Active) should involve a 10% brightness shift.
-- **Input Fields**: Feature a light gray border that transitions to the primary blue on focus. Label text is positioned above the input in a smaller, bold Inter font.
-- **Cards**: The primary vehicle for dashboard data. Each card has a white background, 8px corner radius, and a subtle gray border. Padding inside cards is strictly 24px (`lg`).
-- **Data Tables**: Use alternating row colors (White and Off-white) instead of heavy horizontal lines. Headers are capitalized, bold, and in a slightly smaller font size for clarity.
-- **Chips**: Used for status (e.g., "Shipped", "Pending"). They use a low-opacity version of the semantic color as a background with high-opacity text for maximum readability without clutter.
-- **Icons**: Use a 2px stroke weight with minimal details. Avoid filled icons unless indicating an active navigation state.
+### Buttons
+Primary buttons use the #5E5CE6 fill with white text. Secondary buttons use a #FFFFFF fill with a 1px border of #5E5CE6. Both feature 4px rounded corners and 16px horizontal padding for a compact, efficient footprint.
+
+### Cards
+Cards are the primary container for data. They must feature a white background, a 1px border (#E2E8F0), and an 8px corner radius. Padding inside cards should be a consistent 24px (lg spacing) for readability.
+
+### Input Fields
+Inputs use a white background with a #D1D5DB border. On focus, the border transitions to #5E5CE6 with a subtle 2px outer glow in the same color at 20% opacity. 
+
+### Chips & Status Indicators
+Status chips (e.g., "In Stock," "Low Inventory") use a desaturated background version of the status color (e.g., light green for success) with high-contrast bold text to ensure accessibility and quick scanning.
+
+### Data Tables
+Tables are the heart of the system. They use a flat style with 1px horizontal dividers. Header rows are slightly tinted (#F9FAFB) with semi-bold text. Row heights are kept tight (40px–48px) to allow for high data density.
+
+### Additional Components
+- **KPI Metrics:** Large-format numbers within cards, utilizing the primary blue for the metric value.
+- **Progress Bars:** Thin, 4px height bars for stock levels or sales targets, using tonal variations of the primary blue.
