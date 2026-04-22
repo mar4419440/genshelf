@@ -3,11 +3,11 @@
 @section('content')
 <div class="container-fluid">
     <div class="row mb-4 align-items-center">
-        <div class="col-md-6">
-            <h2 class="fw-bold"><i class="fas fa-brain me-2 text-primary"></i>{{ __('Business Intelligence') }}</h2>
+        <div class="col-md-6 {{ app()->getLocale() === 'ar' ? 'text-right' : '' }}">
+            <h2 class="fw-bold"><i class="fas fa-brain {{ app()->getLocale() === 'ar' ? 'ms-2' : 'me-2' }} text-primary"></i>{{ __('Business Intelligence') }}</h2>
             <p class="text-muted">{{ __('Data-driven insights for your retail operation') }}</p>
         </div>
-        <div class="col-md-6 text-end">
+        <div class="col-md-6 {{ app()->getLocale() === 'ar' ? 'text-start' : 'text-end' }}">
             <form action="{{ route('bi.index') }}" method="GET" class="d-inline-flex gap-2">
                 <select name="period" class="form-select border-0 shadow-sm bg-white" onchange="this.form.submit()">
                     <option value="today" {{ $period == 'today' ? 'selected' : '' }}>{{ __('Today') }}</option>
@@ -68,7 +68,7 @@
                 <div class="mb-4">
                     <span class="text-muted small d-block mb-1">{{ __('Peak Sales Day') }}</span>
                     @if($salesIntelligence->peak_day)
-                        <h4 class="fw-bold mb-0">{{ Carbon\Carbon::parse($salesIntelligence->peak_day->date)->format('l, d M') }}</h4>
+                        <h4 class="fw-bold mb-0">{{ __(Carbon\Carbon::parse($salesIntelligence->peak_day->date)->format('l')) }}, {{ Carbon\Carbon::parse($salesIntelligence->peak_day->date)->format('d M') }}</h4>
                         <span class="text-primary fw-bold">{{ number_format($salesIntelligence->peak_day->revenue, 2) }}</span>
                     @else
                         <span class="text-muted italic">{{ __('No data yet') }}</span>
@@ -123,17 +123,17 @@
                     <table class="table table-hover align-middle mb-0">
                         <thead class="bg-light">
                             <tr class="x-small text-muted">
-                                <th class="ps-4 border-0">{{ __('PRODUCT') }}</th>
+                                <th class="{{ app()->getLocale() === 'ar' ? 'pe-4' : 'ps-4' }} border-0">{{ __('PRODUCT') }}</th>
                                 <th class="border-0">{{ __('UNITS') }}</th>
-                                <th class="border-0 text-end pe-4">{{ __('REVENUE') }}</th>
+                                <th class="border-0 {{ app()->getLocale() === 'ar' ? 'text-start ps-4' : 'text-end pe-4' }}">{{ __('REVENUE') }}</th>
                             </tr>
                         </thead>
                         <tbody>
                             @foreach($topProducts as $p)
                             <tr>
-                                <td class="ps-4 fw-bold">{{ $p->name }}<br><span class="x-small text-muted">{{ $p->category }}</span></td>
+                                <td class="{{ app()->getLocale() === 'ar' ? 'pe-4' : 'ps-4' }} fw-bold">{{ $p->name }}<br><span class="x-small text-muted">{{ __($p->category) }}</span></td>
                                 <td>{{ number_format($p->units) }}</td>
-                                <td class="text-end pe-4 fw-bold text-success">{{ number_format($p->revenue, 2) }}</td>
+                                <td class="{{ app()->getLocale() === 'ar' ? 'text-start ps-4' : 'text-end pe-4' }} fw-bold text-success">{{ number_format($p->revenue, 2) }}</td>
                             </tr>
                             @endforeach
                         </tbody>
@@ -154,17 +154,17 @@
                     <table class="table table-hover align-middle mb-0">
                          <thead class="bg-light">
                             <tr class="x-small text-muted">
-                                <th class="ps-4 border-0">{{ __('CUSTOMER') }}</th>
+                                <th class="{{ app()->getLocale() === 'ar' ? 'pe-4' : 'ps-4' }} border-0">{{ __('CUSTOMER') }}</th>
                                 <th class="border-0">{{ __('ORDERS') }}</th>
-                                <th class="border-0 text-end pe-4">{{ __('LTV') }}</th>
+                                <th class="border-0 {{ app()->getLocale() === 'ar' ? 'text-start ps-4' : 'text-end pe-4' }}">{{ __('LTV') }}</th>
                             </tr>
                         </thead>
                         <tbody>
                             @foreach($topCustomers as $c)
                             <tr>
-                                <td class="ps-4 fw-bold">{{ $c->name }}</td>
+                                <td class="{{ app()->getLocale() === 'ar' ? 'pe-4' : 'ps-4' }} fw-bold">{{ $c->name }}</td>
                                 <td>{{ number_format($c->orders) }}</td>
-                                <td class="text-end pe-4 fw-bold text-primary">{{ number_format($c->total, 2) }}</td>
+                                <td class="{{ app()->getLocale() === 'ar' ? 'text-start ps-4' : 'text-end pe-4' }} fw-bold text-primary">{{ number_format($c->total, 2) }}</td>
                             </tr>
                             @endforeach
                         </tbody>

@@ -111,6 +111,10 @@ class ExpenseController extends Controller
                 ->store('expenses/attachments', 'public');
         }
 
+        if ($validated['category'] === 'other' && $request->filled('other_name')) {
+            $validated['sub_category'] = $request->other_name;
+        }
+
         $expense = Expense::create($validated);
 
         // لو متكرر، سجل الجدول الزمني
@@ -148,12 +152,10 @@ class ExpenseController extends Controller
             'expense_date'     => 'required|date',
         ]);
 
-        if ($request->hasFile('attachment')) {
-            if ($expense->attachment_path) {
-                Storage::disk('public')->delete($expense->attachment_path);
-            }
-            $validated['attachment_path'] = $request->file('attachment')
-                ->store('expenses/attachments', 'public');
+        if ($validated['category'] === 'other' && $request->filled('other_name')) {
+            $validated['sub_category'] = $request->other_name;
+        } else {
+            $validated['sub_category'] = null;
         }
 
         $expense->update($validated);

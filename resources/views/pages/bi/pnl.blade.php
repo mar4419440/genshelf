@@ -3,11 +3,11 @@
 @section('content')
 <div class="container-fluid">
     <div class="row mb-4 align-items-center">
-        <div class="col-md-6">
-            <h2 class="fw-bold"><i class="fas fa-file-invoice-dollar me-2 text-primary"></i>{{ __('Profit & Loss Statement') }}</h2>
+        <div class="col-md-6 {{ app()->getLocale() === 'ar' ? 'text-right' : '' }}">
+            <h2 class="fw-bold"><i class="fas fa-file-invoice-dollar {{ app()->getLocale() === 'ar' ? 'ms-2' : 'me-2' }} text-primary"></i>{{ __('Profit & Loss Statement') }}</h2>
             <p class="text-muted">{{ __('Monthly financial performance summary for') }} {{ $year }}</p>
         </div>
-        <div class="col-md-6 text-end">
+        <div class="col-md-6 {{ app()->getLocale() === 'ar' ? 'text-start' : 'text-end' }}">
             <form action="{{ route('bi.pnl') }}" method="GET" class="d-inline-flex gap-2">
                 <input type="number" name="year" class="form-control border-0 shadow-sm bg-white" 
                        value="{{ $year }}" placeholder="{{ __('Year') }}" onchange="this.form.submit()">
@@ -23,12 +23,12 @@
             <table class="table table-hover align-middle mb-0">
                 <thead class="bg-light">
                     <tr class="x-small text-muted">
-                        <th class="ps-4 py-3 border-0">{{ __('MONTH') }}</th>
+                        <th class="{{ app()->getLocale() === 'ar' ? 'pe-4' : 'ps-4' }} py-3 border-0">{{ __('MONTH') }}</th>
                         <th class="border-0">{{ __('TOTAL REVENUE') }}</th>
                         <th class="border-0">{{ __('COGS (PURCHASE COST)') }}</th>
                         <th class="border-0">{{ __('GROSS PROFIT') }}</th>
                         <th class="border-0">{{ __('OTHER EXPENSES') }}</th>
-                        <th class="border-0 ps-4 pe-4 bg-soft-primary text-primary fw-bold">{{ __('NET PROFIT') }}</th>
+                        <th class="border-0 {{ app()->getLocale() === 'ar' ? 'pe-4 ps-4' : 'ps-4 pe-4' }} bg-soft-primary text-primary fw-bold">{{ __('NET PROFIT') }}</th>
                     </tr>
                 </thead>
                 <tbody>

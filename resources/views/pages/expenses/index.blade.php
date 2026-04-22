@@ -206,9 +206,10 @@
                                             'inventory' => 'bg-primary-fixed text-on-primary-fixed-variant',
                                             default => 'bg-surface-container-highest text-on-surface-variant'
                                         };
+                                        $catDisplay = $e->category === 'other' && $e->sub_category ? $e->sub_category : __($e->category);
                                     @endphp
                                     <span class="inline-block px-3 py-1 rounded-full text-[12px] font-bold uppercase {{ $catColor }}">
-                                        {{ __($e->category) }}
+                                        {{ $catDisplay }}
                                     </span>
                                 </td>
                                 <td class="px-6 py-4">
@@ -291,7 +292,11 @@
                 <div style="display:grid;grid-template-columns:1fr 1fr;gap:12px;">
                     <div>
                         <label style="display:block;font-size:12px;font-weight:600;color:var(--tx2);margin-bottom:4px;">{{ __('Category') }}</label>
-                        <select name="category" required style="text-align: inherit;">${categoryOptions}</select>
+                        <select name="category" required style="text-align: inherit;" onchange="toggleOtherField(this)">${categoryOptions}</select>
+                    </div>
+                    <div id="other-name-wrapper" style="display:none;">
+                        <label style="display:block;font-size:12px;font-weight:600;color:var(--tx2);margin-bottom:4px;">{{ __('Name') }}</label>
+                        <input type="text" name="other_name" style="text-align: inherit;">
                     </div>
                     <div>
                         <label style="display:block;font-size:12px;font-weight:600;color:var(--tx2);margin-bottom:4px;">{{ __('Date') }}</label>
@@ -321,6 +326,7 @@
             </form>
         `;
         renderExpenseModal(html);
+        toggleOtherField(document.querySelector('select[name="category"]'));
     }
 
     function editExpense(id) {
@@ -338,7 +344,11 @@
                 <div style="display:grid;grid-template-columns:1fr 1fr;gap:12px;">
                     <div>
                         <label style="display:block;font-size:12px;font-weight:600;color:var(--tx2);margin-bottom:4px;">{{ __('Category') }}</label>
-                        <select name="category" style="text-align: inherit;">${categoryOptions.replace('value="'+e.category+'"', 'value="'+e.category+'" selected')}</select>
+                        <select name="category" style="text-align: inherit;" onchange="toggleOtherField(this)">${categoryOptions.replace('value="'+e.category+'"', 'value="'+e.category+'" selected')}</select>
+                    </div>
+                    <div id="other-name-wrapper" style="display: ${e.category === 'other' ? 'block' : 'none'};">
+                        <label style="display:block;font-size:12px;font-weight:600;color:var(--tx2);margin-bottom:4px;">{{ __('Name') }}</label>
+                        <input type="text" name="other_name" value="${e.sub_category || ''}" style="text-align: inherit;">
                     </div>
                     <div>
                         <label style="display:block;font-size:12px;font-weight:600;color:var(--tx2);margin-bottom:4px;">{{ __('Date') }}</label>
@@ -368,6 +378,19 @@
             </form>
         `;
         renderExpenseModal(html);
+        toggleOtherField(document.querySelector('select[name="category"]'));
+    }
+
+    function toggleOtherField(select) {
+        const wrapper = document.getElementById('other-name-wrapper');
+        if (!wrapper) return;
+        if (select.value === 'other') {
+            wrapper.style.display = 'block';
+            wrapper.querySelector('input').required = true;
+        } else {
+            wrapper.style.display = 'none';
+            wrapper.querySelector('input').required = false;
+        }
     }
 
     function renderExpenseModal(html) {

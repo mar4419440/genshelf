@@ -3,11 +3,11 @@
 @section('content')
 <div class="container-fluid">
     <div class="row mb-4 align-items-center">
-        <div class="col-md-6">
-            <h2 class="fw-bold"><i class="fas fa-chart-line me-2 text-primary"></i>{{ __('Product Performance') }}</h2>
+        <div class="col-md-6 {{ app()->getLocale() === 'ar' ? 'text-right' : '' }}">
+            <h2 class="fw-bold"><i class="fas fa-chart-line {{ app()->getLocale() === 'ar' ? 'ms-2' : 'me-2' }} text-primary"></i>{{ __('Product Performance') }}</h2>
             <p class="text-muted">{{ __('Deep dive into inventory profitability and sales velocity') }}</p>
         </div>
-        <div class="col-md-6 text-end">
+        <div class="col-md-6 {{ app()->getLocale() === 'ar' ? 'text-start' : 'text-end' }}">
             <form action="{{ route('bi.products') }}" method="GET" class="d-inline-flex gap-2">
                 <select name="period" class="form-select border-0 shadow-sm bg-white" onchange="this.form.submit()">
                     <option value="this_month" {{ $period == 'this_month' ? 'selected' : '' }}>{{ __('This Month') }}</option>
@@ -26,12 +26,12 @@
             <table class="table table-hover align-middle mb-0">
                 <thead class="bg-light">
                     <tr class="x-small text-muted fw-bold">
-                        <th class="ps-4 py-3 border-0">{{ __('PRODUCT') }}</th>
+                        <th class="{{ app()->getLocale() === 'ar' ? 'pe-4' : 'ps-4' }} py-3 border-0">{{ __('PRODUCT') }}</th>
                         <th class="border-0">{{ __('CATEGORY') }}</th>
                         <th class="border-0">{{ __('UNITS SOLD') }}</th>
                         <th class="border-0">{{ __('REVENUE') }}</th>
                         <th class="border-0">{{ __('AVG PRICE') }}</th>
-                        <th class="border-0 pe-4 text-end">{{ __('SALES %') }}</th>
+                        <th class="border-0 {{ app()->getLocale() === 'ar' ? 'ps-4 text-start' : 'pe-4 text-end' }}">{{ __('SALES %') }}</th>
                     </tr>
                 </thead>
                 <tbody>
