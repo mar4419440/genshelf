@@ -712,6 +712,7 @@
                 @endphp
                 
 
+                @if(in_array('dashboard', $roles))<a href="{{ route('dashboard') }}" class="{{ request()->routeIs('dashboard') ? 'active' : '' }}">📈 {{ __('Dashboard') }}</a>@endif
                 @if(in_array('pos', $roles))<a href="{{ route('pos') }}" class="{{ request()->routeIs('pos') ? 'active' : '' }}">🛒 {{ __('Point of Sale') }}</a>@endif
                 @if(in_array('inventory', $roles))<a href="{{ route('inventory') }}" class="{{ request()->routeIs('inventory') && !request()->routeIs('inventory.expiring') ? 'active' : '' }}">📦 {{ __('Product Management') }}</a>@endif
                 @if(in_array('inventory', $roles))
