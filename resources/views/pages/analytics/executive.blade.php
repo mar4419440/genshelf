@@ -5,6 +5,44 @@
 
 @section('analytics_content')
 <div class="space-y-8">
+    <!-- Alerts Section -->
+    @if(($alerts['overdue_debts'] ?? 0) > 0 || ($alerts['low_stock'] ?? 0) > 0)
+    <div class="grid grid-cols-1 md:grid-cols-2 gap-6">
+        @if($alerts['overdue_debts'] > 0)
+        <div class="bg-rose-50 border border-rose-200 p-4 rounded-2xl flex items-center justify-between">
+            <div class="flex items-center gap-3">
+                <div class="w-10 h-10 rounded-xl bg-rose-500 text-white flex items-center justify-center animate-pulse">
+                    <span class="material-symbols-outlined">priority_high</span>
+                </div>
+                <div>
+                    <h4 class="font-manrope font-bold text-sm text-rose-900">{{ __('Critical: Overdue Debts') }}</h4>
+                    <p class="text-rose-700 text-[10px]">{{ $alerts['overdue_debts'] }} {{ __('customers have outstanding payments past due.') }}</p>
+                </div>
+            </div>
+            <a href="{{ route('analytics.finance') }}" class="text-rose-900 hover:bg-rose-100 p-2 rounded-lg transition-colors">
+                <span class="material-symbols-outlined text-sm">arrow_forward</span>
+            </a>
+        </div>
+        @endif
+
+        @if($alerts['low_stock'] > 0)
+        <div class="bg-amber-50 border border-amber-200 p-4 rounded-2xl flex items-center justify-between">
+            <div class="flex items-center gap-3">
+                <div class="w-10 h-10 rounded-xl bg-amber-500 text-white flex items-center justify-center">
+                    <span class="material-symbols-outlined">inventory_2</span>
+                </div>
+                <div>
+                    <h4 class="font-manrope font-bold text-sm text-amber-900">{{ __('Warning: Low Stock') }}</h4>
+                    <p class="text-amber-700 text-[10px]">{{ $alerts['low_stock'] }} {{ __('products are below their reorder threshold.') }}</p>
+                </div>
+            </div>
+            <a href="{{ route('analytics.inventory') }}" class="text-amber-900 hover:bg-amber-100 p-2 rounded-lg transition-colors">
+                <span class="material-symbols-outlined text-sm">arrow_forward</span>
+            </a>
+        </div>
+        @endif
+    </div>
+    @endif
     <!-- KPI Row -->
     <div class="grid grid-cols-1 md:grid-cols-3 lg:grid-cols-5 gap-6">
         @php

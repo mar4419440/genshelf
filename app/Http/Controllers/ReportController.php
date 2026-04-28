@@ -78,6 +78,9 @@ class ReportController extends Controller
         $leastSelling = $this->aggregateSales($transactions, 'asc');
 
         $duePayments = Transaction::where('due_amount', '>', 0)
+            ->whereHas('customer', function($q) {
+                $q->where('credit_balance', '>', 0);
+            })
             ->with('customer')
             ->latest('due_date')
             ->get();

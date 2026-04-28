@@ -557,5 +557,9 @@
     "Inventory Intelligence": "ذكاء المخزون",
     "Executive Overview": "نظرة عامة تنفيذية",
     "Analytics Report": "تقرير التحليلات",
-    "Comprehensive business intelligence for GenShelf": "ذكاء أعمال شامل لـ GenShelf"
+    "Comprehensive business intelligence for GenShelf": "ذكاء أعمال شامل لـ GenShelf",
+    "Critical: Overdue Debts": "حرج: ديون متأخرة",
+    "Warning: Low Stock": "تحذير: نقص في المخزون",
+    "customers have outstanding payments past due.": "عملاء لديهم مدفوعات مستحقة تجاوزت موعدها.",
+    "products are below their reorder threshold.": "منتجات أقل من حد إعادة الطلب."
 }

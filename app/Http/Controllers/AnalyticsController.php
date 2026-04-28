@@ -35,12 +35,28 @@ class AnalyticsController extends Controller
         $prevKpis = $this->calculateExecutiveKPIs($prevStart, $prevEnd);
         $trend = $this->getRevenueTrend($start, $end);
         $forecast = $this->getForecastData();
+        $alerts = [
+            'overdue_debts' => DB::table('transactions')
+                ->where('due_amount', '>', 0)
+                ->where('due_date', '<', now())
+                ->whereExists(function ($query) {
+                    $query->select(DB::raw(1))
+                        ->from('customers')
+                        ->whereRaw('customers.id = transactions.customer_id')
+                        ->where('credit_balance', '>', 0);
+                })
+                ->count(),
+            'low_stock' => DB::table('products')
+                ->where('is_service', false)
+                ->whereRaw("(SELECT COALESCE(SUM(qty), 0) FROM product_batches WHERE product_id = products.id) <= (CASE WHEN products.low_stock_threshold > 0 THEN products.low_stock_threshold ELSE (SELECT CAST(value AS UNSIGNED) FROM settings WHERE `key` = 'low_stock_default' LIMIT 1) END)")
+                ->count()
+        ];
         $miniCharts = [
             'top_products' => $this->getTopProducts($start, $end, 5),
             'payment_distribution' => $this->getPaymentDistribution($start, $end),
             'return_rate' => $this->getReturnRate($start, $end)
         ];
-        return view('pages.analytics.executive', compact('start', 'end', 'period', 'kpis', 'prevKpis', 'trend', 'forecast', 'miniCharts'));
+        return view('pages.analytics.executive', compact('start', 'end', 'period', 'kpis', 'prevKpis', 'trend', 'forecast', 'miniCharts', 'alerts'));
     }
 
     public function sales(Request $request)
