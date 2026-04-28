@@ -740,7 +740,10 @@
                    lass="{{ request()->routeIs('returns') ? 'active' : '' }}">🔄 {{ __('Invoices & Returns') }}</a>@endif
                 @if(in_array('finance', $roles))<a href="{{ route('finance') }}" class="{{ request()->routeIs('finance*') ? 'active' : '' }}">💰 {{ __('Finance') }}</a>@endif
                 @if(in_array('finance', $roles))<a href="{{ route('expenses.index') }}" class="{{ request()->routeIs('expenses*') ? 'active' : '' }}">💸 {{ __('Expenses') }}</a>@endif
-                @if(in_array('reports', $roles))<a href="{{ route('bi.index') }}" class="{{ request()->routeIs('bi*') ? 'active' : '' }}">📊 {{ __('Intelligence') }}</a>@endif
+                @if(in_array('reports', $roles))
+                <div style="padding: 10px 20px 5px; font-size: 10px; font-weight: 800; color: var(--tx3); text-transform: uppercase; letter-spacing: 1px;">Analytics</div>
+                <a href="{{ route('analytics.executive') }}" class="{{ request()->routeIs('analytics.*') ? 'active' : '' }}">📊 {{ __('Advanced Reports') }}</a>
+                @endif
                 @if(in_array('warranty', $roles))<a href="{{ route('warranty') }}" class="{{ request()->routeIs('warranty') ? 'active' : '' }}">🛡️ {{ __('Warranty') }}</a>@endif
 @if(in_array('transfers', $roles))<a href="{{ route('transfers') }}" class="{{ request()->routeIs('transfers') ? 'active' : '' }}">🚚 {{ __('Stock Transfers') }}</a>@endif
 @if(in_array('settings', $roles))<a href="{{ route('settings') }}" class="{{ request()->routeIs('settings') ? 'active' : '' }}">⚙️ {{ __('Settings') }}</a>@endif

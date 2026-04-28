@@ -21,6 +21,7 @@ use App\Http\Controllers\WarrantyController;
 use App\Http\Controllers\TransferController;
 use App\Http\Controllers\SettingController;
 use App\Http\Controllers\UserController;
+use App\Http\Controllers\AnalyticsController;
 
 Route::get('/', function () {
     return redirect()->route('login');
@@ -118,6 +119,16 @@ Route::middleware(['auth'])->group(function () {
         Route::get('/pnl',       [BIController::class, 'pnl'])->name('pnl');
         Route::get('/products',  [BIController::class, 'products'])->name('products');
         Route::get('/forecast',  [BIController::class, 'forecast'])->name('forecast');
+    });
+
+    // ===== ADVANCED ANALYTICS =====
+    Route::prefix('analytics')->name('analytics.')->group(function () {
+        Route::get('/executive',  [AnalyticsController::class, 'executive'])->name('executive');
+        Route::get('/sales',      [AnalyticsController::class, 'sales'])->name('sales');
+        Route::get('/inventory',  [AnalyticsController::class, 'inventory'])->name('inventory');
+        Route::get('/finance',    [AnalyticsController::class, 'finance'])->name('finance');
+        Route::get('/customers',  [AnalyticsController::class, 'customers'])->name('customers');
+        Route::get('/operations', [AnalyticsController::class, 'operations'])->name('operations');
     });
 
     // ===== FINANCE (Expanded) =====
