@@ -227,7 +227,7 @@ class AnalyticsController extends Controller
 
     private function getStorageDistribution()
     {
-        return DB::table('product_batches')->join('products', 'products.id', '=', 'product_batches.product_id')->join('storages', 'storages.id', '=', 'product_batches.storage_id')->select('products.name as product', 'storages.name as storage', DB::raw('SUM(product_batches.qty) as qty'))->groupBy('products.id', 'products.name', 'storages.id', 'storages.name')->orderByDesc('product_batches.qty')->limit(20)->get();
+        return DB::table('product_batches')->join('products', 'products.id', '=', 'product_batches.product_id')->join('storages', 'storages.id', '=', 'product_batches.storage_id')->select('products.name as product', 'storages.name as storage', DB::raw('SUM(product_batches.qty) as qty'))->groupBy('products.id', 'products.name', 'storages.id', 'storages.name')->orderByRaw('SUM(product_batches.qty) DESC')->limit(20)->get();
     }
 
     private function getExpiryTracker()
