@@ -22,6 +22,7 @@ use App\Http\Controllers\TransferController;
 use App\Http\Controllers\SettingController;
 use App\Http\Controllers\UserController;
 use App\Http\Controllers\AnalyticsController;
+use App\Http\Controllers\AiAgentController;
 
 Route::get('/', function () {
     return redirect()->route('login');
@@ -163,6 +164,15 @@ Route::middleware(['auth'])->group(function () {
     Route::post('/settings/update', [SettingController::class, 'update'])->name('settings.update');
     Route::post('/settings/toggles', [SettingController::class, 'updateToggles'])->name('settings.updateToggles');
     Route::get('/set-language/{lang}', [SettingController::class, 'setLanguage'])->name('set-language');
+
+    // ===== AI ASSISTANT =====
+    Route::prefix('ai')->name('admin.ai.')->group(function () {
+        Route::get('/assistant/{chatId?}', [AiAgentController::class, 'index'])->name('index');
+        Route::post('/ask', [AiAgentController::class, 'ask'])->name('ask');
+        Route::post('/chats', [AiAgentController::class, 'storeChat'])->name('chats.store');
+        Route::delete('/chats/{id}', [AiAgentController::class, 'destroyChat'])->name('chats.destroy');
+        Route::post('/settings/save-token', [AiAgentController::class, 'saveToken'])->name('settings.save-token');
+    });
 
     // Users
     Route::get('/users', [UserController::class, 'index'])->name('users');

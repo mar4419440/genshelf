@@ -12,6 +12,7 @@
     <link rel="preconnect" href="https://fonts.googleapis.com">
     <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
     <link href="https://fonts.googleapis.com/css2?family=Outfit:wght@400;500;600;700;800&family=Inter:wght@400;500;600;700&family=Manrope:wght@400;500;600;700;800&display=swap" rel="stylesheet">
+    <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/bootstrap-icons@1.11.3/font/bootstrap-icons.min.css">
     <style>
         :root {
             --bg: #f4f5f7;
@@ -743,6 +744,7 @@
                 @if(in_array('reports', $roles))
                 <div style="padding: 10px 20px 5px; font-size: 10px; font-weight: 800; color: var(--tx3); text-transform: uppercase; letter-spacing: 1px;">Analytics</div>
                 <a href="{{ route('analytics.executive') }}" class="{{ request()->routeIs('analytics.*') ? 'active' : '' }}">📊 {{ __('Advanced Reports') }}</a>
+                <a href="{{ route('admin.ai.index') }}" class="{{ request()->routeIs('admin.ai.*') ? 'active' : '' }}">🤖 {{ __('AI Assistant') }}</a>
                 @endif
                 @if(in_array('warranty', $roles))<a href="{{ route('warranty') }}" class="{{ request()->routeIs('warranty') ? 'active' : '' }}">🛡️ {{ __('Warranty') }}</a>@endif
 @if(in_array('transfers', $roles))<a href="{{ route('transfers') }}" class="{{ request()->routeIs('transfers') ? 'active' : '' }}">🚚 {{ __('Stock Transfers') }}</a>@endif
