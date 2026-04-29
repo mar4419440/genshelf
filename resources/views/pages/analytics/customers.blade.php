@@ -106,20 +106,23 @@
                             </div>
                             <span class="text-sm font-bold text-slate-700">{{ $l->name }}</span>
                         </div>
-                        <div class="text-amber-600 font-extrabold text-sm">{{ number_format($l->loyalty_points) }} pts</div>
+                        <div class="text-amber-600 font-extrabold text-sm">{{ number_format($l->loyalty_points) }} {{ __('pts') }}</div>
                     </div>
                     @endforeach
                 </div>
             </div>
 
-            <!-- Churn Risk Indicator -->
-            <div class="bg-rose-900 p-8 rounded-3xl shadow-2xl relative overflow-hidden">
+            <!-- Churn Risk Indicator (Buying Frequency) -->
+            <div class="bg-slate-900 p-8 rounded-3xl shadow-2xl relative overflow-hidden">
                 <div class="absolute top-0 right-0 w-32 h-32 bg-white/5 rounded-full blur-2xl -mr-16 -mt-16"></div>
                 <div class="flex items-center gap-3 mb-6">
                     <span class="p-2 bg-white/10 text-rose-300 rounded-lg">
                         <span class="material-symbols-outlined">running_with_errors</span>
                     </span>
-                    <h3 class="text-white font-manrope font-bold text-lg">{{ __('Churn Risk Indicators') }}</h3>
+                    <div>
+                        <h3 class="text-white font-manrope font-bold text-lg">{{ __('Churn Risk Indicators') }}</h3>
+                        <p class="text-slate-400 text-[10px] uppercase font-bold">{{ __('Based on purchase frequency, not debt') }}</p>
+                    </div>
                 </div>
                 <div class="space-y-3 max-h-[200px] overflow-y-auto no-scrollbar">
                     @foreach($churn as $c)
@@ -129,8 +132,8 @@
                             <div class="text-rose-300 text-[9px] font-bold uppercase">{{ __('Last:') }} {{ $c->last_purchase }}</div>
                         </div>
                         <div class="text-right">
-                            <div class="text-white text-xs font-extrabold">{{ $c->days_overdue }} {{ __('Days Overdue') }}</div>
-                            <div class="text-rose-400 text-[9px] font-bold uppercase">{{ __('Risk: High') }}</div>
+                            <div class="text-white text-xs font-extrabold">{{ $c->delay_days }} {{ __('Purchase Delay') }}</div>
+                            <div class="text-slate-400 text-[9px] font-bold uppercase">{{ __('Risk: High') }}</div>
                         </div>
                     </div>
                     @endforeach
@@ -188,8 +191,8 @@
                 }
             },
             scales: {
-                y: { title: { display: true, text: 'Frequency (Total Orders)', font: { size: 10, weight: 'bold' } }, grid: { borderDash: [5, 5] } },
-                x: { title: { display: true, text: 'Recency (Days since last order)', font: { size: 10, weight: 'bold' } }, grid: { display: false } }
+                y: { title: { display: true, text: '{{ __("Frequency (Total Orders)") }}', font: { size: 10, weight: 'bold' } }, grid: { borderDash: [5, 5] } },
+                x: { title: { display: true, text: '{{ __("Recency (Days since last order)") }}', font: { size: 10, weight: 'bold' } }, grid: { display: false } }
             }
         }
     });

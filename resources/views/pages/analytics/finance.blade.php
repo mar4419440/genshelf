@@ -59,12 +59,12 @@
         <div class="bg-white p-8 rounded-3xl border border-slate-200 shadow-sm">
             <h3 class="font-manrope font-bold text-lg text-slate-900 mb-8">{{ __('Cash Flow Statement') }}</h3>
             <div class="space-y-6">
-                @foreach(['operating' => 'Operating Activities', 'investing' => 'Investing Activities', 'financing' => 'Financing Activities'] as $key => $label)
+                @foreach(['operating' => __('Operating Activities'), 'investing' => __('Investing Activities'), 'financing' => __('Financing Activities')] as $key => $label)
                 <div class="p-6 rounded-2xl border border-slate-100 bg-slate-50/50">
                     <div class="flex justify-between items-center mb-4">
-                        <h4 class="font-bold text-sm text-slate-900">{{ __($label) }}</h4>
+                        <h4 class="font-bold text-sm text-slate-900">{{ $label }}</h4>
                         <span class="text-xs font-extrabold {{ $cashFlow[$key]['in'] - $cashFlow[$key]['out'] >= 0 ? 'text-emerald-600' : 'text-rose-600' }}">
-                            NET: {{ number_format($cashFlow[$key]['in'] - $cashFlow[$key]['out'], 0) }}
+                            {{ __('NET:') }} {{ number_format($cashFlow[$key]['in'] - $cashFlow[$key]['out'], 0) }}
                         </span>
                     </div>
                     <div class="grid grid-cols-2 gap-4">

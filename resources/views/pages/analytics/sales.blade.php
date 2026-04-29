@@ -11,7 +11,7 @@
             <div class="p-6 border-b border-slate-100 flex items-center justify-between">
                 <h3 class="font-manrope font-bold text-lg text-slate-900">{{ __('Product Performance Breakdown') }}</h3>
                 <div class="flex gap-2">
-                    <span class="px-3 py-1 rounded-full bg-indigo-50 text-indigo-600 text-[10px] font-bold uppercase tracking-wider">ABC CLASSIFIED</span>
+                    <span class="px-3 py-1 rounded-full bg-indigo-50 text-indigo-600 text-[10px] font-bold uppercase tracking-wider">{{ __('ABC CLASSIFIED') }}</span>
                 </div>
             </div>
             <div class="overflow-x-auto">
@@ -104,7 +104,7 @@
                                 @php $opacity = $count / $maxCount; @endphp
                                 <div class="aspect-square rounded-sm transition-transform hover:scale-110 cursor-pointer" 
                                      style="background: rgba(79, 70, 229, {{ 0.05 + ($opacity * 0.95) }})"
-                                     title="{{ $count }} orders">
+                                     title="{{ $count }} {{ __('orders') }}">
                                 </div>
                             @endforeach
                         @endforeach
@@ -210,7 +210,7 @@
             labels: {!! json_encode($paymentTrend['labels']) !!},
             datasets: [
                 {
-                    label: 'Cash',
+                    label: '{{ __("Cash") }}',
                     data: {!! json_encode($paymentTrend['datasets']['cash']) !!},
                     borderColor: '#10b981',
                     backgroundColor: 'rgba(16, 185, 129, 0.2)',
@@ -218,7 +218,7 @@
                     tension: 0.4
                 },
                 {
-                    label: 'Card',
+                    label: '{{ __("Card") }}',
                     data: {!! json_encode($paymentTrend['datasets']['card']) !!},
                     borderColor: '#3b82f6',
                     backgroundColor: 'rgba(59, 130, 246, 0.2)',
@@ -226,7 +226,7 @@
                     tension: 0.4
                 },
                 {
-                    label: 'Debt',
+                    label: '{{ __("Debt") }}',
                     data: {!! json_encode($paymentTrend['datasets']['debt']) !!},
                     borderColor: '#f59e0b',
                     backgroundColor: 'rgba(245, 158, 11, 0.2)',
@@ -253,13 +253,13 @@
             labels: {!! json_encode($paymentTrend['labels']) !!},
             datasets: [
                 {
-                    label: 'With Offers',
+                    label: '{{ __("With Offers") }}',
                     data: {!! json_encode($paymentTrend['raw_dates']->map(fn($d) => (float)($offerImpact['withOffers']->get($d)->revenue ?? 0))) !!},
                     backgroundColor: '#6366f1',
                     borderRadius: 4
                 },
                 {
-                    label: 'Standard',
+                    label: '{{ __("Standard") }}',
                     data: {!! json_encode($paymentTrend['raw_dates']->map(fn($d) => (float)($offerImpact['withoutOffers']->get($d)->revenue ?? 0))) !!},
                     backgroundColor: 'rgba(255, 255, 255, 0.1)',
                     borderRadius: 4

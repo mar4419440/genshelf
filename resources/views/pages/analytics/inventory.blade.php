@@ -117,7 +117,7 @@
                         <tr class="hover:bg-slate-50 transition-colors">
                             <td class="px-6 py-4">
                                 <div class="font-bold text-slate-900">{{ $rp->name }}</div>
-                                <div class="text-[10px] text-slate-400 font-semibold uppercase tracking-tighter">{{ $rp->supplier ?: 'No Supplier' }}</div>
+                                <div class="text-[10px] text-slate-400 font-semibold uppercase tracking-tighter">{{ $rp->supplier ?: __('No Supplier') }}</div>
                             </td>
                             <td class="px-6 py-4 text-center font-bold text-slate-600">{{ round($rp->daily_rate, 1) }}</td>
                             <td class="px-6 py-4 text-center">
@@ -154,7 +154,7 @@
                         <tr class="hover:bg-slate-50 transition-colors">
                             <td class="px-6 py-4">
                                 <div class="font-bold text-slate-900">{{ $et->product }}</div>
-                                <div class="text-[10px] text-slate-400 font-bold uppercase">{{ $et->batch_number ?: 'NO-BATCH' }} / {{ $et->storage }}</div>
+                                <div class="text-[10px] text-slate-400 font-bold uppercase">{{ $et->batch_number ?: __('NO-BATCH') }} / {{ $et->storage }}</div>
                             </td>
                             <td class="px-6 py-4 text-center font-bold text-slate-600">{{ number_format($et->qty) }}</td>
                             <td class="px-6 py-4 text-right font-extrabold text-slate-900">{{ $et->expiration_date }}</td>

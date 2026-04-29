@@ -69,7 +69,7 @@
 
                 <div id="customDateRange" class="{{ ($period ?? '') == 'custom' ? 'flex' : 'hidden' }} items-center gap-2">
                     <input type="date" name="start_date" value="{{ request('start_date', substr($start, 0, 10)) }}" class="bg-slate-50 border-none rounded-xl text-sm px-3 py-2 focus:ring-2 focus:ring-primary/20">
-                    <span class="text-slate-400 text-xs font-bold">TO</span>
+                    <span class="text-slate-400 text-xs font-bold">{{ __('TO') }}</span>
                     <input type="date" name="end_date" value="{{ request('end_date', substr($end, 0, 10)) }}" class="bg-slate-50 border-none rounded-xl text-sm px-3 py-2 focus:ring-2 focus:ring-primary/20">
                 </div>
 

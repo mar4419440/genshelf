@@ -170,7 +170,7 @@
                 <div class="flex items-end gap-3">
                     <div class="text-4xl font-extrabold text-white">{{ round($miniCharts['return_rate'], 1) }}%</div>
                     <div class="mb-1 text-[10px] font-bold {{ $miniCharts['return_rate'] < 5 ? 'text-emerald-400' : ($miniCharts['return_rate'] < 10 ? 'text-amber-400' : 'text-rose-400') }}">
-                        {{ $miniCharts['return_rate'] < 5 ? 'EXCELLENT' : ($miniCharts['return_rate'] < 10 ? 'MODERATE' : 'CRITICAL') }}
+                        {{ $miniCharts['return_rate'] < 5 ? __('EXCELLENT') : ($miniCharts['return_rate'] < 10 ? __('MODERATE') : __('CRITICAL')) }}
                     </div>
                 </div>
                 <div class="mt-4 h-1 w-full bg-white/10 rounded-full">

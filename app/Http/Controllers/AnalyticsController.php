@@ -45,7 +45,8 @@ class AnalyticsController extends Controller
                         ->whereRaw('customers.id = transactions.customer_id')
                         ->where('credit_balance', '>', 0);
                 })
-                ->count(),
+                ->distinct('customer_id')
+                ->count('customer_id'),
             'low_stock' => DB::table('products')
                 ->where('is_service', false)
                 ->whereRaw("(SELECT COALESCE(SUM(qty), 0) FROM product_batches WHERE product_id = products.id) <= (CASE WHEN products.low_stock_threshold > 0 THEN products.low_stock_threshold ELSE (SELECT CAST(value AS UNSIGNED) FROM settings WHERE `key` = 'low_stock_default' LIMIT 1) END)")
@@ -310,9 +311,20 @@ class AnalyticsController extends Controller
             if ($customerTxs->count() < 2) continue;
             $gaps = []; for ($i = 1; $i < $customerTxs->count(); $i++) { $gaps[] = Carbon::parse($customerTxs[$i-1]->created_at)->diffInDays(Carbon::parse($customerTxs[$i]->created_at)); }
             $avgGap = array_sum($gaps) / count($gaps); $lastTx = Carbon::parse($customerTxs->last()->created_at); $daysSince = $lastTx->diffInDays(now());
-            if ($daysSince > ($avgGap * 2) && $avgGap > 0) { $customer = DB::table('customers')->where('id', $custId)->first(); $risky->push((object)['name' => $customer->name, 'last_purchase' => $lastTx->toDateString(), 'avg_gap' => round($avgGap, 1), 'days_overdue' => round($daysSince - $avgGap, 1)]); }
+            if ($daysSince > ($avgGap * 2) && $avgGap > 0) { 
+                $customer = DB::table('customers')->where('id', $custId)->where('credit_balance', '>', 0)->first(); 
+                if ($customer) {
+                    $risky->push((object)[
+                        'name' => $customer->name, 
+                        'last_purchase' => $lastTx->toDateString(), 
+                        'avg_gap' => round($avgGap, 1), 
+                        'delay_days' => round($daysSince - $avgGap, 1),
+                        'is_paid' => false
+                    ]);
+                }
+            }
         }
-        return $risky->sortByDesc('days_overdue');
+        return $risky->sortByDesc('delay_days');
     }
 
     private function getQuintiles($data, $reverse = false)

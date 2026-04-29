@@ -12,6 +12,7 @@ class DatabaseSeeder extends Seeder
         $this->call([
             AdminSeeder::class,
             SettingSeeder::class,
+            AnalyticsDemoSeeder::class, // Remove this line to skip demo data
         ]);
 
         // Create a default POS location so the system is usable immediately
