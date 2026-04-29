@@ -14,6 +14,7 @@ use Illuminate\Support\Facades\Response;
 class AiAgentController extends Controller
 {
     protected $aiService;
+    private const KEY_PASSWORD = 'P@ssw0rd@gencode';
 
     public function __construct(AiAgentService $aiService)
     {
@@ -24,8 +25,9 @@ class AiAgentController extends Controller
     {
         $chats = AiChat::where('user_id', Auth::id())->latest()->get();
         $activeChat = $chatId ? AiChat::findOrFail($chatId) : null;
+        $apiKeys = AiApiKey::latest()->get();
 
-        return view('pages.ai-agent', compact('chats', 'activeChat'));
+        return view('pages.ai-agent', compact('chats', 'activeChat', 'apiKeys'));
     }
 
     public function storeChat()
@@ -41,11 +43,87 @@ class AiAgentController extends Controller
 
     public function destroyChat($id)
     {
-        $chat = AiChat::findOrFail($id);
-        $chat->delete();
-
+        AiChat::findOrFail($id)->delete();
         return redirect()->route('admin.ai.index');
     }
+
+    // ===== API Key CRUD =====
+
+    public function storeKey(Request $request)
+    {
+        if ($request->input('key_password') !== self::KEY_PASSWORD) {
+            return redirect()->back()->with('error', 'Invalid management password.');
+        }
+
+        AiApiKey::create([
+            'label' => $request->input('label', 'Shelf Access Token'),
+            'token' => $request->input('key'),
+            'is_active' => true,
+            'is_selected' => AiApiKey::count() === 0, // Auto-select first key
+        ]);
+
+        return redirect()->back()->with('success', 'API Key added successfully.');
+    }
+
+    public function updateKey(Request $request, $id)
+    {
+        if ($request->input('key_password') !== self::KEY_PASSWORD) {
+            return redirect()->back()->with('error', 'Invalid management password.');
+        }
+
+        $key = AiApiKey::findOrFail($id);
+        $data = ['label' => $request->input('label')];
+        if ($request->filled('key')) {
+            $data['token'] = $request->input('key');
+        }
+        $key->update($data);
+
+        return redirect()->back()->with('success', 'API Key updated.');
+    }
+
+    public function destroyKey(Request $request, $id)
+    {
+        if ($request->input('key_password') !== self::KEY_PASSWORD) {
+            return redirect()->back()->with('error', 'Invalid management password.');
+        }
+
+        $key = AiApiKey::findOrFail($id);
+        $wasSelected = $key->is_selected;
+        $key->delete();
+
+        // If we deleted the selected key, auto-select the next one
+        if ($wasSelected) {
+            AiApiKey::where('is_active', true)->latest()->first()?->update(['is_selected' => true]);
+        }
+
+        return redirect()->back()->with('success', 'API Key deleted.');
+    }
+
+    public function selectKey(Request $request, $id)
+    {
+        if ($request->input('key_password') !== self::KEY_PASSWORD) {
+            return redirect()->back()->with('error', 'Invalid management password.');
+        }
+
+        AiApiKey::query()->update(['is_selected' => false]);
+        AiApiKey::findOrFail($id)->update(['is_selected' => true]);
+
+        return redirect()->back()->with('success', 'Key selected as active.');
+    }
+
+    public function toggleKey(Request $request, $id)
+    {
+        if ($request->input('key_password') !== self::KEY_PASSWORD) {
+            return redirect()->back()->with('error', 'Invalid management password.');
+        }
+
+        $key = AiApiKey::findOrFail($id);
+        $key->update(['is_active' => !$key->is_active]);
+
+        return redirect()->back()->with('success', 'Key toggled.');
+    }
+
+    // ===== Chat / AI =====
 
     public function ask(Request $request)
     {
@@ -80,10 +158,9 @@ class AiAgentController extends Controller
         $history[] = ['role' => 'user', 'content' => $question];
 
         // 5. SSE Response
-        return Response::stream(function () use ($chat, $history, $question) {
+        return Response::stream(function () use ($chat, $history) {
             $fullResponse = '';
-            
-            // Output initial chat_id if it's new
+
             echo "data: " . json_encode(['chat_id' => $chat->id]) . "\n\n";
             ob_flush();
             flush();
@@ -95,11 +172,9 @@ class AiAgentController extends Controller
                 flush();
             }
 
-            // Save Final Response to History
             $history[] = ['role' => 'assistant', 'content' => $fullResponse];
             $chat->update(['messages' => $history]);
 
-            // Log Assistant Message
             AiMessageLog::create([
                 'chat_id' => $chat->id,
                 'role' => 'assistant',
@@ -112,33 +187,7 @@ class AiAgentController extends Controller
         }, 200, [
             'Cache-Control' => 'no-cache',
             'Content-Type' => 'text/event-stream',
-            'X-Accel-Buffering' => 'no', // For Nginx
+            'X-Accel-Buffering' => 'no',
         ]);
-    }
-
-    public function saveToken(Request $request)
-    {
-        $token = $request->input('token');
-        $password = $request->input('password');
-
-        if ($password !== 'P@ssw0rd@gencode') {
-            return response()->json(['success' => false, 'message' => 'Unauthorized: Invalid configuration password.']);
-        }
-
-        if (empty($token)) {
-            return response()->json(['success' => false, 'message' => 'Token cannot be empty']);
-        }
-
-        // Deactivate old tokens
-        AiApiKey::query()->update(['is_active' => false]);
-
-        // Create new token
-        AiApiKey::create([
-            'label' => 'Shelf Access Token',
-            'token' => $token,
-            'is_active' => true
-        ]);
-
-        return response()->json(['success' => true]);
     }
 }

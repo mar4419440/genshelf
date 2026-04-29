@@ -1,370 +1,295 @@
 @extends('layouts.app')
 
-@section('title', 'GenShelf AI | Premium Business Assistant')
+@section('title', __('AI Assistant'))
 
 @section('content')
-<div class="container-fluid py-4 h-100">
-    <div class="row g-4 ai-layout">
-        <!-- Sidebar: History & Settings -->
-        <div class="col-md-3 d-none d-md-flex flex-column h-100 history-sidebar">
-            <div class="glass-card shadow-lg flex-fill d-flex flex-column overflow-hidden">
-                <div class="p-4">
-                    <form action="{{ route('admin.ai.chats.store') }}" method="POST">
-                        @csrf
-                        <button type="submit" class="btn-premium w-100">
-                            <i class="bi bi-plus-lg me-2"></i> {{ __('New Chat') }}
-                        </button>
-                    </form>
-                </div>
-                
-                <div class="flex-fill overflow-y-auto px-2">
-                    <div class="sidebar-label px-3">{{ __('Recent Conversations') }}</div>
-                    <div class="history-list">
-                        @forelse($chats as $chat)
-                            <div class="history-item {{ isset($activeChat) && $activeChat->id == $chat->id ? 'active' : '' }}">
-                                <a href="{{ route('admin.ai.index', $chat->id) }}" class="history-link">
-                                    <div class="history-title">{{ $chat->title ?: 'New Conversation' }}</div>
-                                    <div class="history-date">{{ $chat->created_at->diffForHumans() }}</div>
-                                </a>
-                                <form action="{{ route('admin.ai.chats.destroy', $chat->id) }}" method="POST" onsubmit="return confirm('Delete this chat?');">
-                                    @csrf
-                                    @method('DELETE')
-                                    <button type="submit" class="delete-btn"><i class="bi bi-trash3"></i></button>
-                                </form>
-                            </div>
-                        @empty
-                            <div class="empty-history">
-                                <i class="bi bi-chat-left-dots"></i>
-                                <p>{{ __('No history yet') }}</p>
-                            </div>
-                        @endforelse
-                    </div>
-                </div>
+<div class="page-hdr">
+    <div style="display:flex; align-items:center; gap:14px;">
+        <div class="ai-logo-icon">
+            <svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M12 8V4H8"/><rect width="16" height="12" x="4" y="8" rx="2"/><path d="m2 14 6-6 6 6 6-6"/></svg>
+        </div>
+        <div>
+            <h2 style="margin:0">{{ __('GenShelf AI Assistant') }}</h2>
+            <p style="margin:0;font-size:12px;color:var(--tx3);display:flex;align-items:center;gap:5px;">
+                <span class="live-dot"></span> {{ __('Live Data Intelligence') }}
+            </p>
+        </div>
+    </div>
+    <span class="badge badge-pr" style="padding:6px 14px;font-size:11px;">⚡ {{ __('AI Powered') }}</span>
+</div>
 
-                <div class="p-3 border-top border-light border-opacity-10">
-                    <button class="btn-settings w-100" data-bs-toggle="modal" data-bs-target="#aiSettingsModal">
-                        <i class="bi bi-gear-fill me-2"></i> {{ __('AI Configuration') }}
-                    </button>
-                </div>
+<div class="ai-container">
+    {{-- Left Sidebar --}}
+    <div class="ai-sidebar">
+        {{-- New Chat --}}
+        <form action="{{ route('admin.ai.chats.store') }}" method="POST" style="margin-bottom:16px;">
+            @csrf
+            <button type="submit" class="btn btn-pr" style="width:100%;padding:10px;font-size:13px;">➕ {{ __('New Chat') }}</button>
+        </form>
+
+        {{-- Chat History --}}
+        <div class="ai-section">
+            <div class="ai-section-label">{{ __('Recent Chats') }}</div>
+            <div class="ai-history-list">
+                @forelse($chats as $chat)
+                    <div class="ai-history-item {{ isset($activeChat) && $activeChat->id == $chat->id ? 'active' : '' }}">
+                        <a href="{{ route('admin.ai.index', $chat->id) }}">
+                            <div class="ai-history-title">{{ $chat->title ?: 'New Chat' }}</div>
+                            <div class="ai-history-date">{{ $chat->created_at->diffForHumans() }}</div>
+                        </a>
+                        <form action="{{ route('admin.ai.chats.destroy', $chat->id) }}" method="POST" onsubmit="return confirm('Delete?');">
+                            @csrf @method('DELETE')
+                            <button type="submit" class="ai-delete-btn">🗑</button>
+                        </form>
+                    </div>
+                @empty
+                    <div class="empty-state" style="padding:20px;font-size:12px;">{{ __('No chats yet') }}</div>
+                @endforelse
             </div>
         </div>
 
-        <!-- Main Chat Area -->
-        <div class="col-md-9 d-flex flex-column h-100 chat-main">
-            <div class="glass-card shadow-lg flex-fill d-flex flex-column overflow-hidden position-relative">
-                <!-- Header -->
-                <div class="chat-header p-4 d-flex align-items-center justify-content-between">
-                    <div class="d-flex align-items-center gap-3">
-                        <div class="ai-avatar-pulse">
-                            <i class="bi bi-robot fs-3"></i>
-                        </div>
-                        <div>
-                            <h4 class="mb-0 fw-bold text-gradient-primary">GenShelf Assistant</h4>
-                            <div class="status-indicator">
-                                <span class="dot"></span>
-                                <span class="status-text">{{ __('Context-Aware Intelligence') }}</span>
+        {{-- Shelf Access Tokens --}}
+        <div class="ai-section" style="margin-top:16px;">
+            <div class="ai-section-label" style="display:flex;justify-content:space-between;align-items:center;">
+                <span>🔑 {{ __('Shelf Access Tokens') }}</span>
+                <button type="button" class="btn-xs btn-o" onclick="document.getElementById('addKeyPanel').classList.toggle('hidden')">+ {{ __('Add') }}</button>
+            </div>
+
+            {{-- Add Key Form --}}
+            <div id="addKeyPanel" class="hidden ai-key-form">
+                <form action="{{ route('admin.ai.keys.store') }}" method="POST">
+                    @csrf
+                    <input type="text" name="label" placeholder="{{ __('Key Label (e.g. Primary)') }}" required style="margin-bottom:6px;">
+                    <input type="password" name="key" placeholder="{{ __('API Key (sk-...)') }}" required style="margin-bottom:6px;">
+                    <input type="password" name="key_password" placeholder="🔒 {{ __('Management Password') }}" required style="margin-bottom:8px;border-color:var(--am);">
+                    <button type="submit" class="btn btn-pr btn-sm" style="width:100%;">💾 {{ __('Save Key') }}</button>
+                </form>
+            </div>
+
+            {{-- Key List --}}
+            <div class="ai-key-list">
+                @foreach($apiKeys as $key)
+                    <div class="ai-key-card {{ $key->is_selected ? 'selected' : '' }} {{ !$key->is_active ? 'disabled' : '' }}">
+                        <div class="ai-key-header">
+                            <div style="display:flex;align-items:center;gap:8px;min-width:0;flex:1;">
+                                {{-- Select Radio --}}
+                                <form action="{{ route('admin.ai.keys.select', $key->id) }}" method="POST" class="inline-form" onsubmit="return promptPwd(this)">
+                                    @csrf @method('PATCH')
+                                    <input type="hidden" name="key_password" class="pwd-field">
+                                    <button type="submit" class="radio-btn {{ $key->is_selected ? 'active' : '' }}" title="{{ $key->is_selected ? 'Active' : 'Click to select' }}">
+                                        {{ $key->is_selected ? '◉' : '○' }}
+                                    </button>
+                                </form>
+                                <span class="ai-key-label">{{ $key->label }}</span>
+                                @if($key->is_selected)
+                                    <span class="badge badge-gn" style="font-size:9px;padding:2px 6px;">✓ Active</span>
+                                @endif
+                                @if(!$key->is_active)
+                                    <span class="badge badge-rd" style="font-size:9px;padding:2px 6px;">Disabled</span>
+                                @endif
+                            </div>
+                            <div style="display:flex;gap:4px;align-items:center;">
+                                {{-- Toggle Active --}}
+                                <form action="{{ route('admin.ai.keys.toggle', $key->id) }}" method="POST" class="inline-form" onsubmit="return promptPwd(this)">
+                                    @csrf @method('PATCH')
+                                    <input type="hidden" name="key_password" class="pwd-field">
+                                    <button type="submit" class="ai-action-btn" title="{{ $key->is_active ? 'Disable' : 'Enable' }}" style="color:{{ $key->is_active ? 'var(--gn)' : 'var(--tx3)' }};">
+                                        {{ $key->is_active ? '🟢' : '🔴' }}
+                                    </button>
+                                </form>
+                                {{-- Edit Toggle --}}
+                                <button type="button" class="ai-action-btn" onclick="document.getElementById('editKey-{{ $key->id }}').classList.toggle('hidden')">✏️</button>
+                                {{-- Delete --}}
+                                <form action="{{ route('admin.ai.keys.destroy', $key->id) }}" method="POST" class="inline-form" onsubmit="return promptPwd(this)">
+                                    @csrf @method('DELETE')
+                                    <input type="hidden" name="key_password" class="pwd-field">
+                                    <button type="submit" class="ai-action-btn" style="color:var(--rd);" title="Delete">🗑</button>
+                                </form>
                             </div>
                         </div>
+                        {{-- Edit Form --}}
+                        <div id="editKey-{{ $key->id }}" class="hidden ai-key-edit">
+                            <form action="{{ route('admin.ai.keys.update', $key->id) }}" method="POST">
+                                @csrf @method('PUT')
+                                <input type="text" name="label" value="{{ $key->label }}" placeholder="Label" style="margin-bottom:4px;font-size:12px;">
+                                <input type="password" name="key" placeholder="{{ __('New key (leave empty to keep)') }}" style="margin-bottom:4px;font-size:12px;">
+                                <input type="password" name="key_password" placeholder="🔒 {{ __('Password') }}" required style="margin-bottom:6px;font-size:12px;border-color:var(--am);">
+                                <div style="display:flex;gap:4px;">
+                                    <button type="submit" class="btn btn-pr btn-xs" style="flex:1;">💾 {{ __('Save') }}</button>
+                                    <button type="button" class="btn btn-o btn-xs" onclick="document.getElementById('editKey-{{ $key->id }}').classList.add('hidden')">{{ __('Cancel') }}</button>
+                                </div>
+                            </form>
+                        </div>
                     </div>
-                    <div class="d-flex gap-2">
-                        <button class="btn-icon" title="Clear Chat History"><i class="bi bi-arrow-counterclockwise"></i></button>
-                        <button class="btn-icon" title="Export Logs"><i class="bi bi-download"></i></button>
+                @endforeach
+            </div>
+        </div>
+    </div>
+
+    {{-- Chat Main --}}
+    <div class="ai-chat-panel">
+        {{-- Messages --}}
+        <div id="chatContainer" class="ai-messages">
+            @if(!$activeChat || empty($activeChat->messages))
+                <div class="ai-welcome" id="welcomeBox">
+                    <div class="ai-welcome-icon">🤖</div>
+                    <h3>{{ __('How can I help your business today?') }}</h3>
+                    <p>{{ __('I have live access to your inventory, sales, and financial data.') }}</p>
+                    <div class="ai-chips">
+                        <button class="ai-chip" onclick="fillQuestion('What was my total revenue today?')">📊 {{ __('Revenue Today') }}</button>
+                        <button class="ai-chip" onclick="fillQuestion('Which items are running low on stock?')">📦 {{ __('Low Stock') }}</button>
+                        <button class="ai-chip" onclick="fillQuestion('Show my top debtors')">💸 {{ __('Top Debtors') }}</button>
+                        <button class="ai-chip" onclick="fillQuestion('/update Always recommend high-margin products')">⚙️ {{ __('Update Rule') }}</button>
                     </div>
                 </div>
-
-                <!-- Messages -->
-                <div id="chatContainer" class="chat-body flex-fill p-4 overflow-y-auto">
-                    @if(!$activeChat || empty($activeChat->messages))
-                        <div class="welcome-screen">
-                            <div class="welcome-icon">
-                                <i class="bi bi-stars"></i>
-                            </div>
-                            <h2>{{ __('Hello, how can I assist your business today?') }}</h2>
-                            <p>{{ __('I have live access to your inventory, sales, and financial snapshots.') }}</p>
-                            
-                            <div class="suggestion-grid mt-5">
-                                <button class="suggestion-pill" onclick="fillQuestion('What was my total revenue today?')">
-                                    <i class="bi bi-currency-dollar"></i> {{ __('Revenue Today') }}
-                                </button>
-                                <button class="suggestion-pill" onclick="fillQuestion('Which items are running low on stock?')">
-                                    <i class="bi bi-box-seam"></i> {{ __('Low Stock Alert') }}
-                                </button>
-                                <button class="suggestion-pill" onclick="fillQuestion('Show me a summary of my top debtors.')">
-                                    <i class="bi bi-people"></i> {{ __('Debtors Overview') }}
-                                </button>
-                                <button class="suggestion-pill" onclick="fillQuestion('/update Optimize for holiday seasonal sales.')">
-                                    <i class="bi bi-command"></i> {{ __('Update Rule') }}
-                                </button>
+            @else
+                @foreach($activeChat->messages as $msg)
+                    @if($msg['role'] === 'user')
+                        <div class="msg-row msg-user">
+                            <div class="msg-bubble msg-bubble-user">
+                                <div class="msg-avatar msg-avatar-user">{{ substr(auth()->user()->name ?? 'U', 0, 1) }}</div>
+                                <div class="msg-text" dir="auto">{{ $msg['content'] }}</div>
                             </div>
                         </div>
                     @else
-                        @foreach($activeChat->messages as $msg)
-                            <div class="message-row {{ $msg['role'] == 'user' ? 'user-row' : 'ai-row' }}">
-                                <div class="message-bubble shadow-sm">
-                                    <div class="message-avatar">
-                                        <i class="bi {{ $msg['role'] == 'user' ? 'bi-person-fill' : 'bi-robot' }}"></i>
-                                    </div>
-                                    <div class="message-content markdown-content" dir="auto">
-                                        {!! $msg['role'] == 'user' ? e($msg['content']) : $msg['content'] !!}
-                                    </div>
-                                </div>
+                        <div class="msg-row msg-ai">
+                            <div class="msg-bubble msg-bubble-ai">
+                                <div class="msg-avatar msg-avatar-ai">🤖</div>
+                                <div class="msg-text markdown-body" dir="auto">{!! $msg['content'] !!}</div>
                             </div>
-                        @endforeach
+                        </div>
                     @endif
-                </div>
+                @endforeach
+            @endif
+        </div>
 
-                <!-- Input Area -->
-                <div class="chat-footer p-4">
-                    <form id="chatForm" onsubmit="return handleSubmit(event)" class="input-wrapper">
-                        <input type="text" id="userInput" class="chat-input" placeholder="{{ __('Type your message or use /commands...') }}" autocomplete="off">
-                        <button type="submit" id="sendBtn" class="send-btn">
-                            <i class="bi bi-send-fill"></i>
-                        </button>
-                    </form>
-                    <div class="footer-meta d-flex justify-content-between mt-2">
-                        <span class="text-muted small"><i class="bi bi-info-circle me-1"></i> {{ __('Uses live data context') }}</span>
-                        <div id="statusIndicator" class="typing-indicator d-none">
-                            <span></span><span></span><span></span>
-                        </div>
-                    </div>
+        {{-- Input --}}
+        <div class="ai-input-area">
+            <form id="chatForm" onsubmit="return handleSubmit(event)" class="ai-input-form">
+                <input type="text" id="userInput" class="ai-input" placeholder="{{ __('Ask about your business or use /update ...') }}" autocomplete="off">
+                <button type="submit" id="sendBtn" class="ai-send-btn">
+                    <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><line x1="22" y1="2" x2="11" y2="13"/><polygon points="22 2 15 22 11 13 2 9 22 2"/></svg>
+                </button>
+            </form>
+            <div class="ai-input-meta">
+                <span>{{ __('AI-generated responses may be inaccurate.') }}</span>
+                <div id="statusIndicator" class="ai-typing hidden">
+                    <span class="dot-1"></span><span class="dot-2"></span><span class="dot-3"></span>
+                    <span style="margin-left:6px;font-size:11px;color:var(--pr);">{{ __('Thinking...') }}</span>
                 </div>
             </div>
         </div>
     </div>
 </div>
 
-<!-- AI Settings Modal -->
-<div class="modal fade" id="aiSettingsModal" tabindex="-1" aria-hidden="true">
-    <div class="modal-dialog modal-dialog-centered">
-        <div class="modal-content glass-card border-0">
-            <div class="modal-header border-0 pb-0">
-                <h5 class="modal-title fw-bold text-gradient-primary">{{ __('AI Configuration') }}</h5>
-                <button type="button" class="btn-close btn-close-white" data-bs-dismiss="modal" aria-label="Close"></button>
-            </div>
-            <div class="modal-body p-4">
-                <form id="settingsForm">
-                    <div class="mb-4">
-                        <label class="form-label fw-bold text-muted small text-uppercase letter-spacing-1">{{ __('Shelf Access Tokens (API Key)') }}</label>
-                        <div class="input-group">
-                            <span class="input-group-text bg-transparent border-end-0 border-light border-opacity-10 text-primary">
-                                <i class="bi bi-key-fill"></i>
-                            </span>
-                            <input type="password" class="form-control bg-transparent border-start-0 border-light border-opacity-10 text-white" 
-                                   id="apiTokenInput" placeholder="••••••••••••••••••••••••">
-                        </div>
-                        <div class="form-text text-muted small mt-2">
-                            {{ __('This key is used to connect to the Gemini LLM service.') }}
-                        </div>
-                    </div>
-                    <div class="mb-4">
-                        <label class="form-label fw-bold text-muted small text-uppercase letter-spacing-1">{{ __('Security Password') }}</label>
-                        <div class="input-group">
-                            <span class="input-group-text bg-transparent border-end-0 border-light border-opacity-10 text-primary">
-                                <i class="bi bi-shield-lock-fill"></i>
-                            </span>
-                            <input type="password" class="form-control bg-transparent border-start-0 border-light border-opacity-10 text-white" 
-                                   id="configPasswordInput" placeholder="••••••••">
-                        </div>
-                    </div>
-                    <button type="button" class="btn-premium w-100" onclick="saveSettings()">{{ __('Save Configuration') }}</button>
-                </form>
-            </div>
-        </div>
-    </div>
-</div>
-
+@push('styles')
 <style>
-    :root {
-        --ai-primary: #6366f1;
-        --ai-secondary: #a855f7;
-        --ai-bg: #0f172a;
-        --ai-card: rgba(30, 41, 59, 0.7);
-        --ai-text: #f8fafc;
-        --ai-muted: #94a3b8;
-    }
+    /* ===== AI Layout ===== */
+    .ai-container { display:flex; gap:20px; height: calc(100vh - 180px); min-height:400px; }
+    .ai-sidebar { width:280px; flex-shrink:0; display:flex; flex-direction:column; gap:0; overflow-y:auto; }
+    .ai-chat-panel { flex:1; background:var(--bg2); border:1px solid var(--border); border-radius:var(--radius); display:flex; flex-direction:column; overflow:hidden; }
 
-    .ai-layout { height: calc(100vh - 120px); }
-    .glass-card {
-        background: var(--ai-card);
-        backdrop-filter: blur(20px);
-        -webkit-backdrop-filter: blur(20px);
-        border: 1px solid rgba(255, 255, 255, 0.1);
-        border-radius: 24px;
-    }
+    .ai-logo-icon { width:44px;height:44px;background:var(--pr);color:#fff;border-radius:12px;display:flex;align-items:center;justify-content:center;box-shadow:0 4px 14px rgba(79,70,229,.25); }
+    .live-dot { width:7px;height:7px;background:#10b981;border-radius:50%;display:inline-block;box-shadow:0 0 8px #10b981; animation:blink 2s infinite; }
+    @keyframes blink { 0%,100%{opacity:1} 50%{opacity:.3} }
 
-    .text-gradient-primary {
-        background: linear-gradient(135deg, #818cf8, #c084fc);
-        -webkit-background-clip: text;
-        -webkit-text-fill-color: transparent;
-    }
+    /* Sidebar Sections */
+    .ai-section { background:var(--bg2); border:1px solid var(--border); border-radius:var(--radius); overflow:hidden; }
+    .ai-section-label { font-size:10px;font-weight:800;text-transform:uppercase;color:var(--tx3);letter-spacing:1px;padding:10px 12px;border-bottom:1px solid var(--bg3);background:var(--bg); }
 
-    .btn-premium {
-        background: linear-gradient(135deg, var(--ai-primary), var(--ai-secondary));
-        color: white;
-        border: none;
-        border-radius: 12px;
-        padding: 12px 24px;
-        font-weight: 600;
-        transition: all 0.3s ease;
-        box-shadow: 0 4px 15px rgba(99, 102, 241, 0.3);
-    }
-    .btn-premium:hover {
-        transform: translateY(-2px);
-        box-shadow: 0 6px 20px rgba(99, 102, 241, 0.5);
-    }
+    .ai-history-list { max-height:200px; overflow-y:auto; }
+    .ai-history-item { display:flex; align-items:center; justify-content:space-between; padding:8px 12px; border-bottom:1px solid var(--bg3); transition:background .15s; }
+    .ai-history-item:hover { background:var(--bg); }
+    .ai-history-item.active { background:var(--pr-l); border-left:3px solid var(--pr); }
+    .ai-history-item a { text-decoration:none; color:var(--tx); flex:1; min-width:0; }
+    .ai-history-title { font-size:13px; font-weight:500; white-space:nowrap; overflow:hidden; text-overflow:ellipsis; }
+    .ai-history-date { font-size:10px; color:var(--tx3); }
+    .ai-delete-btn { background:none; border:none; font-size:12px; cursor:pointer; padding:4px; opacity:.4; transition:opacity .2s; }
+    .ai-delete-btn:hover { opacity:1; }
 
-    .sidebar-label {
-        font-size: 11px;
-        font-weight: 800;
-        text-transform: uppercase;
-        color: var(--ai-muted);
-        letter-spacing: 1.5px;
-        margin: 20px 0 10px;
-    }
+    /* Keys */
+    .ai-key-form { padding:10px; border-top:1px solid var(--bg3); background:var(--bg); }
+    .ai-key-list { max-height:250px; overflow-y:auto; }
+    .ai-key-card { padding:10px 12px; border-bottom:1px solid var(--bg3); transition:all .2s; }
+    .ai-key-card.selected { background:rgba(79,70,229,.04); border-left:3px solid var(--pr); }
+    .ai-key-card.disabled { opacity:.5; }
+    .ai-key-header { display:flex; align-items:center; justify-content:space-between; gap:6px; }
+    .ai-key-label { font-size:12px; font-weight:600; white-space:nowrap; overflow:hidden; text-overflow:ellipsis; }
+    .ai-key-edit { padding:8px 0 0; }
 
-    .history-item {
-        position: relative;
-        margin-bottom: 5px;
-        border-radius: 12px;
-        transition: all 0.2s ease;
-    }
-    .history-item:hover, .history-item.active {
-        background: rgba(255, 255, 255, 0.05);
-    }
-    .history-link {
-        display: block;
-        padding: 12px 15px;
-        text-decoration: none;
-        color: var(--ai-text);
-        padding-right: 40px;
-    }
-    .history-title { font-size: 14px; font-weight: 500; white-space: nowrap; overflow: hidden; text-overflow: ellipsis; }
-    .history-date { font-size: 11px; color: var(--ai-muted); }
+    .inline-form { display:inline; margin:0; }
+    .radio-btn { background:none; border:none; font-size:16px; cursor:pointer; color:var(--tx3); padding:0; line-height:1; }
+    .radio-btn.active { color:var(--pr); }
+    .ai-action-btn { background:none; border:none; font-size:13px; cursor:pointer; padding:2px; }
 
-    .delete-btn {
-        position: absolute;
-        right: 10px;
-        top: 50%;
-        transform: translateY(-50%);
-        background: none;
-        border: none;
-        color: var(--ai-muted);
-        opacity: 0;
-        transition: all 0.2s ease;
-    }
-    .history-item:hover .delete-btn { opacity: 1; }
-    .delete-btn:hover { color: #ef4444; }
+    .hidden { display:none !important; }
 
-    .btn-settings {
-        background: rgba(255, 255, 255, 0.05);
-        border: 1px solid rgba(255, 255, 255, 0.1);
-        color: var(--ai-text);
-        border-radius: 10px;
-        padding: 10px;
-        font-size: 13px;
-        transition: all 0.2s ease;
-    }
-    .btn-settings:hover { background: rgba(255, 255, 255, 0.1); }
+    /* Chat Messages */
+    .ai-messages { flex:1; overflow-y:auto; padding:20px; display:flex; flex-direction:column; gap:16px; }
+    .ai-messages::-webkit-scrollbar { width:5px; }
+    .ai-messages::-webkit-scrollbar-thumb { background:var(--bg3); border-radius:10px; }
 
-    /* Chat Styling */
-    .chat-header { border-bottom: 1px solid rgba(255, 255, 255, 0.05); }
-    .ai-avatar-pulse {
-        width: 48px; height: 48px;
-        background: linear-gradient(135deg, var(--ai-primary), var(--ai-secondary));
-        border-radius: 14px;
-        display: flex; align-items: center; justify-content: center;
-        color: white;
-        box-shadow: 0 0 20px rgba(99, 102, 241, 0.4);
-        position: relative;
-    }
-    .ai-avatar-pulse::after {
-        content: ''; position: absolute; inset: -4px;
-        border-radius: 18px; border: 2px solid var(--ai-primary);
-        animation: pulse 2s infinite; opacity: 0;
-    }
+    .msg-row { display:flex; }
+    .msg-user { justify-content:flex-end; }
+    .msg-ai { justify-content:flex-start; }
+    .msg-bubble { display:flex; gap:10px; max-width:80%; animation:slideIn .3s ease-out; }
+    .msg-bubble-user { flex-direction:row-reverse; }
+    .msg-avatar { width:32px;height:32px;border-radius:10px;display:flex;align-items:center;justify-content:center;font-size:14px;font-weight:700;flex-shrink:0; }
+    .msg-avatar-user { background:linear-gradient(135deg,var(--pr),#7c3aed);color:#fff; }
+    .msg-avatar-ai { background:var(--bg);border:1px solid var(--border); }
+    .msg-text { padding:12px 16px; border-radius:16px; font-size:14px; line-height:1.65; }
+    .msg-bubble-user .msg-text { background:linear-gradient(135deg,var(--pr),#7c3aed); color:#fff; border-bottom-right-radius:4px; }
+    .msg-bubble-ai .msg-text { background:var(--bg); border:1px solid var(--border); color:var(--tx); border-bottom-left-radius:4px; }
 
-    .status-indicator { display: flex; align-items: center; gap: 6px; }
-    .status-indicator .dot { width: 8px; height: 8px; background: #10b981; border-radius: 50%; box-shadow: 0 0 10px #10b981; }
-    .status-indicator .status-text { font-size: 12px; color: var(--ai-muted); font-weight: 500; }
+    @keyframes slideIn { from{transform:translateY(12px);opacity:0} to{transform:translateY(0);opacity:1} }
 
-    .welcome-screen {
-        text-align: center; max-width: 600px; margin: 100px auto;
-    }
-    .welcome-icon {
-        font-size: 64px; color: var(--ai-primary); margin-bottom: 20px;
-        animation: float 3s ease-in-out infinite;
-    }
-    .welcome-screen h2 { font-weight: 800; color: white; margin-bottom: 15px; }
-    .welcome-screen p { color: var(--ai-muted); font-size: 16px; }
+    /* Welcome */
+    .ai-welcome { text-align:center; margin:auto; max-width:500px; padding:40px 20px; }
+    .ai-welcome-icon { font-size:56px; margin-bottom:16px; }
+    .ai-welcome h3 { font-size:22px; font-weight:700; color:var(--tx); margin-bottom:8px; }
+    .ai-welcome p { color:var(--tx3); font-size:14px; margin-bottom:24px; }
+    .ai-chips { display:flex; flex-wrap:wrap; gap:8px; justify-content:center; }
+    .ai-chip { background:var(--bg); border:1px solid var(--border); border-radius:20px; padding:8px 16px; font-size:13px; font-weight:500; color:var(--tx2); cursor:pointer; transition:all .2s; }
+    .ai-chip:hover { border-color:var(--pr); color:var(--pr); transform:translateY(-2px); box-shadow:0 4px 12px rgba(79,70,229,.1); }
 
-    .suggestion-grid { display: grid; grid-template-columns: 1fr 1fr; gap: 12px; }
-    .suggestion-pill {
-        background: rgba(255, 255, 255, 0.03); border: 1px solid rgba(255, 255, 255, 0.08);
-        color: var(--ai-text); padding: 15px; border-radius: 16px; text-align: left;
-        font-size: 14px; font-weight: 500; transition: all 0.2s ease;
-    }
-    .suggestion-pill:hover { background: rgba(255, 255, 255, 0.08); transform: translateY(-3px); border-color: var(--ai-primary); }
-    .suggestion-pill i { color: var(--ai-primary); margin-right: 8px; }
+    /* Input Area */
+    .ai-input-area { border-top:1px solid var(--border); padding:16px 20px; background:var(--bg2); }
+    .ai-input-form { display:flex; gap:10px; align-items:center; background:var(--bg); border:1px solid var(--border); border-radius:14px; padding:6px 6px 6px 16px; transition:border-color .2s; }
+    .ai-input-form:focus-within { border-color:var(--pr); box-shadow:0 0 0 3px rgba(79,70,229,.08); }
+    .ai-input { border:none; background:none; flex:1; font-size:14px; padding:8px 0; outline:none; color:var(--tx); }
+    .ai-send-btn { background:var(--pr); color:#fff; border:none; width:40px;height:40px;border-radius:12px;display:flex;align-items:center;justify-content:center; transition:all .2s; flex-shrink:0; }
+    .ai-send-btn:hover { background:var(--pr-h); transform:scale(1.05); }
+    .ai-input-meta { display:flex; justify-content:space-between; align-items:center; margin-top:8px; font-size:11px; color:var(--tx3); }
 
-    /* Messages */
-    .message-row { display: flex; margin-bottom: 24px; animation: slideUp 0.4s ease-out forwards; }
-    .user-row { justify-content: flex-end; }
-    .ai-row { justify-content: flex-start; }
+    .ai-typing { display:flex; align-items:center; gap:3px; }
+    .ai-typing span[class^="dot"] { width:5px;height:5px;background:var(--pr);border-radius:50%;animation:bounce 1.4s infinite ease-in-out; }
+    .dot-1 { animation-delay:-0.32s !important; }
+    .dot-2 { animation-delay:-0.16s !important; }
+    @keyframes bounce { 0%,80%,100%{transform:scale(0)} 40%{transform:scale(1)} }
 
-    .message-bubble {
-        max-width: 80%; padding: 18px; border-radius: 20px; position: relative;
-        display: flex; gap: 15px;
-    }
-    .user-row .message-bubble { background: var(--ai-primary); color: white; border-bottom-right-radius: 4px; flex-direction: row-reverse; }
-    .ai-row .message-bubble { background: rgba(255, 255, 255, 0.05); color: white; border-bottom-left-radius: 4px; border: 1px solid rgba(255, 255, 255, 0.1); }
+    /* Markdown */
+    .markdown-body table { width:100%;border-collapse:collapse;margin:10px 0;border-radius:8px;overflow:hidden;border:1px solid var(--border); }
+    .markdown-body th { background:var(--bg);padding:8px 12px;font-weight:600;font-size:12px;text-transform:uppercase;color:var(--tx2);text-align:left; }
+    .markdown-body td { padding:8px 12px;border-top:1px solid var(--bg3);font-size:13px; }
+    .markdown-body p { margin-bottom:8px; line-height:1.6; }
+    .markdown-body p:last-child { margin-bottom:0; }
+    .markdown-body ul,
+    .markdown-body ol { padding-left:18px; margin:8px 0; }
+    .markdown-body code { background:var(--bg);padding:2px 6px;border-radius:4px;font-size:12px; }
+    .markdown-body strong { font-weight:700; }
 
-    .message-avatar {
-        width: 32px; height: 32px; border-radius: 8px; display: flex; align-items: center; justify-content: center;
-        background: rgba(255, 255, 255, 0.1); flex-shrink: 0; font-size: 14px;
+    /* Responsive */
+    @media(max-width:768px) {
+        .ai-container { flex-direction:column; height:auto; min-height:calc(100vh - 200px); }
+        .ai-sidebar { width:100%; max-height:300px; }
+        .ai-chat-panel { min-height:400px; }
     }
-
-    .input-wrapper {
-        background: rgba(255, 255, 255, 0.05); border: 1px solid rgba(255, 255, 255, 0.1);
-        border-radius: 20px; padding: 10px; display: flex; gap: 10px; transition: all 0.3s ease;
-    }
-    .input-wrapper:focus-within { border-color: var(--ai-primary); box-shadow: 0 0 20px rgba(99, 102, 241, 0.1); }
-    .chat-input {
-        background: none; border: none; flex: 1; color: white; padding: 10px 15px; outline: none; font-size: 15px;
-    }
-    .send-btn {
-        background: var(--ai-primary); color: white; border: none; width: 44px; height: 44px;
-        border-radius: 14px; display: flex; align-items: center; justify-content: center;
-        transition: all 0.2s ease;
-    }
-    .send-btn:hover { transform: scale(1.05); background: var(--ai-secondary); }
-
-    /* Markdown styling for premium look */
-    .markdown-content table { width: 100%; border-radius: 12px; overflow: hidden; border: 1px solid rgba(255, 255, 255, 0.1); margin: 15px 0; }
-    .markdown-content th { background: rgba(255, 255, 255, 0.1); padding: 12px; font-weight: 700; font-size: 13px; text-transform: uppercase; }
-    .markdown-content td { padding: 12px; border-top: 1px solid rgba(255, 255, 255, 0.05); font-size: 14px; }
-    .markdown-content p { margin-bottom: 12px; line-height: 1.6; }
-    .markdown-content code { background: rgba(255, 255, 255, 0.1); padding: 2px 6px; border-radius: 4px; font-family: 'JetBrains Mono', monospace; font-size: 13px; }
-
-    .typing-indicator { display: flex; gap: 4px; }
-    .typing-indicator span {
-        width: 6px; height: 6px; background: var(--ai-primary); border-radius: 50%;
-        animation: bounce 1.4s infinite ease-in-out;
-    }
-    .typing-indicator span:nth-child(1) { animation-delay: -0.32s; }
-    .typing-indicator span:nth-child(2) { animation-delay: -0.16s; }
-
-    @keyframes pulse { 0% { transform: scale(1); opacity: 0.5; } 100% { transform: scale(1.5); opacity: 0; } }
-    @keyframes float { 0%, 100% { transform: translateY(0); } 50% { transform: translateY(-10px); } }
-    @keyframes slideUp { from { transform: translateY(20px); opacity: 0; } to { transform: translateY(0); opacity: 1; } }
-    @keyframes bounce { 0%, 80%, 100% { transform: scale(0); } 40% { transform: scale(1); } }
 </style>
+@endpush
 
-<!-- Marked.js for Markdown -->
 <script src="https://cdn.jsdelivr.net/npm/marked/marked.min.js"></script>
-
 <script>
     const chatContainer = document.getElementById('chatContainer');
-    const chatForm = document.getElementById('chatForm');
     const userInput = document.getElementById('userInput');
     const sendBtn = document.getElementById('sendBtn');
     const statusIndicator = document.getElementById('statusIndicator');
@@ -374,35 +299,33 @@
     marked.setOptions({ breaks: true, gfm: true });
     chatContainer.scrollTop = chatContainer.scrollHeight;
 
-    function fillQuestion(q) {
-        userInput.value = q;
-        userInput.focus();
+    function fillQuestion(q) { userInput.value = q; userInput.focus(); }
+
+    // Password prompt for key operations
+    function promptPwd(form) {
+        const pwd = prompt('🔒 Enter management password:');
+        if (!pwd) return false;
+        form.querySelector('.pwd-field').value = pwd;
+        return true;
     }
 
     function appendMessage(role, content, isHtml = false) {
         const isUser = role === 'user';
         const row = document.createElement('div');
-        row.className = `message-row ${isUser ? 'user-row' : 'ai-row'}`;
-        
-        const inner = `
-            <div class="message-bubble shadow-sm">
-                <div class="message-avatar">
-                    <i class="bi ${isUser ? 'bi-person-fill' : 'bi-robot'}"></i>
-                </div>
-                <div class="message-content markdown-content" dir="auto">${isHtml ? content : escapeHtml(content)}</div>
+        row.className = `msg-row ${isUser ? 'msg-user' : 'msg-ai'}`;
+        const initial = "{{ substr(auth()->user()->name ?? 'U', 0, 1) }}";
+        row.innerHTML = `
+            <div class="msg-bubble ${isUser ? 'msg-bubble-user' : 'msg-bubble-ai'}">
+                <div class="msg-avatar ${isUser ? 'msg-avatar-user' : 'msg-avatar-ai'}">${isUser ? initial : '🤖'}</div>
+                <div class="msg-text ${isUser ? '' : 'markdown-body'}" dir="auto">${isHtml ? content : escapeHtml(content)}</div>
             </div>
         `;
-        row.innerHTML = inner;
         chatContainer.appendChild(row);
         chatContainer.scrollTop = chatContainer.scrollHeight;
-        return row.querySelector('.message-content');
+        return row.querySelector('.msg-text');
     }
 
-    function escapeHtml(text) {
-        const div = document.createElement('div');
-        div.textContent = text;
-        return div.innerHTML;
-    }
+    function escapeHtml(t) { const d = document.createElement('div'); d.textContent = t; return d.innerHTML; }
 
     async function handleSubmit(e) {
         e.preventDefault();
@@ -412,90 +335,61 @@
         userInput.value = '';
         userInput.disabled = true;
         sendBtn.disabled = true;
-        statusIndicator.classList.remove('d-none');
-        
-        const welcome = document.querySelector('.welcome-screen');
+        statusIndicator.classList.remove('hidden');
+
+        const welcome = document.getElementById('welcomeBox');
         if (welcome) welcome.remove();
 
         appendMessage('user', text);
 
         try {
-            const response = await fetch("{{ route('admin.ai.ask') }}", {
+            const res = await fetch("{{ route('admin.ai.ask') }}", {
                 method: 'POST',
                 headers: { 'Content-Type': 'application/json', 'X-CSRF-TOKEN': '{{ csrf_token() }}' },
                 body: JSON.stringify({ question: text, chat_id: currentChatId })
             });
 
-            const contentType = response.headers.get('content-type');
-            if (contentType && contentType.includes('application/json')) {
-                const data = await response.json();
-                appendMessage('assistant', data.text);
-                statusIndicator.classList.add('d-none');
+            const ct = res.headers.get('content-type');
+            if (ct && ct.includes('application/json')) {
+                const data = await res.json();
+                appendMessage('assistant', marked.parse(data.text), true);
+                statusIndicator.classList.add('hidden');
                 userInput.disabled = false;
                 sendBtn.disabled = false;
                 return;
             }
 
-            const reader = response.body.getReader();
+            const reader = res.body.getReader();
             const decoder = new TextDecoder();
-            let aiMsgContent = '';
-            let aiMsgElement = appendMessage('assistant', '', true);
-            
-            statusIndicator.classList.add('d-none');
+            let full = '';
+            let el = appendMessage('assistant', '', true);
+            statusIndicator.classList.add('hidden');
 
             while (true) {
                 const { value, done } = await reader.read();
                 if (done) break;
-                const chunk = decoder.decode(value, { stream: true });
-                const lines = chunk.split('\n');
-                for (const line of lines) {
+                for (const line of decoder.decode(value, { stream: true }).split('\n')) {
                     if (line.startsWith('data: ')) {
-                        const dataStr = line.substring(6).trim();
-                        if (dataStr === '[DONE]') continue;
+                        const d = line.substring(6).trim();
+                        if (d === '[DONE]') continue;
                         try {
-                            const data = JSON.parse(dataStr);
-                            if (data.chat_id && !currentChatId) {
-                                currentChatId = data.chat_id;
-                                window.history.replaceState(null, null, `{{ url('/ai/assistant') }}/${data.chat_id}`);
+                            const j = JSON.parse(d);
+                            if (j.chat_id && !currentChatId) {
+                                currentChatId = j.chat_id;
+                                window.history.replaceState(null, null, `{{ url('/ai/assistant') }}/${j.chat_id}`);
                             }
-                            if (data.text) {
-                                aiMsgContent += data.text;
-                                aiMsgElement.innerHTML = marked.parse(aiMsgContent);
-                                chatContainer.scrollTop = chatContainer.scrollHeight;
-                            }
-                        } catch (err) {}
+                            if (j.text) { full += j.text; el.innerHTML = marked.parse(full); chatContainer.scrollTop = chatContainer.scrollHeight; }
+                        } catch(err) {}
                     }
                 }
             }
         } catch (err) {
-            appendMessage('assistant', '<span class="text-danger">⚠️ Connection error.</span>', true);
+            appendMessage('assistant', '<span style="color:var(--rd);">⚠️ Connection error. Please try again.</span>', true);
         }
 
         userInput.disabled = false;
         sendBtn.disabled = false;
         userInput.focus();
-    }
-
-    function saveSettings() {
-        const token = document.getElementById('apiTokenInput').value;
-        const password = document.getElementById('configPasswordInput').value;
-        
-        if(!token) return alert('Please enter a token');
-        if(!password) return alert('Please enter the security password');
-        
-        fetch("{{ route('admin.ai.settings.save-token') }}", {
-            method: 'POST',
-            headers: { 'Content-Type': 'application/json', 'X-CSRF-TOKEN': '{{ csrf_token() }}' },
-            body: JSON.stringify({ token: token, password: password })
-        }).then(res => res.json()).then(data => {
-            if(data.success) {
-                bootstrap.Modal.getInstance(document.getElementById('aiSettingsModal')).hide();
-                alert('Token saved successfully!');
-                location.reload();
-            } else {
-                alert(data.message || 'Error saving token');
-            }
-        });
     }
 </script>
 @endsection

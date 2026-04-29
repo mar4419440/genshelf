@@ -171,7 +171,13 @@ Route::middleware(['auth'])->group(function () {
         Route::post('/ask', [AiAgentController::class, 'ask'])->name('ask');
         Route::post('/chats', [AiAgentController::class, 'storeChat'])->name('chats.store');
         Route::delete('/chats/{id}', [AiAgentController::class, 'destroyChat'])->name('chats.destroy');
-        Route::post('/settings/save-token', [AiAgentController::class, 'saveToken'])->name('settings.save-token');
+
+        // API Key CRUD
+        Route::post('/keys', [AiAgentController::class, 'storeKey'])->name('keys.store');
+        Route::put('/keys/{id}', [AiAgentController::class, 'updateKey'])->name('keys.update');
+        Route::delete('/keys/{id}', [AiAgentController::class, 'destroyKey'])->name('keys.destroy');
+        Route::patch('/keys/{id}/select', [AiAgentController::class, 'selectKey'])->name('keys.select');
+        Route::patch('/keys/{id}/toggle', [AiAgentController::class, 'toggleKey'])->name('keys.toggle');
     });
 
     // Users
