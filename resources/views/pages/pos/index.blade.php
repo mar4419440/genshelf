@@ -581,7 +581,7 @@
         function submitCheckout() {
             if (cart.length === 0) { alert("Cart is empty"); return; }
 
-            if (!navigator.onLine) {
+            if (!window.isDbOnline) {
                 const order = {
                     _token: document.querySelector('input[name="_token"]').value,
                     storage_id: document.getElementById('cart-storage-id').value,
@@ -602,7 +602,7 @@
                 document.getElementById('customer-search').value = '';
                 document.getElementById('due-date-container').style.display = 'none';
 
-                alert("You are offline. Order saved locally. It will automatically sync when internet is restored.");
+                alert("You are offline. Order saved locally. It will automatically sync when connection is restored.");
                 updateConnectionStatus();
             } else {
                 document.getElementById('checkout-form').submit();
@@ -654,7 +654,7 @@
             const badge = document.getElementById('connection-status');
             const offlineOrders = JSON.parse(localStorage.getItem('pos_offline_orders') || '[]');
 
-            if (navigator.onLine) {
+            if (window.isDbOnline) {
                 if (offlineOrders.length > 0) {
                     badge.className = 'badge badge-am';
                     badge.innerText = '🔄 Syncing...';
@@ -668,17 +668,18 @@
             }
         }
 
-        window.addEventListener('online', () => {
+        // Hook into the global DB check from layout to update POS status
+        const _originalCheckDb = window.checkDbConnection;
+        window.checkDbConnection = async function() {
+            await _originalCheckDb();
             updateConnectionStatus();
-            syncOfflineOrders();
-        });
-
-        window.addEventListener('offline', updateConnectionStatus);
+            if (window.isDbOnline) syncOfflineOrders();
+        };
 
         window.addEventListener('DOMContentLoaded', () => {
             updateActiveStorage(document.getElementById('pos-storage-selector').value);
             updateConnectionStatus();
-            if (navigator.onLine) {
+            if (window.isDbOnline) {
                 syncOfflineOrders();
             }
         });
