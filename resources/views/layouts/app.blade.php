@@ -804,7 +804,7 @@
             }));
             
             // Global Auto-Sync initial check
-            if(navigator.onLine) syncGenericQueue();
+            checkDbConnection();
         });
 
         function toggleSidebar() {
@@ -813,14 +813,15 @@
         }
 
         // Global Offline Sync Manager
+        window.isDbOnline = true;
         window.updateGenericConnectionStatus = function() {
             const q = JSON.parse(localStorage.getItem('generic_offline_queue') || '[]');
             const badge = document.getElementById('global-sync-badge');
             if (badge) {
-                if (!navigator.onLine) {
+                if (!window.isDbOnline) {
                     badge.style.display = 'inline-block';
                     badge.className = 'badge badge-rd';
-                    badge.innerHTML = '🔴 Offline' + (q.length>0 ? ` (${q.length})` : '');
+                    badge.innerHTML = '🔴 Database Offline' + (q.length>0 ? ` (${q.length})` : '');
                 } else if (q.length > 0) {
                     badge.style.display = 'inline-block';
                     badge.className = 'badge badge-am';
@@ -831,12 +832,29 @@
             }
         };
 
-        window.addEventListener('online', () => {
+        window.checkDbConnection = async function() {
+            try {
+                const response = await fetch('{{ route('db.check') }}');
+                window.isDbOnline = response.ok;
+            } catch (err) {
+                window.isDbOnline = false;
+            }
             updateGenericConnectionStatus();
-            syncGenericQueue();
+            if (window.isDbOnline) syncGenericQueue();
+        };
+
+        // Periodic Check (30s)
+        setInterval(window.checkDbConnection, 30000);
+
+        window.addEventListener('online', () => {
+            window.checkDbConnection();
         });
         window.addEventListener('offline', () => {
+            window.isDbOnline = false;
             updateGenericConnectionStatus();
+        });
+        window.addEventListener('focus', () => {
+            window.checkDbConnection();
         });
 
         async function syncGenericQueue() {

@@ -105,40 +105,40 @@ Route::middleware(['auth'])->group(function () {
 
     // ===== EXPENSES (Dedicated) =====
     Route::prefix('expenses')->name('expenses.')->group(function () {
-        Route::get('/',                  [ExpenseController::class, 'index'])->name('index');
-        Route::post('/',                 [ExpenseController::class, 'store'])->name('store');
-        Route::put('/{expense}',         [ExpenseController::class, 'update'])->name('update');
-        Route::delete('/{expense}',      [ExpenseController::class, 'destroy'])->name('destroy');
-        Route::post('/{expense}/approve',[ExpenseController::class, 'approve'])->name('approve');
+        Route::get('/', [ExpenseController::class, 'index'])->name('index');
+        Route::post('/', [ExpenseController::class, 'store'])->name('store');
+        Route::put('/{expense}', [ExpenseController::class, 'update'])->name('update');
+        Route::delete('/{expense}', [ExpenseController::class, 'destroy'])->name('destroy');
+        Route::post('/{expense}/approve', [ExpenseController::class, 'approve'])->name('approve');
         Route::post('/{expense}/reject', [ExpenseController::class, 'reject'])->name('reject');
-        Route::get('/summary',           [ExpenseController::class, 'summary'])->name('summary');
+        Route::get('/summary', [ExpenseController::class, 'summary'])->name('summary');
     });
 
     // ===== BUSINESS INTELLIGENCE =====
     Route::prefix('bi')->name('bi.')->group(function () {
-        Route::get('/',          [BIController::class, 'index'])->name('index');
-        Route::get('/pnl',       [BIController::class, 'pnl'])->name('pnl');
-        Route::get('/products',  [BIController::class, 'products'])->name('products');
-        Route::get('/forecast',  [BIController::class, 'forecast'])->name('forecast');
+        Route::get('/', [BIController::class, 'index'])->name('index');
+        Route::get('/pnl', [BIController::class, 'pnl'])->name('pnl');
+        Route::get('/products', [BIController::class, 'products'])->name('products');
+        Route::get('/forecast', [BIController::class, 'forecast'])->name('forecast');
     });
 
     // ===== ADVANCED ANALYTICS =====
     Route::prefix('analytics')->name('analytics.')->group(function () {
-        Route::get('/executive',  [AnalyticsController::class, 'executive'])->name('executive');
-        Route::get('/sales',      [AnalyticsController::class, 'sales'])->name('sales');
-        Route::get('/inventory',  [AnalyticsController::class, 'inventory'])->name('inventory');
-        Route::get('/finance',    [AnalyticsController::class, 'finance'])->name('finance');
-        Route::get('/customers',  [AnalyticsController::class, 'customers'])->name('customers');
+        Route::get('/executive', [AnalyticsController::class, 'executive'])->name('executive');
+        Route::get('/sales', [AnalyticsController::class, 'sales'])->name('sales');
+        Route::get('/inventory', [AnalyticsController::class, 'inventory'])->name('inventory');
+        Route::get('/finance', [AnalyticsController::class, 'finance'])->name('finance');
+        Route::get('/customers', [AnalyticsController::class, 'customers'])->name('customers');
         Route::get('/operations', [AnalyticsController::class, 'operations'])->name('operations');
     });
 
     // ===== FINANCE (Expanded) =====
     Route::prefix('finance')->group(function () {
-        Route::get('/',                [FinanceController::class, 'index'])->name('finance');
-        Route::post('/expense',        [FinanceController::class, 'storeExpense'])->name('finance.expense.store');
-        Route::post('/drawer',         [FinanceController::class, 'storeDrawerEvent'])->name('finance.drawer.store');
-        Route::get('/cash-flow',       [FinanceController::class, 'cashFlow'])->name('finance.cashflow');
-        Route::get('/tax',             [FinanceController::class, 'taxReport'])->name('finance.tax');
+        Route::get('/', [FinanceController::class, 'index'])->name('finance');
+        Route::post('/expense', [FinanceController::class, 'storeExpense'])->name('finance.expense.store');
+        Route::post('/drawer', [FinanceController::class, 'storeDrawerEvent'])->name('finance.drawer.store');
+        Route::get('/cash-flow', [FinanceController::class, 'cashFlow'])->name('finance.cashflow');
+        Route::get('/tax', [FinanceController::class, 'taxReport'])->name('finance.tax');
     });
 
     // Reports Old (Keep for compatibility if needed)
@@ -190,4 +190,14 @@ Route::middleware(['auth'])->group(function () {
     Route::post('/roles/store', [UserController::class, 'storeRole'])->name('roles.store');
     Route::put('/roles/{role}', [UserController::class, 'updateRole'])->name('roles.update');
     Route::delete('/roles/{role}', [UserController::class, 'destroyRole'])->name('roles.destroy');
+
+    // Database Health Check
+    Route::get('/db-check', function () {
+        try {
+            \Illuminate\Support\Facades\DB::connection()->getPdo();
+            return response()->json(['status' => 'online']);
+        } catch (\Exception $e) {
+            return response()->json(['status' => 'offline'], 503);
+        }
+    })->name('db.check');
 });
