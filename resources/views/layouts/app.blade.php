@@ -850,8 +850,8 @@
             window.checkDbConnection();
         });
         window.addEventListener('offline', () => {
-            window.isDbOnline = false;
-            updateGenericConnectionStatus();
+            // Check if DB is still reachable even if "offline" from internet perspective
+            window.checkDbConnection();
         });
         window.addEventListener('focus', () => {
             window.checkDbConnection();
