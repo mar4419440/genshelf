@@ -834,8 +834,18 @@
 
         window.checkDbConnection = async function() {
             try {
-                const response = await fetch('{{ route('db.check') }}');
-                window.isDbOnline = response.ok;
+                // Use XHR instead of fetch — fetch is blocked by browsers when navigator.onLine is false,
+                // but XHR to localhost still works even without internet.
+                const result = await new Promise((resolve, reject) => {
+                    const xhr = new XMLHttpRequest();
+                    xhr.open('GET', '/db-check', true);
+                    xhr.timeout = 5000;
+                    xhr.onload = () => resolve(xhr.status >= 200 && xhr.status < 300);
+                    xhr.onerror = () => reject();
+                    xhr.ontimeout = () => reject();
+                    xhr.send();
+                });
+                window.isDbOnline = result;
             } catch (err) {
                 window.isDbOnline = false;
             }
@@ -843,16 +853,10 @@
             if (window.isDbOnline) syncGenericQueue();
         };
 
-        // Periodic Check (30s)
-        setInterval(window.checkDbConnection, 30000);
+        // Periodic DB Check (every 15s)
+        setInterval(window.checkDbConnection, 15000);
 
-        window.addEventListener('online', () => {
-            window.checkDbConnection();
-        });
-        window.addEventListener('offline', () => {
-            // Check if DB is still reachable even if "offline" from internet perspective
-            window.checkDbConnection();
-        });
+        // Only re-check on window focus — ignore browser online/offline events entirely
         window.addEventListener('focus', () => {
             window.checkDbConnection();
         });
